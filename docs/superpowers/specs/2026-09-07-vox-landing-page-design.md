@@ -92,3 +92,7 @@ Before publishing:
 - Payments or financial transactions
 - Analytics and tracking
 - Blog, documentation, or CMS
+
+## September 7 implementation update
+
+The user's supplied orb-ui screenshot and explicit Tailwind v4 instruction supersede the earlier plain-CSS requirement and navy-heavy palette. Use React, TypeScript, Vite and Tailwind v4, near-black surfaces, off-white text and a blue-lavender cloud orb. Refer to 21st.dev's orb collection for component design. Keep the lightweight animation requirement; no microphone or actual call is needed. The example selector demonstrates the intended vision and must be labeled illustrative. Use locally bundled Manrope, reduced-motion support, and an explicit pause control for ambient animation.
