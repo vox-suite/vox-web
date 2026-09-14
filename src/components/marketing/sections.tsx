@@ -35,7 +35,7 @@ export function Hero() {
           src="/artwork/signal-ring.svg"
           alt="Vox intelligence signal ring"
           width={1160}
-          height={810}
+          height={436}
           priority
         />
       </div>
