@@ -84,7 +84,7 @@ export function Card({
 }: Children & {
   title?: string;
   description?: string;
-  tone?: "plain" | "lavender" | "peach" | "green";
+  tone?: "plain" | "soft" | "subtle" | "contrast";
 }) {
   return (
     <section className="ui-card" data-tone={tone}>
@@ -327,7 +327,7 @@ export function AuthFrame({ children }: Children) {
 export function ColorSwatches() {
   return (
     <div className="ui-swatches">
-      {["paper", "ink", "lavender", "peach", "green"].map((tone) => (
+      {["paper", "ink", "soft", "subtle", "contrast"].map((tone) => (
         <div key={tone}>
           <span data-swatch={tone} />
           <small>{tone}</small>

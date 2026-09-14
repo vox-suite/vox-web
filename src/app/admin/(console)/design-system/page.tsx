@@ -27,7 +27,7 @@ export default async function DesignSystemPage() {
       <Grid columns={2}>
         <Card
           title="Color"
-          description="Quiet surfaces, clear contrast, and a little warmth."
+          description="A monochrome palette with a clear hierarchy."
         >
           <ColorSwatches />
         </Card>

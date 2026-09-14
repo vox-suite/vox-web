@@ -1,26 +1,23 @@
+import Image from "next/image";
 import {
   CalendarDays,
   Check,
   Fingerprint,
-  ListChecks,
   MessageCircle,
   Phone,
   Sparkles,
-  Waves,
 } from "lucide-react";
 import { Badge, Grid, LinkButton, Row, Section } from "@/components/ui";
 import { ConversationDemo } from "./demo";
+
 export function Hero() {
   return (
     <section className="hero">
-      <div className="hero-mark" aria-hidden="true">
-        <Waves />
-      </div>
       <Badge tone="accent">Voice-first intelligence</Badge>
       <h1>
         Your chief of staff,
         <br />
-        on speed dial.
+        <span>on speed dial.</span>
       </h1>
       <p>
         The smartest person in the room is now one phone call away.
@@ -33,32 +30,42 @@ export function Hero() {
           How it works
         </LinkButton>
       </Row>
-      <p className="hero-note">Designed with intention. Built around you.</p>
+      <div className="hero-art" aria-hidden="true">
+        <Image
+          src="/artwork/signal-ring.svg"
+          alt="Vox intelligence signal ring"
+          width={1160}
+          height={810}
+          priority
+        />
+      </div>
     </section>
   );
 }
+
 export function Capabilities() {
   return (
     <div className="capability-line" aria-label="Planned capabilities">
-      <span>
+      <span className="capability-item" data-tone="blue">
         <Phone size={16} aria-hidden="true" />
         One simple call
       </span>
-      <span>
+      <span className="capability-item" data-tone="purple">
         <MessageCircle size={16} aria-hidden="true" />
         Natural conversation
       </span>
-      <span>
+      <span className="capability-item" data-tone="amber">
         <CalendarDays size={16} aria-hidden="true" />
         Everyday coordination
       </span>
-      <span>
+      <span className="capability-item" data-tone="emerald">
         <Fingerprint size={16} aria-hidden="true" />
         Private by design
       </span>
     </div>
   );
 }
+
 export function DemoSection() {
   return (
     <div className="demo-section">
@@ -72,6 +79,7 @@ export function DemoSection() {
     </div>
   );
 }
+
 export function FeatureSection() {
   return (
     <Section
@@ -85,27 +93,37 @@ export function FeatureSection() {
             title: "Pick up the phone",
             description:
               "No apps to navigate or menus to search. Just place a quick call whenever you need a hand, wherever your day takes you.",
-            icon: Phone,
-            tone: "lavender",
+            badge: "Connection",
+            cardTheme: "cyan",
           },
           {
             title: "Speak naturally",
             description:
               "Talk through details, change your mind, or think out loud. Vox follows the nuance of conversation effortlessly.",
-            icon: Waves,
-            tone: "peach",
+            badge: "Conversation",
+            cardTheme: "violet",
           },
           {
             title: "Turn talk into action",
             description:
               "Vox connects the dots across your schedule, tasks, and notes, turning spoken thoughts into clear, reliable follow-through.",
-            icon: ListChecks,
-            tone: "green",
+            badge: "Continuity",
+            cardTheme: "amber",
           },
-        ].map(({ title, description, icon: Icon, tone }) => (
-          <article className="feature-card" key={title}>
-            <div className="feature-visual" data-tone={tone} aria-hidden="true">
-              <Icon />
+        ].map(({ title, description, badge, cardTheme }, index) => (
+          <article
+            className="feature-card"
+            key={title}
+            data-card-theme={cardTheme}
+          >
+            <Badge>{badge}</Badge>
+            <div className="feature-visual" aria-hidden="true">
+              <Image
+                src={`/artwork/${["connection", "conversation", "continuity"][index]}.svg`}
+                alt=""
+                width={360}
+                height={300}
+              />
             </div>
             <h3>{title}</h3>
             <p>{description}</p>
@@ -115,6 +133,7 @@ export function FeatureSection() {
     </Section>
   );
 }
+
 export function StorySection() {
   return (
     <Section>
@@ -127,12 +146,13 @@ export function StorySection() {
             Command it.
           </h2>
           <p>
-            No apps to click. No endless menus to scroll. Just pick up, speak your mind,
-            and let your assistant turn the chaos into clear follow-through.
+            No apps to click. No endless menus to scroll. Just pick up, speak
+            your mind, and let your assistant turn the chaos into clear
+            follow-through.
           </p>
           <p>
-            Vox remembers your context across conversations, quietly taking care of the
-            details so you can focus on what actually matters.
+            Vox remembers your context across conversations, quietly taking care
+            of the details so you can focus on what actually matters.
           </p>
           <LinkButton href="#principles" variant="secondary">
             What guides us
@@ -161,6 +181,7 @@ export function StorySection() {
     </Section>
   );
 }
+
 export function PrinciplesSection() {
   return (
     <Section id="principles" title="Designed around your trust">
@@ -182,8 +203,8 @@ export function PrinciplesSection() {
               "Helpful, without the noise",
               "A great assistant lightens your day instead of competing for your attention. Vox gives you time back rather than another screen to check.",
             ],
-          ].map(([title, body]) => (
-            <article className="principle" key={title}>
+          ].map(([title, body], index) => (
+            <article className="principle" key={title} data-principle-index={index}>
               <h3>{title}</h3>
               <p>{body}</p>
             </article>
@@ -193,6 +214,7 @@ export function PrinciplesSection() {
     </Section>
   );
 }
+
 export function ClosingSection() {
   return (
     <Section>

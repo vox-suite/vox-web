@@ -1,12 +1,12 @@
 # Vox design system
 
-The supplied Sarvam screenshot informs the white canvas, orange/lavender hero, quiet typography and generous spacing. Vox keeps its own content and identity. The public experience is editorial and spacious; management screens are compact and functional with the same surfaces and controls.
+The latest supplied Selecta reference informs the monochrome canvas, fine structural borders, square controls, bold typography, dot grids and original halftone artwork. Vox keeps its own content and identity. Public sections form a continuous bordered frame; management screens use the same neutral surfaces and sharp controls. This replaces the earlier Sarvam-inspired palette.
 
 ## Foundations
 
-`src/app/globals.css` is the source of truth. Tailwind v4 `@theme` exposes `paper`, `ink`, `muted`, `line`, `lavender`, `peach`, `green`, and `accent`, plus the font, card/control radii and panel shadow. Layout variables control the page width, section space, card padding and control height. Change these foundations to redesign all pages together.
+`src/app/globals.css` is the source of truth. Tailwind v4 `@theme` exposes `paper`, `ink`, `muted`, `line`, `soft`, `subtle`, `contrast`, and `accent`, plus the font, card/control radii and panel shadow. Layout variables control the page width, section space, card padding and control height. Change these foundations to redesign all pages together.
 
-Manrope is bundled locally, including a Latin subset. Headings use a shared scale and normal weight. Body text, inputs, labels, native tables, focus rings and form validation states have global defaults. All input text is at least 16px. Layouts adapt at 1000px and 720px. Motion respects reduced-motion preferences.
+Manrope is bundled locally, including a Latin subset. Headings use a shared scale and strong weights. Body text, inputs, labels, native tables, focus rings and form validation states have global defaults. All input text is at least 16px. Layouts adapt at 1000px and 720px. Motion respects reduced-motion preferences.
 
 ## Composition
 
@@ -36,7 +36,7 @@ The example shows visual composition; put editable controls in a real form conne
 | Component | Responsibility |
 | --- | --- |
 | `Page` | Management title, description, actions and content spacing |
-| `Section` | Public content width, vertical rhythm and centered section heading |
+| `Section` | Public content width, vertical rhythm and left-aligned section heading |
 | `Stack`, `Row`, `Grid` | Vertical, wrapping horizontal, and responsive column layouts |
 | `Card` | Related content with optional heading and semantic surface tone |
 | `Text`, `Badge` | Body hierarchy and small explicit state labels |
@@ -64,3 +64,7 @@ Use the authenticated `/admin/design-system` page as the live component referenc
 - [Tailwind theme variables](https://tailwindcss.com/docs/theme)
 - [Next.js authentication guidance](https://nextjs.org/docs/app/guides/authentication)
 - [Google provider and verified email](https://next-auth.js.org/providers/google)
+
+## Artwork
+
+The four local SVGs in `public/artwork` are original geometric point illustrations: a large signal ring and three feature studies. They are decorative, have empty alternative text and require no external asset service. Keep these monochrome; avoid importing screenshots or third-party brand assets into the interface.
