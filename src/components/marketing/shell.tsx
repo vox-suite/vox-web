@@ -30,7 +30,7 @@ export function SiteFooter() {
       <div className="footer-top">
         <div>
           <Brand />
-          <p>Your life, one call away.</p>
+          <p>Your chief of staff, on speed dial.</p>
         </div>
         <div className="footer-links">
           <div>

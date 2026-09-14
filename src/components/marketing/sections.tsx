@@ -16,16 +16,16 @@ export function Hero() {
       <div className="hero-mark" aria-hidden="true">
         <Waves />
       </div>
-      <Badge tone="accent">A more personal kind of AI</Badge>
+      <Badge tone="accent">Voice-first intelligence</Badge>
       <h1>
-        Your life,
+        Your chief of staff,
         <br />
-        one call away.
+        on speed dial.
       </h1>
       <p>
-        Less to carry in your head. More room for what matters.
+        The smartest person in the room is now one phone call away.
         <br />
-        Meet the personal assistant you can simply call.
+        Calendar, commitments, priorities—handled before you hang up.
       </p>
       <Row>
         <LinkButton href="#possibilities">Discover Vox</LinkButton>
@@ -122,13 +122,13 @@ export function StorySection() {
         <div className="story-copy">
           <Badge>Made for real life</Badge>
           <h2>
-            Spend less time managing.
+            Don’t manage your day.
             <br />
-            Spend more time living.
+            Command it.
           </h2>
           <p>
-            Life’s loose ends pile up quickly: appointments to book, ideas to revisit,
-            and commitments you made to yourself.
+            No apps to click. No endless menus to scroll. Just pick up, speak your mind,
+            and let your assistant turn the chaos into clear follow-through.
           </p>
           <p>
             Vox remembers your context across conversations, quietly taking care of the

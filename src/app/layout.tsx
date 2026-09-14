@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://voxagent.in"),
-  title: { default: "Vox — Your life, one call away", template: "%s · Vox" },
+  title: { default: "Vox — Your chief of staff, on speed dial", template: "%s · Vox" },
   description:
-    "A personal AI assistant you can reach with a simple phone call. Clear mental clutter and make room for what matters.",
+    "The smartest person in the room is now one phone call away. Calendar, commitments, priorities—handled before you hang up.",
   icons: { icon: "/vox.svg" },
 };
 export default function RootLayout({

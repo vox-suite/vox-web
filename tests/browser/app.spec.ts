@@ -28,7 +28,7 @@ test("public design is responsive, accessible and interactive", async ({
 }, testInfo) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Your life, one call away." }),
+    page.getByRole("heading", { name: "Your chief of staff, on speed dial." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Think it through" }).click();
   await expect(
