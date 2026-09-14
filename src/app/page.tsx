@@ -8,12 +8,10 @@ import {
   PrinciplesSection,
   ClosingSection,
 } from "@/components/marketing/sections";
-import { InteractiveEffects } from "@/components/marketing/interactive-effects";
 
 export default function HomePage() {
   return (
     <>
-      <InteractiveEffects />
       <SiteHeader />
       <main id="main">
         <Hero />
