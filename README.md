@@ -1,59 +1,73 @@
-# Vox
+# Vox web
 
-**Your life, one call away.**
+Next.js App Router application for the Vox public website and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
 
-A responsive coming-soon landing page for Vox's vision: a personal AI assistant for everyday tasks, life patterns, connected devices, and financial organization, reached through a simple phone call.
+## Develop
 
-## Development
-
-Requires Node.js 22.12+ and npm.
+Node.js 22.12+ is required.
 
 ```sh
 npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Vite prints the local URL (normally http://127.0.0.1:5173).
+The website is at http://localhost:3000. Local administration is at `/admin`. Without authentication configuration, the login page explains that setup is incomplete and every management data request is denied.
 
 ```sh
+npm test
 npm run lint
 npm run build
-npm run preview
+npx playwright install chromium
+npm run test:e2e
 ```
 
-## Stack and structure
+Browser tests start isolated servers on 3100 and 3101 with synthetic identities and data. They exercise encrypted sessions through the real authentication boundary. No production authentication bypass exists. Tests do not complete a real Google OAuth exchange.
 
-- React 19, TypeScript, Vite 6, Tailwind CSS v4 via `@tailwindcss/vite`.
-- Locally bundled Manrope variable font and Lucide icons.
-- `src/App.tsx`: landing page and selectable capability examples.
-- `src/components/VoiceOrb.tsx`: original, decorative CSS orb.
-- `src/index.css`: Tailwind import, theme tokens, responsive styles, animation and reduced-motion behavior.
-- `public/vox.svg`: brand favicon.
+## Application structure
 
-No API keys, backend, analytics, microphone access, or account connection. The examples are illustrative and no real calls or tasks are performed. Privacy statements describe design intentions.
+- `src/app`: routes and layouts. Page files compose components; lint rejects `className` and inline `style` in pages.
+- `src/app/globals.css`: Tailwind theme variables, native element defaults, component styling and responsive behavior.
+- `src/components/ui`: shared layout, controls, feedback, cards, tables and typography.
+- `src/components/marketing`: public website sections and illustrative conversation preview.
+- `src/components/admin`: navigation, management features and sign-in controls.
+- `src/lib/admin-modules.ts`: management navigation registry.
+- `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
+- `src/lib/core-admin.ts`: server-only connection to the protected Core admin API.
+- `src/proxy.ts`: admin subdomain routing and private/no-store response headers. It is not the authorization boundary.
 
-## Deployment
+## Add a management page
 
-Ready to import into Vercel as a Vite project:
+```sh
+npm run generate:page -- schedules "Schedules"
+```
 
-- Build command: `npm run build`
-- Output directory: `dist`
-- Install command: `npm ci`
-- No environment variables required.
+This creates a protected page and registers navigation. Every management module lives inside `src/app/admin/(console)` and inherits `AdminShell`. Compose `Page`, `Card`, `Stack`, `Grid`, `Field`, `DataTable`, `Notice`, and `EmptyState`; see `docs/design-system.md`. New modules should add domain-specific components below this layer only when needed. Do not build new navigation, permission checks, spacing scales or button styles per page.
 
-Hosting and domain configuration are separate from repository creation. No production site has been deployed by this setup.
+Call `requireSuperuser()` in server pages that retrieve data. Every new API handler or server action must independently authorize the current session, even though the layout is protected. Keep backend credentials in server-only modules. Add resource-specific authorization if non-superuser roles are introduced later.
 
-## Design references
+## Production activation
 
-The supplied orb-ui screenshot guides the dark surfaces, two-column hero, typography, and voice visual. The original orb implementation is visually informed by these 21st.dev references; no third-party component source was copied:
+See `docs/deployment.md` for exact Google callback, domain mapping and backend routing. This source change alone does not provision a domain or enable production sign-in.
 
-- [21st.dev voice orb collection](https://21st.dev/community/components/explore/voice-orb)
-- [Siri Orb by Umair Waheed](https://21st.dev/@m.umairwaheedansari/components/siri-orb)
-- [Voice Powered Orb by Isaiah](https://21st.dev/@isaiahbjork/components/voice-powered-orb)
-- [Tailwind v4 with Vite](https://tailwindcss.com/docs/installation/using-vite)
+| Variable | Purpose |
+| --- | --- |
+| `NEXTAUTH_URL` | `https://admin.voxagent.in` in production; `http://localhost:3000` locally |
+| `NEXTAUTH_SECRET` | Cryptographically random session secret, at least 32 bytes; identical across web instances |
+| `GOOGLE_CLIENT_ID` | Google OAuth web application client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret, server-only |
+| `SUPERUSER_EMAILS` | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone |
+| `VOX_CORE_ADMIN_URL` | HTTPS origin routing `/v1/admin/redis` to Core; loopback HTTP is accepted locally |
+| `VOX_ADMIN_TOKEN` | Dedicated shared admin credential, also configured in Core; separate from the normal service token |
 
-## Verification
+Redis stays on the backend private network. Web instances are stateless; there is no local session database or in-memory authorization cache. Changes to the allowlist apply on subsequent requests after environment configuration is rolled out. Signing out clears the browser cookie; rotate the shared secret to invalidate all sessions immediately.
 
-Production build and ESLint pass. Browser checks cover desktop (1440px), tablet (768px), mobile (390px), narrow mobile (320px), capability selection, keyboard activation, pause/resume, and reduced motion. An axe-core WCAG 2 A/AA and 2.1 AA scan found zero violations on the checked desktop and mobile states. Automated checks do not replace assistive-technology testing.
+## Redis explorer behavior and limits
 
-Local screenshots are kept in the ignored `artifacts/` directory.
+The Core API uses `SCAN` with a count hint of 100, a reused/reconnecting multiplexed Redis connection, eight concurrent admin requests per Core instance and a four-second request timeout. The web proxy has a six-second timeout. The explorer does not call `KEYS`, load the complete keyspace, offer arbitrary Redis commands, or mutate entries.
+
+`SCAN` is not a snapshot and count is a hint: pages may be empty, duplicate keys can appear across pages, and entries may disappear between listing and inspection. The UI preserves the cursor as a string to avoid JavaScript integer rounding. Previous pages are rescanned. Refresh starts from cursor zero. Searches use Redis glob patterns.
+
+Previews are atomic read-only Lua scripts (`EVAL_RO`, Redis 7+). Strings are limited to 64 KiB. Collection previews use bounded samples with a total raw string budget of 64 KiB and a 2 KiB per-value limit. Hashes/sets sample their first scan batch, lists/sorted sets show their first 40 members, and streams show their first 20 entries. JSON formatting is best-effort, and truncated content is explicitly marked. Keys must be UTF-8; detail requests accept 1–1,024 bytes without control characters. Binary value bytes are displayed lossily. Redis Cluster is not supported by this standalone-Redis reader.
+
+Authorization is checked server-side for every management request. Redis responses and admin pages are private/no-store. Data is not persisted to browser storage. The application does not log Redis values, keys or tokens; configure reverse-proxy access logging to omit query strings on admin endpoints as described in the deployment guide.

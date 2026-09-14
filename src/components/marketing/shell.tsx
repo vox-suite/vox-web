@@ -1,0 +1,67 @@
+import Link from "next/link";
+import { Brand, LinkButton } from "@/components/ui";
+export function SiteHeader() {
+  return (
+    <header className="site-header">
+      <div className="site-nav">
+        <Brand />
+        <nav aria-label="Main navigation">
+          <Link href="/#possibilities">Possibilities</Link>
+          <Link href="/#how-it-works">How it works</Link>
+          <Link href="/#principles">Our principles</Link>
+        </nav>
+        <LinkButton
+          href={
+            process.env.NODE_ENV === "production"
+              ? "https://admin.voxagent.in/admin/login"
+              : "/admin/login"
+          }
+          variant="secondary"
+        >
+          Sign in
+        </LinkButton>
+      </div>
+    </header>
+  );
+}
+export function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="footer-top">
+        <div>
+          <Brand />
+          <p>Your life, one call away.</p>
+        </div>
+        <div className="footer-links">
+          <div>
+            <small>Discover</small>
+            <Link href="/#possibilities">Possibilities</Link>
+            <Link href="/#how-it-works">How it works</Link>
+            <Link href="/#principles">Our principles</Link>
+          </div>
+          <div>
+            <small>Vox</small>
+            <Link href="/privacy">Privacy</Link>
+            <Link
+              href={
+                process.env.NODE_ENV === "production"
+                  ? "https://admin.voxagent.in/admin/login"
+                  : "/admin/login"
+              }
+            >
+              Administration
+            </Link>
+            <Link href="/#main">Back to top</Link>
+          </div>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <span>© {new Date().getFullYear()} Vox</span>
+        <span>Less screen time. More human.</span>
+      </div>
+      <div className="footer-wordmark" aria-hidden="true">
+        vox
+      </div>
+    </footer>
+  );
+}

@@ -1,0 +1,66 @@
+# Vox design system
+
+The supplied Sarvam screenshot informs the white canvas, orange/lavender hero, quiet typography and generous spacing. Vox keeps its own content and identity. The public experience is editorial and spacious; management screens are compact and functional with the same surfaces and controls.
+
+## Foundations
+
+`src/app/globals.css` is the source of truth. Tailwind v4 `@theme` exposes `paper`, `ink`, `muted`, `line`, `lavender`, `peach`, `green`, and `accent`, plus the font, card/control radii and panel shadow. Layout variables control the page width, section space, card padding and control height. Change these foundations to redesign all pages together.
+
+Manrope is bundled locally, including a Latin subset. Headings use a shared scale and normal weight. Body text, inputs, labels, native tables, focus rings and form validation states have global defaults. All input text is at least 16px. Layouts adapt at 1000px and 720px. Motion respects reduced-motion preferences.
+
+## Composition
+
+```tsx
+import { Page, Card, Stack, Field, Button } from '@/components/ui';
+import { requireSuperuser } from '@/lib/auth';
+
+export default async function SettingsPage() {
+  await requireSuperuser();
+  return (
+    <Page title="Settings" description="Manage your workspace preferences.">
+      <Card title="Workspace">
+        <Stack>
+          <Field id="workspace-name" name="name" label="Workspace name" />
+          <Button type="submit">Save changes</Button>
+        </Stack>
+      </Card>
+    </Page>
+  );
+}
+```
+
+The example shows visual composition; put editable controls in a real form connected to an authorized server action when adding persistence. Server components remain the default. Only interactive feature components require `use client`.
+
+## Components
+
+| Component | Responsibility |
+| --- | --- |
+| `Page` | Management title, description, actions and content spacing |
+| `Section` | Public content width, vertical rhythm and centered section heading |
+| `Stack`, `Row`, `Grid` | Vertical, wrapping horizontal, and responsive column layouts |
+| `Card` | Related content with optional heading and semantic surface tone |
+| `Text`, `Badge` | Body hierarchy and small explicit state labels |
+| `Button`, `LinkButton` | Actions and navigation, with primary/secondary/ghost variants |
+| `Field`, `Select` | Visible labels, controls, helper text and accessible associations |
+| `DataTable` | Caption, headers and a keyboard-accessible horizontal overflow region |
+| `Notice` | Informational, success or error feedback with appropriate live regions |
+| `EmptyState`, `LoadingState` | Consistent recovery and loading patterns |
+| `CodeBlock` | Bounded, scrollable plain-text data presentation |
+| `Stat`, `ModuleCard` | Overview data and links to management modules |
+
+Use the authenticated `/admin/design-system` page as the live component reference. It includes a page composition example.
+
+## Extension rules
+
+1. Generate pages with `npm run generate:page -- slug "Title"`.
+2. Compose existing components without class names or inline styles in route pages; lint enforces this.
+3. If a visual pattern is missing, create a reusable component with semantic props instead of a page-specific style override. Keep its styling beside the shared component styles in `globals.css`.
+4. Every interactive control needs a real action, an accessible name, pending/error handling and keyboard support.
+5. Every new data boundary must check authorization independently. A navigation entry does not grant permission.
+6. Do not invent operational counts, connection status or product capabilities; show actual data, explicit examples or an honest empty state.
+
+## References
+
+- [Tailwind theme variables](https://tailwindcss.com/docs/theme)
+- [Next.js authentication guidance](https://nextjs.org/docs/app/guides/authentication)
+- [Google provider and verified email](https://next-auth.js.org/providers/google)
