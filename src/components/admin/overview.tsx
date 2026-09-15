@@ -15,7 +15,9 @@ export function WorkspaceWelcome() {
     </div>
   );
 }
-export function ManagementModules() {
+export function ManagementModules({
+  basePath = "/admin",
+}: { basePath?: string } = {}) {
   return (
     <Grid columns={2}>
       {adminModules
@@ -25,7 +27,7 @@ export function ManagementModules() {
             key={module.slug}
             title={module.title}
             description={module.description}
-            href={adminHref(module.slug)}
+            href={adminHref(module.slug, basePath)}
             icon={
               module.icon === "database" ? (
                 <Database size={22} />

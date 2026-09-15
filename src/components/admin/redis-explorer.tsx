@@ -159,7 +159,16 @@ export function RedisExplorer() {
                 Try again
               </Button>
               {error.includes("session") && (
-                <LinkButton href="/admin/login">Sign in</LinkButton>
+                <LinkButton
+                  href={
+                    typeof window !== "undefined" &&
+                    window.location.host.startsWith("admin.")
+                      ? "/login"
+                      : "/admin/login"
+                  }
+                >
+                  Sign in
+                </LinkButton>
               )}
             </Row>
           </Stack>

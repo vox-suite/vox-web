@@ -57,25 +57,35 @@ test("only verified Google profiles may authenticate", () => {
 test("callbacks cannot leave the application", () => {
   assert.equal(
     safeCallback("https://evil.test", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/admin",
+    "https://admin.voxagent.in/",
   );
   assert.equal(
     safeCallback("//evil.test", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/admin",
+    "https://admin.voxagent.in/",
   );
   assert.equal(
     safeCallback("/admin/redis", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/admin/redis",
+    "https://admin.voxagent.in/redis",
+  );
+  assert.equal(
+    safeCallback("/redis", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/redis",
   );
   assert.equal(
     safeCallback("/\\evil.test", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/admin",
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    safeCallback("https://evil.test", "http://localhost:3000"),
+    "http://localhost:3000/admin",
   );
 });
 test("subdomain routing only rewrites the exact admin host", () => {
   assert.equal(adminDestination("admin.voxagent.in", "/"), "/admin");
   assert.equal(adminDestination("admin.voxagent.in", "/redis"), "/admin/redis");
+  assert.equal(adminDestination("admin.voxagent.in", "/login"), "/admin/login");
   assert.equal(adminDestination("admin.voxagent.in", "/api/admin/redis"), null);
+  assert.equal(adminDestination("admin.voxagent.in", "/admin"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/admin/login"), null);
   assert.equal(adminDestination("admin.voxagent.in.evil.test", "/"), null);
   assert.equal(adminDestination("voxagent.in", "/"), null);
@@ -104,7 +114,15 @@ test("public-domain admin entry uses the OAuth cookie host", async () => {
       "/admin/login",
       "https://admin.voxagent.in",
     ),
-    "https://admin.voxagent.in/admin/login",
+    "https://admin.voxagent.in/login",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "voxagent.in",
+      "/admin",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/",
   );
   assert.equal(
     canonicalAdminRedirect("voxagent.in", "/", "https://admin.voxagent.in"),
@@ -114,6 +132,22 @@ test("public-domain admin entry uses the OAuth cookie host", async () => {
     canonicalAdminRedirect(
       "admin.voxagent.in",
       "/admin/login",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/login",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "admin.voxagent.in",
+      "/admin",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "admin.voxagent.in",
+      "/login",
       "https://admin.voxagent.in",
     ),
     null,

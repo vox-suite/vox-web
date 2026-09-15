@@ -3,6 +3,7 @@ import { signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { Button, Notice, Stack } from "@/components/ui";
+
 export function GoogleSignIn({ disabled = false }: { disabled?: boolean }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
@@ -14,7 +15,12 @@ export function GoogleSignIn({ disabled = false }: { disabled?: boolean }) {
           setPending(true);
           setError(false);
           try {
-            await signIn("google", { callbackUrl: "/admin" });
+            const callbackUrl =
+              typeof window !== "undefined" &&
+              window.location.host.startsWith("admin.")
+                ? "/"
+                : "/admin";
+            await signIn("google", { callbackUrl });
           } catch {
             setError(true);
             setPending(false);
@@ -44,7 +50,14 @@ export function SignOutButton() {
   return (
     <Button
       variant="ghost"
-      onClick={() => void signOut({ callbackUrl: "/admin/login" })}
+      onClick={() => {
+        const callbackUrl =
+          typeof window !== "undefined" &&
+          window.location.host.startsWith("admin.")
+            ? "/login"
+            : "/admin/login";
+        void signOut({ callbackUrl });
+      }}
     >
       <LogOut size={15} aria-hidden="true" />
       Sign out

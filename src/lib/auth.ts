@@ -2,6 +2,7 @@ import "server-only";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { isSuperuser, maySignIn, safeCallback } from "./access";
 
 export function authConfigured() {
@@ -12,6 +13,7 @@ export function authConfigured() {
     process.env.SUPERUSER_EMAILS?.trim(),
   );
 }
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -56,6 +58,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
 export async function currentSuperuser() {
   if (!authConfigured()) return null;
   const session = await getServerSession(authOptions);
@@ -63,8 +66,19 @@ export async function currentSuperuser() {
     ? session!.user!
     : null;
 }
+
 export async function requireSuperuser() {
   const user = await currentSuperuser();
-  if (!user) redirect("/admin/login");
+  if (!user) {
+    let target = "/admin/login";
+    try {
+      const headerList = await headers();
+      const host = headerList.get("host")?.toLowerCase().split(":")[0];
+      if (host === "admin.voxagent.in") {
+        target = "/login";
+      }
+    } catch {}
+    redirect(target);
+  }
   return user;
 }

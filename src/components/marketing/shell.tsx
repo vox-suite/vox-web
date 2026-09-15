@@ -13,7 +13,7 @@ export function SiteHeader() {
         <LinkButton
           href={
             process.env.NODE_ENV === "production"
-              ? "https://admin.voxagent.in/admin/login"
+              ? "https://admin.voxagent.in/login"
               : "/admin/login"
           }
           variant="secondary"
@@ -45,7 +45,7 @@ export function SiteFooter() {
             <Link
               href={
                 process.env.NODE_ENV === "production"
-                  ? "https://admin.voxagent.in/admin/login"
+                  ? "https://admin.voxagent.in/login"
                   : "/admin/login"
               }
             >

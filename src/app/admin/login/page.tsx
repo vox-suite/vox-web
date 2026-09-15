@@ -9,13 +9,24 @@ import {
 import { GoogleSignIn } from "@/components/admin/auth-controls";
 import { authConfigured, currentSuperuser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+
 export const dynamic = "force-dynamic";
+
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  if (await currentSuperuser()) redirect("/admin");
+  let target = "/admin";
+  try {
+    const headerList = await headers();
+    const host = headerList.get("host")?.toLowerCase().split(":")[0];
+    if (host === "admin.voxagent.in") {
+      target = "/";
+    }
+  } catch {}
+  if (await currentSuperuser()) redirect(target);
   const { error } = await searchParams;
   const configured = authConfigured();
   return (

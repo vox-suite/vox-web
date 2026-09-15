@@ -25,15 +25,17 @@ export function AdminShell({
   email: string;
 }) {
   const pathname = usePathname();
+  const isClean = !pathname.startsWith("/admin");
+  const basePath = isClean ? "" : "/admin";
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Brand href="/admin" />
+        <Brand href={basePath || "/"} />
         <nav aria-label="Administration">
           <p className="admin-nav-label">Workspace</p>
           {adminModules.map((module) => {
             const Icon = icons[module.icon];
-            const href = adminHref(module.slug);
+            const href = adminHref(module.slug, basePath);
             const active =
               pathname === href ||
               (module.slug && pathname.startsWith(`${href}/`)) ||

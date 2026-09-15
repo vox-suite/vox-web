@@ -24,6 +24,9 @@ export const adminModules: AdminModule[] = [
     icon: "design",
   },
 ];
-export function adminHref(slug: string) {
-  return slug ? `/admin/${slug}` : "/admin";
+export function adminHref(slug: string, basePath = "/admin") {
+  if (basePath === "") {
+    return slug ? `/${slug}` : "/";
+  }
+  return slug ? `${basePath}/${slug}` : basePath;
 }

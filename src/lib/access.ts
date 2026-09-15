@@ -21,11 +21,21 @@ export function maySignIn(
   );
 }
 export function safeCallback(url: string, baseUrl: string) {
+  const isSubdomain =
+    new URL(baseUrl).hostname.toLowerCase() === "admin.voxagent.in";
   try {
     const target = new URL(url, baseUrl);
-    if (target.origin === new URL(baseUrl).origin) return target.href;
+    if (target.origin === new URL(baseUrl).origin) {
+      if (isSubdomain && /^\/admin(\/|$)/.test(target.pathname)) {
+        target.pathname =
+          target.pathname === "/admin" || target.pathname === "/admin/"
+            ? "/"
+            : target.pathname.replace(/^\/admin/, "");
+      }
+      return target.href;
+    }
   } catch {}
-  return `${baseUrl}/admin`;
+  return isSubdomain ? `${baseUrl}/` : `${baseUrl}/admin`;
 }
 export function adminDestination(host: string, path: string) {
   if (host.toLowerCase().split(":")[0] !== "admin.voxagent.in") return null;
@@ -55,10 +65,35 @@ export function canonicalAdminRedirect(
     const canonical = new URL(origin);
     if (
       canonical.protocol !== "https:" ||
-      canonical.hostname !== "admin.voxagent.in" ||
-      host.toLowerCase() === canonical.host
+      canonical.hostname !== "admin.voxagent.in"
     )
       return null;
+
+    const normalizedHost = host.toLowerCase().split(":")[0];
+    const isSubdomain = normalizedHost === canonical.hostname;
+
+    // On the admin subdomain, redirect /admin or /admin/* to clean paths (/ or /*)
+    if (isSubdomain) {
+      if (/^\/admin(\/|$)/.test(path)) {
+        const cleanPath =
+          path === "/admin" || path === "/admin/"
+            ? "/"
+            : path.replace(/^\/admin/, "");
+        return new URL(cleanPath, canonical.origin).href;
+      }
+      return null;
+    }
+
+    // On other domains (e.g. voxagent.in), redirect /admin to subdomain root and /admin/* to subdomain /*
+    if (/^\/admin(\/|$)/.test(path)) {
+      const cleanPath =
+        path === "/admin" || path === "/admin/"
+          ? "/"
+          : path.replace(/^\/admin/, "");
+      return new URL(cleanPath, canonical.origin).href;
+    }
+
+    // Auth endpoints (/api/auth) redirect to canonical admin subdomain
     return new URL(path, canonical.origin).href;
   } catch {
     return null;

@@ -2,7 +2,7 @@
 
 ## What the code provides
 
-One Next.js deployment serves both `voxagent.in` and `admin.voxagent.in`. An exact host match rewrites the admin domain's `/` to `/admin`; `/redis` and `/design-system` work there too. Canonical links inside the app use `/admin/...`, which also works locally. Route handlers and server pages enforce permissions, independent of the host rewrite.
+One Next.js deployment serves both `voxagent.in` and `admin.voxagent.in`. Clean paths are used on the subdomain (`/`, `/login`, `/redis`, `/design-system`), and any incoming `/admin` paths automatically redirect to the clean routes. Local development continues to work under `/admin` on localhost. Route handlers and server pages enforce permissions, independent of the host rewrite.
 
 No credentials or superuser identity are inferred. Missing configuration denies access. Complete these steps with the owner-selected Google account before production use.
 

@@ -5,8 +5,16 @@ import {
   WorkspaceWelcome,
 } from "@/components/admin/overview";
 import { requireSuperuser } from "@/lib/auth";
+import { headers } from "next/headers";
+
 export default async function OverviewPage() {
   await requireSuperuser();
+  let isClean = false;
+  try {
+    const headerList = await headers();
+    const host = headerList.get("host")?.toLowerCase().split(":")[0];
+    isClean = host === "admin.voxagent.in";
+  } catch {}
   const connected = Boolean(
     process.env.VOX_CORE_ADMIN_URL && process.env.VOX_ADMIN_TOKEN,
   );
@@ -34,7 +42,7 @@ export default async function OverviewPage() {
           description="Restricted to approved accounts."
         />
       </Grid>
-      <ManagementModules />
+      <ManagementModules basePath={isClean ? "" : "/admin"} />
       <ConnectionNotice configured={connected} />
     </Page>
   );
