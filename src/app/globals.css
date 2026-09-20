@@ -1471,7 +1471,7 @@
     color: white;
     font-weight: 600;
   }
-  .admin-nav-link:hover {
+  .admin-nav-link:hover:not([aria-current="page"]) {
     background: #f7f7f7;
   }
   .admin-nav-label {
@@ -1594,6 +1594,307 @@
   .redis-panel {
     scroll-margin-top: 2rem;
   }
+
+  /* ==========================================================================
+     Changelog Page Styles
+     ========================================================================== */
+  .changelog-page {
+    width: min(var(--page-width), calc(100% - 3rem));
+    margin: 0 auto;
+    border-inline: 1px solid var(--color-line);
+    padding: 4.5rem 2rem 6rem;
+    min-height: calc(100vh - 200px);
+  }
+  .changelog-hero {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .changelog-hero h1 {
+    font-size: clamp(2.5rem, 5vw, 3.8rem);
+    margin: 1.25rem 0 0.85rem;
+    letter-spacing: -0.05em;
+  }
+  .changelog-hero p {
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    max-width: 68ch;
+    line-height: 1.6;
+  }
+  .changelog-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .changelog-metric-card {
+    padding: 1.25rem;
+    background: var(--color-soft);
+    border: 1px solid var(--color-line);
+    transition: all 0.2s ease;
+  }
+  .changelog-metric-card:hover {
+    border-color: #a5b4fc;
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.08);
+  }
+  .changelog-metric-val {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: #111;
+    font-family: var(--font-button);
+  }
+  .changelog-metric-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    margin-top: 0.25rem;
+  }
+  .changelog-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 3.5rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .changelog-filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .changelog-tab-btn {
+    font-family: var(--font-button);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.45rem 0.95rem;
+    border: 1px solid var(--color-line);
+    background: white;
+    color: var(--color-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .changelog-tab-btn:hover {
+    color: #111;
+    border-color: #888;
+  }
+  .changelog-tab-btn[aria-pressed="true"] {
+    background: #111;
+    color: white;
+    border-color: #111;
+  }
+  .changelog-search {
+    max-width: 280px;
+    width: 100%;
+  }
+  .changelog-search input {
+    min-height: 2.25rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-line);
+  }
+  .changelog-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+  .changelog-timeline::before {
+    content: "";
+    position: absolute;
+    top: 1.5rem;
+    bottom: 2rem;
+    left: 140px;
+    width: 2px;
+    background: var(--color-line);
+  }
+  .changelog-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 2.5rem;
+  }
+  .changelog-date-col {
+    text-align: right;
+    padding-top: 0.25rem;
+    position: relative;
+  }
+  .changelog-date {
+    font-family: var(--font-button);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .changelog-relative-time {
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    margin-top: 0.2rem;
+  }
+  .changelog-dot {
+    position: absolute;
+    right: -2.5rem;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 2.5px solid #6366f1;
+    transform: translateX(calc(50% + 1px));
+    box-shadow: 0 0 0 4px white;
+    z-index: 2;
+  }
+  .changelog-card {
+    border: 1px solid var(--color-line);
+    background: white;
+    padding: 2rem;
+    position: relative;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .changelog-card:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.06);
+  }
+  .changelog-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: 1.25rem;
+  }
+  .changelog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .changelog-subsystem-badge {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    font-weight: 600;
+    border: 1px solid var(--color-line);
+  }
+  .changelog-subsystem-badge[data-subsystem="vox-bridge"] {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+  .changelog-subsystem-badge[data-subsystem="vox-core"] {
+    background: #ede9fe;
+    color: #6d28d9;
+    border-color: #ddd6fe;
+  }
+  .changelog-subsystem-badge[data-subsystem="vox-web"] {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+  .changelog-subsystem-badge[data-subsystem="vox-deploy"] {
+    background: #fefce8;
+    color: #a16207;
+    border-color: #fef08a;
+  }
+  .changelog-title {
+    font-size: 1.45rem;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+    color: #111;
+  }
+  .changelog-summary {
+    color: var(--color-muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .changelog-section-group {
+    margin-top: 1.25rem;
+  }
+  .changelog-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    margin-bottom: 0.75rem;
+  }
+  .changelog-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .changelog-bullet {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #262626;
+  }
+  .changelog-bullet::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #6366f1;
+    font-weight: 600;
+  }
+  .changelog-bullet strong {
+    color: #111;
+    font-weight: 600;
+  }
+  .changelog-highlight-banner {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-soft);
+    border-left: 3px solid #6366f1;
+    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .changelog-highlight-banner span {
+    font-weight: 600;
+    color: #111;
+  }
+  .changelog-highlight-banner p {
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .changelog-page {
+      width: calc(100% - 2rem);
+      padding: 3rem 1rem 5rem;
+    }
+    .changelog-timeline::before {
+      left: 20px;
+    }
+    .changelog-item {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      padding-left: 45px;
+    }
+    .changelog-date-col {
+      text-align: left;
+    }
+    .changelog-dot {
+      left: 16px;
+      right: auto;
+      transform: none;
+    }
+  }
+
 }
 @keyframes spin {
   to {

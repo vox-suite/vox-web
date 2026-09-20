@@ -9,6 +9,7 @@ export function SiteHeader() {
           <Link href="/#possibilities">Possibilities</Link>
           <Link href="/#how-it-works">How it works</Link>
           <Link href="/#principles">Our principles</Link>
+          <Link href="/changelog">Changelog</Link>
         </nav>
         <LinkButton
           href={
@@ -38,9 +39,11 @@ export function SiteFooter() {
             <Link href="/#possibilities">Possibilities</Link>
             <Link href="/#how-it-works">How it works</Link>
             <Link href="/#principles">Our principles</Link>
+            <Link href="/changelog">Changelog</Link>
           </div>
           <div>
             <small>Vox</small>
+            <Link href="/changelog">Changelog</Link>
             <Link href="/privacy">Privacy</Link>
             <Link
               href={
