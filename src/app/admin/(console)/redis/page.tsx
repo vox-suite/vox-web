@@ -6,8 +6,8 @@ export default async function RedisPage() {
   return (
     <Page
       title="Redis explorer"
-      description="A closer look at your cached data. Search keys and inspect their contents."
-      actions={<Badge tone="accent">Read-only access</Badge>}
+      description="Search, inspect and manage cached data through a bounded Redis interface."
+      actions={<Badge tone="warning">Managed access</Badge>}
     >
       <RedisExplorer />
     </Page>

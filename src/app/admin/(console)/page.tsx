@@ -34,7 +34,7 @@ export default async function OverviewPage() {
         <Stat
           label="Data access"
           value="Read only"
-          description="Inspect Redis without changing entries."
+          description="Inspect and manage Redis entries through a bounded interface."
         />
         <Stat
           label="Authentication"

@@ -60,6 +60,16 @@ test("unauthenticated management routes redirect and APIs deny access", async ({
   const response = await request.get("/api/admin/redis");
   expect(response.status()).toBe(401);
   expect(response.headers()["cache-control"]).toContain("no-store");
+  expect(
+    (
+      await request.put("/api/admin/redis", {
+        data: { key: "vox:test", type: "string", value: "blocked" },
+      })
+    ).status(),
+  ).toBe(401);
+  expect((await request.delete("/api/admin/redis?key=vox:test")).status()).toBe(
+    401,
+  );
   await expect(
     page.getByRole("heading", { name: "A clearer view of your workspace." }),
   ).toBeVisible();
@@ -101,6 +111,28 @@ test("management navigation, Redis search, preview and recovery", async ({
   await expect(
     page.getByText("Planning a quiet morning.", { exact: false }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Edit value" }).click();
+  await page
+    .getByLabel("Redis value")
+    .fill('{"name":"Fixture user","summary":"Updated from the console."}');
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Redis entry updated.")).toBeVisible();
+  await expect(
+    page.getByText("Updated from the console.", { exact: false }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close entry preview" }).click();
+  await page
+    .getByRole("button", { name: "vox:user-context:fixture-002", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Delete entry" }).click();
+  await page.getByRole("button", { name: "Confirm delete" }).click();
+  await expect(page.getByText("Redis entry deleted.")).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "vox:user-context:fixture-002",
+      exact: true,
+    }),
+  ).toHaveCount(0);
   await page.screenshot({
     path: `artifacts/redis-${testInfo.project.name}.png`,
     fullPage: true,

@@ -6,7 +6,7 @@ One Next.js deployment serves both `voxagent.in` and `admin.voxagent.in`. Clean 
 
 No credentials or superuser identity are inferred. Missing configuration denies access. Complete these steps with the owner-selected Google account before production use.
 
-## 1. Deploy Core with the Redis reader
+## 1. Deploy Core with Redis administration
 
 Deploy the matching `vox-core` change containing `/v1/admin/redis`. Configure `VOX_ADMIN_TOKEN` in the backend's protected environment file with a new random credential. Keep it distinct from `VOX_CORE_SERVICE_TOKEN`. Existing Compose `env_file` handling passes it to Core; no Redis port publication is necessary.
 
@@ -16,7 +16,7 @@ Route only the exact admin endpoint to Core's loopback port 3001 through an HTTP
 
 ```nginx
 location = /v1/admin/redis {
-    limit_except GET { deny all; }
+    limit_except GET PUT DELETE { deny all; }
     proxy_pass http://127.0.0.1:3001;
     proxy_set_header Authorization $http_authorization;
     proxy_set_header Host $host;
@@ -68,8 +68,8 @@ The public sign-in link uses the canonical admin hostname in production. Local s
 2. `admin.voxagent.in` shows the login screen when signed out.
 3. A signed-out request to `/api/admin/redis` returns 401 with no-store headers.
 4. An unauthorized Google account is denied; an approved, verified account can sign in.
-5. Redis explorer returns real data or an explicit empty state. Search, next/previous batches and a value preview work.
+5. Redis explorer returns real data or an explicit empty state. Search, pagination, preview, edit and confirmed deletion work with a disposable verification key.
 6. Sign out and confirm data requests are denied again.
-7. Check the backend admin endpoint independently: requests without the dedicated token return 401, and mutation methods are rejected.
+7. Check the backend admin endpoint independently: requests without the dedicated token return 401, and unsupported methods are rejected.
 
-Local tests validate the application, signed session handling and Redis protocol separately. Only a live Google sign-in and real deployed data read validate the full production chain.
+Local tests validate the application, signed session handling and Redis protocol separately. Only a live Google sign-in and a disposable real Redis mutation validate the full production chain.

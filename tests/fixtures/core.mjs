@@ -1,5 +1,34 @@
 import { createServer } from "node:http";
-createServer((request, response) => {
+function fixtureStore() {
+  return new Map([
+    [
+      "vox:user-context:fixture-001",
+      {
+        type: "string",
+        ttl: 300,
+        value: JSON.stringify({
+          name: "Fixture user",
+          summary: "Planning a quiet morning.",
+        }),
+      },
+    ],
+    [
+      "vox:user-context:fixture-002",
+      { type: "string", ttl: -1, value: "Second fixture" },
+    ],
+  ]);
+}
+
+let store = fixtureStore();
+let reset = false;
+
+async function jsonBody(request) {
+  const chunks = [];
+  for await (const chunk of request) chunks.push(chunk);
+  return JSON.parse(Buffer.concat(chunks).toString());
+}
+
+createServer(async (request, response) => {
   if (request.url === "/health") {
     response.end("ok");
     return;
@@ -18,33 +47,72 @@ createServer((request, response) => {
     response.end("{}");
     return;
   }
+  if (request.method === "PUT") {
+    const body = await jsonBody(request);
+    const entry = store.get(body.key);
+    if (!entry || entry.type !== body.type) {
+      response.writeHead(entry ? 409 : 404);
+      response.end("{}");
+      return;
+    }
+    entry.value = body.value;
+    response.end(JSON.stringify({ updated: true, key: body.key }));
+    return;
+  }
+  if (request.method === "DELETE") {
+    if (!key || !store.delete(key)) {
+      response.writeHead(404);
+      response.end("{}");
+      return;
+    }
+    reset = true;
+    response.end(JSON.stringify({ deleted: true, key }));
+    return;
+  }
   if (key) {
+    const entry = store.get(key);
+    if (!entry) {
+      response.end(
+        JSON.stringify({
+          key,
+          type: "none",
+          ttl: -2,
+          size: 0,
+          truncated: false,
+          value: null,
+        }),
+      );
+      return;
+    }
     response.end(
       JSON.stringify({
         key,
-        type: "string",
-        ttl: 300,
-        size: 54,
+        type: entry.type,
+        ttl: entry.ttl,
+        size: entry.value.length,
         truncated: false,
-        value: JSON.stringify({
-          name: "Fixture user",
-          summary: "Planning a quiet morning.",
-        }),
+        value: entry.value,
       }),
     );
     return;
   }
-  const entries =
+  const cursor = url.searchParams.get("cursor") || "0";
+  if (reset === "ready" && match === "vox:*" && cursor === "0") {
+    store = fixtureStore();
+    reset = false;
+  }
+  const pageEntries =
     match === "empty:*"
       ? []
-      : [
-          { key: "vox:user-context:fixture-001", type: "string", ttl: 300 },
-          { key: "vox:user-context:fixture-002", type: "string", ttl: -1 },
-        ];
-  const cursor = url.searchParams.get("cursor") || "0";
+      : Array.from(store, ([key, entry]) => ({
+          key,
+          type: entry.type,
+          ttl: entry.ttl,
+        }));
+  if (reset === true && match === "vox:*" && cursor === "0") reset = "ready";
   response.end(
     JSON.stringify({
-      entries,
+      entries: pageEntries,
       cursor: match === "empty:*" || cursor !== "0" ? "0" : "128",
       match: match || "vox:*",
     }),

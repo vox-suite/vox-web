@@ -4,6 +4,7 @@ import type {
   InputHTMLAttributes,
   ReactNode,
   SelectHTMLAttributes,
+  TextareaHTMLAttributes,
 } from "react";
 import { ArrowUpRight, Waves } from "lucide-react";
 
@@ -125,7 +126,7 @@ export function Button({
   type = "button",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
 }) {
   return (
     <button type={type} className="ui-button" data-variant={variant} {...props}>
@@ -142,6 +143,31 @@ export function LinkButton({
     <Link href={href} className="ui-button" data-variant={variant}>
       {children}
     </Link>
+  );
+}
+export function TextArea({
+  label,
+  hint,
+  id,
+  monospace = false,
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  id: string;
+  label: string;
+  hint?: string;
+  monospace?: boolean;
+}) {
+  return (
+    <div className="ui-field">
+      <label htmlFor={id}>{label}</label>
+      <textarea
+        id={id}
+        data-monospace={monospace}
+        aria-describedby={hint ? `${id}-hint` : undefined}
+        {...props}
+      />
+      {hint && <small id={`${id}-hint`}>{hint}</small>}
+    </div>
   );
 }
 export function Field({

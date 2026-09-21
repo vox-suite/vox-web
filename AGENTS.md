@@ -6,7 +6,7 @@
 - Generate new management pages with `npm run generate:page -- slug "Title"` and keep them in `src/app/admin/(console)`.
 - Authentication in layouts is not sufficient: each data route/server action must check the current superuser independently.
 - Never add an authentication bypass, infer an owner email, or expose server environment variables in client components.
-- Redis administration is read-only. Use bounded previews and SCAN cursors, never KEYS or arbitrary command execution.
+- Redis administration uses bounded previews, typed replacement and explicit deletion. Use SCAN cursors, never KEYS or arbitrary command execution.
 - Preserve truthful product copy and explicit illustrative examples.
 - Run `npm test`, `npm run lint`, `npm run build` and relevant Playwright tests before claiming completion.
 

@@ -64,10 +64,12 @@ Redis stays on the backend private network. Web instances are stateless; there i
 
 ## Redis explorer behavior and limits
 
-The Core API uses `SCAN` with a count hint of 100, a reused/reconnecting multiplexed Redis connection, eight concurrent admin requests per Core instance and a four-second request timeout. The web proxy has a six-second timeout. The explorer does not call `KEYS`, load the complete keyspace, offer arbitrary Redis commands, or mutate entries.
+The Core API uses `SCAN` with a count hint of 100, a reused/reconnecting multiplexed Redis connection, eight concurrent admin requests per Core instance and a four-second request timeout. The web proxy has a six-second timeout. The explorer does not call `KEYS`, load the complete keyspace, offer arbitrary Redis commands or create keys.
 
 `SCAN` is not a snapshot and count is a hint: pages may be empty, duplicate keys can appear across pages, and entries may disappear between listing and inspection. The UI preserves the cursor as a string to avoid JavaScript integer rounding. Previous pages are rescanned. Refresh starts from cursor zero. Searches use Redis glob patterns.
 
 Previews are atomic read-only Lua scripts (`EVAL_RO`, Redis 7+). Strings are limited to 64 KiB. Collection previews use bounded samples with a total raw string budget of 64 KiB and a 2 KiB per-value limit. Hashes/sets sample their first scan batch, lists/sorted sets show their first 40 members, and streams show their first 20 entries. JSON formatting is best-effort, and truncated content is explicitly marked. Keys must be UTF-8; detail requests accept 1–1,024 bytes without control characters. Binary value bytes are displayed lossily. Redis Cluster is not supported by this standalone-Redis reader.
+
+Existing strings, lists, hashes, sets and sorted sets can be replaced through type-aware editors. Replacement is atomic, preserves the remaining expiry and is disabled for truncated previews. Streams remain preview-only. Deletion requires an explicit confirmation and works for every listed type.
 
 Authorization is checked server-side for every management request. Redis responses and admin pages are private/no-store. Data is not persisted to browser storage. The application does not log Redis values, keys or tokens; configure reverse-proxy access logging to omit query strings on admin endpoints as described in the deployment guide.
