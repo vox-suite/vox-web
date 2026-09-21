@@ -1,44 +1,84 @@
 import { Section, Stack, Text, LinkButton, Brand } from "@/components/ui";
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Privacy" };
+
+export const metadata: Metadata = {
+  title: "Privacy & Compliance",
+  description:
+    "Privacy policy, security commitments, and legal compliance disclosures for Vox.",
+};
+
 export default function PrivacyPage() {
   return (
     <main id="main">
       <Section>
         <Stack gap="large">
           <Brand />
-          <h1>Privacy at Vox</h1>
+          <h1>Privacy & Legal Disclosures</h1>
           <Text muted>
-            This page describes the website and administration area available
-            today.
+            Last updated: September 2026. This page describes how Vox protects
+            your data, complies with applicable privacy laws, and operates its
+            telephony and web interfaces.
           </Text>
-          <h2>Public website</h2>
+
+          <h2>1. Public Website & Telephony</h2>
           <Text>
-            The public website presents the Vox vision. Its conversation
-            examples are illustrative. It does not start calls, record your
-            microphone, or connect your accounts.
+            The public website introduces the Vox product. Fonts are self-hosted
+            locally at build time without third-party IP leakage. The website does
+            not activate your microphone, initiate calls, or inspect accounts
+            without your explicit action.
           </Text>
-          <h2>Administration sign-in</h2>
+
+          <h2>2. Children&apos;s Privacy (COPPA Compliance)</h2>
           <Text>
-            Administrators sign in through Google. We use your verified email to
-            check an explicit access list, and your name and email to identify
-            your session. An encrypted, HTTP-only session cookie keeps you
-            signed in for up to eight hours. The website does not receive your
-            Google password.
+            Vox is directed to business professionals and is strictly not intended
+            for children under the age of 13. We do not knowingly collect or
+            maintain personal information from persons under 13 years of age.
+            If we learn that personal data of persons under 13 has been collected
+            without verified parental consent, we will promptly delete that
+            information. Contact{" "}
+            <a href="mailto:privacy@voxagent.in">privacy@voxagent.in</a> with any
+            inquiries.
           </Text>
-          <h2>Administrative data</h2>
+
+          <h2>3. Session Replay & Wiretapping Protection (CIPA)</h2>
           <Text>
-            Authorized administrators can view internal Redis data, which may
-            include personal context. These responses are marked private and are
-            not cached by the application. Administrators should only access
-            information needed for their work.
+            We respect your privacy. Vox does not employ invasive session-replay
+            software or keystroke trackers that record sensitive form inputs or
+            private browsing behavior without consent. Telemetry is anonymized,
+            aggregate, and operational only.
           </Text>
-          <h2>Service providers</h2>
+
+          <h2>4. Commercial Communications & CAN-SPAM Act</h2>
           <Text>
-            Google processes sign-in requests. Hosting infrastructure may retain
-            standard request logs. This page does not specify retention periods
-            for the separate Vox voice service or its databases.
+            All marketing, launch, and waitlist announcement emails sent by Vox
+            contain an explicit opt-out / unsubscribe mechanism and our physical
+            mailing address. You can unsubscribe at any time with a single click.
           </Text>
+
+          <h2>5. Subscriptions & Renewal Terms (California ARL)</h2>
+          <Text>
+            Paid subscriptions clearly present pricing, billing frequency, and
+            cancellation terms prior to checkout. You may cancel recurring
+            subscriptions at any time through your account settings or by
+            contacting support with immediate effect.
+          </Text>
+
+          <h2>6. DMCA & Copyright Safe Harbor</h2>
+          <Text>
+            Vox respects intellectual property rights in compliance with 17 U.S.C.
+            § 512. Inquiries regarding alleged copyright infringement or notices
+            under the Digital Millennium Copyright Act should be addressed to our
+            Designated Copyright Agent at{" "}
+            <a href="mailto:dmca@voxagent.in">dmca@voxagent.in</a>.
+          </Text>
+
+          <h2>7. Administration Sign-in & Data Retention</h2>
+          <Text>
+            Administrators sign in via Google OAuth. Sessions are protected by
+            encrypted, HTTP-only session cookies. Authorized administrators access
+            only data strictly necessary for maintenance and support.
+          </Text>
+
           <LinkButton href="/" variant="secondary">
             Back to Vox
           </LinkButton>

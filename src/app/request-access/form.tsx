@@ -29,6 +29,7 @@ export function RequestAccessForm() {
           email: fd.get("email"),
           role: fd.get("role"),
           use_case: fd.get("use_case"),
+          age_consent: fd.get("age_consent") === "on",
         }),
       });
       setState(res.ok ? "success" : "error");
@@ -107,6 +108,24 @@ export function RequestAccessForm() {
         maxLength={1000}
         disabled={state === "submitting"}
       />
+
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.8125rem", color: "var(--color-fg-muted, #666)", margin: "0.75rem 0" }}>
+        <input
+          type="checkbox"
+          id="age_consent"
+          name="age_consent"
+          required
+          disabled={state === "submitting"}
+          style={{ marginTop: "0.15rem", cursor: "pointer" }}
+        />
+        <label htmlFor="age_consent" style={{ cursor: "pointer", lineHeight: 1.4 }}>
+          I confirm that I am at least 18 years old (or 13+ with parental authorization) and accept the{" "}
+          <a href="/privacy" style={{ textDecoration: "underline" }}>
+            Privacy Policy
+          </a>.
+        </label>
+      </div>
+
       <div className="request-access-actions">
         <Button type="submit" variant="primary" disabled={state === "submitting"}>
           {state === "submitting" ? "Sending…" : "Request access"}
