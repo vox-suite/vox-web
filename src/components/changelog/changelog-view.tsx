@@ -56,84 +56,86 @@ export function ChangelogView() {
       <div className="changelog-timeline">
         {CHANGELOG_DATA.map((item) => (
           <article key={item.id} className="changelog-item" id={item.id}>
-            <div className="changelog-date-col">
-              <div className="changelog-date">{item.formattedDate}</div>
-              <div className="changelog-relative-time">{item.version}</div>
-              <span className="changelog-dot" aria-hidden="true" />
-            </div>
-
             <div className="changelog-card">
-              <header className="changelog-card-header">
-                <div className="changelog-tags">
-                  <span className="ui-badge" data-tone="accent">
-                    {item.version}
+              <div className="changelog-tags">
+                <span className="ui-badge" data-tone="accent">
+                  {item.version}
+                </span>
+                {item.subsystems.map((sub) => (
+                  <span
+                    key={sub}
+                    className="changelog-subsystem-badge"
+                    data-subsystem={sub}
+                  >
+                    {sub}
                   </span>
-                  {item.subsystems.map((sub) => (
-                    <span
-                      key={sub}
-                      className="changelog-subsystem-badge"
-                      data-subsystem={sub}
-                    >
-                      {sub}
-                    </span>
-                  ))}
-                  {item.metrics && (
-                    <span
-                      style={{
-                        marginLeft: "auto",
-                        fontFamily: "var(--font-button)",
-                        fontSize: "0.78rem",
-                        fontWeight: 700,
-                        color: "#4f46e5",
-                        background: "#f5f3ff",
-                        padding: "0.2rem 0.6rem",
-                        border: "1px solid #ddd6fe",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {item.metrics.label}: {item.metrics.value}
-                    </span>
-                  )}
-                </div>
-
-                <h2 className="changelog-title">{item.title}</h2>
-                <p className="changelog-summary">{item.summary}</p>
-              </header>
-
-              {item.features.map((section, idx) => (
-                <div key={idx} className="changelog-section-group">
-                  <h3 className="changelog-section-title">
-                    {section.category}
-                  </h3>
-                  <ul className="changelog-bullets">
-                    {section.items.map((feat, fIdx) => (
-                      <li key={fIdx} className="changelog-bullet">
-                        <strong>{feat.title}</strong> — {feat.description}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-
-              {item.highlight && (
-                <div className="changelog-highlight-banner">
+                ))}
+                {item.metrics && (
                   <span
                     style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.4rem",
+                      marginLeft: "auto",
+                      fontFamily: "var(--font-button)",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      color: "#4f46e5",
+                      background: "#f5f3ff",
+                      padding: "0.2rem 0.6rem",
+                      border: "1px solid #ddd6fe",
+                      borderRadius: "4px",
                     }}
                   >
-                    <Sparkles
-                      size={14}
-                      style={{ color: "#6366f1" }}
-                      aria-hidden="true"
-                    />
-                    {item.highlight.title}
+                    {item.metrics.label}: {item.metrics.value}
                   </span>
-                  <p>{item.highlight.description}</p>
+                )}
+              </div>
+
+              <div className="changelog-title-row">
+                <div className="changelog-date-col">
+                  <div className="changelog-date">{item.formattedDate}</div>
+                  <div className="changelog-relative-time">{item.version}</div>
+                  <span className="changelog-dot" aria-hidden="true" />
                 </div>
-              )}
+                <h2 className="changelog-title">{item.title}</h2>
+              </div>
+
+              <div className="changelog-card-body">
+                <p className="changelog-summary">{item.summary}</p>
+
+                {item.features.map((section, idx) => (
+                  <div key={idx} className="changelog-section-group">
+                    <h3 className="changelog-section-title">
+                      {section.category}
+                    </h3>
+                    <ul className="changelog-bullets">
+                      {section.items.map((feat, fIdx) => (
+                        <li key={fIdx} className="changelog-bullet">
+                          <strong>{feat.title}</strong> — {feat.description}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+
+                {item.highlight && (
+                  <div className="changelog-highlight-banner">
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.4rem",
+                      }}
+                    >
+                      <Sparkles
+                        size={14}
+                        style={{ color: "#6366f1" }}
+                        aria-hidden="true"
+                      />
+                      {item.highlight.title}
+                    </span>
+                    <p>{item.highlight.description}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </article>
         ))}

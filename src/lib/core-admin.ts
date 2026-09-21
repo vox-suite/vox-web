@@ -8,14 +8,13 @@ export class CoreAdminError extends Error {
   }
 }
 export async function readCoreRedis(params: URLSearchParams) {
-  const base = process.env.VOX_CORE_ADMIN_URL;
   const token = process.env.VOX_ADMIN_TOKEN;
-  if (!base || !token)
+  if (!token)
     throw new CoreAdminError(
       503,
       "The Redis connection has not been configured. Contact the workspace owner.",
     );
-  const url = new URL("https://api.voxagent.in/v1/admin/redis", base);
+  const url = new URL("https://api.voxagent.in/v1/admin/redis");
   url.search = params.toString();
 
   let response: Response;
