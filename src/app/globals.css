@@ -1702,10 +1702,11 @@
     grid-template-columns: auto 1fr;
     gap: 0.85rem;
     align-items: start;
+    --changelog-date-offset: calc(2rem + 1.45rem + 0.75rem);
   }
   .changelog-date-col {
     text-align: right;
-    padding-top: 0.25rem;
+    padding-top: var(--changelog-date-offset);
     padding-right: 1.1rem;
     position: relative;
     min-width: 5.5rem;
@@ -1726,7 +1727,7 @@
   .changelog-dot {
     position: absolute;
     right: 0;
-    top: 0.45rem;
+    top: calc(var(--changelog-date-offset) + 0.2rem);
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -1866,6 +1867,7 @@
       grid-template-columns: 1fr;
       gap: 0.65rem;
       padding-left: 1.4rem;
+      --changelog-date-offset: 0.25rem;
     }
     .changelog-date-col {
       text-align: left;

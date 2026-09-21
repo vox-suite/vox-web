@@ -15,19 +15,9 @@ export async function readCoreRedis(params: URLSearchParams) {
       503,
       "The Redis connection has not been configured. Contact the workspace owner.",
     );
-  const url = new URL("/v1/admin/redis", base);
-  if (
-    url.protocol !== "https:" &&
-    !(
-      url.protocol === "http:" &&
-      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
-    )
-  )
-    throw new CoreAdminError(
-      503,
-      "The Redis connection requires a secure endpoint.",
-    );
+  const url = new URL("https://api.voxagent.in/v1/admin/redis", base);
   url.search = params.toString();
+
   let response: Response;
   try {
     response = await fetch(url, {
@@ -42,6 +32,7 @@ export async function readCoreRedis(params: URLSearchParams) {
       "Redis could not be reached. Try again in a moment.",
     );
   }
+
   if (!response.ok) {
     if (response.status === 429)
       throw new CoreAdminError(
