@@ -1653,78 +1653,25 @@
     color: var(--color-muted);
     margin-top: 0.25rem;
   }
-  .changelog-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-    margin-bottom: 3.5rem;
-    padding: 1.25rem 0;
-    border-bottom: 1px solid var(--color-line);
-  }
-  .changelog-filter-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .changelog-tab-btn {
-    font-family: var(--font-button);
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.45rem 0.95rem;
-    border: 1px solid var(--color-line);
-    background: white;
-    color: var(--color-muted);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .changelog-tab-btn:hover {
-    color: #111;
-    border-color: #888;
-  }
-  .changelog-tab-btn[aria-pressed="true"] {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
-  .changelog-search {
-    max-width: 280px;
-    width: 100%;
-  }
-  .changelog-search input {
-    min-height: 2.25rem;
-    padding: 0.45rem 0.75rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    border: 1px solid var(--color-line);
-  }
   .changelog-timeline {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 3.5rem;
   }
-  .changelog-timeline::before {
-    content: "";
-    position: absolute;
-    top: 1.5rem;
-    bottom: 2rem;
-    left: 140px;
-    width: 2px;
-    background: var(--color-line);
-  }
   .changelog-item {
     position: relative;
     display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 2.5rem;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    align-items: start;
   }
   .changelog-date-col {
     text-align: right;
     padding-top: 0.25rem;
+    padding-right: 1.1rem;
     position: relative;
+    min-width: 5.5rem;
   }
   .changelog-date {
     font-family: var(--font-button);
@@ -1741,14 +1688,13 @@
   }
   .changelog-dot {
     position: absolute;
-    right: -2.5rem;
-    top: 0.5rem;
+    right: 0;
+    top: 0.45rem;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     background: white;
     border: 2.5px solid #6366f1;
-    transform: translateX(calc(50% + 1px));
     box-shadow: 0 0 0 4px white;
     z-index: 2;
   }
@@ -1877,21 +1823,19 @@
       width: calc(100% - 2rem);
       padding: 3rem 1rem 5rem;
     }
-    .changelog-timeline::before {
-      left: 20px;
-    }
     .changelog-item {
       grid-template-columns: 1fr;
-      gap: 0.75rem;
-      padding-left: 45px;
+      gap: 0.65rem;
+      padding-left: 1.4rem;
     }
     .changelog-date-col {
       text-align: left;
+      padding-right: 0;
+      padding-left: 1.1rem;
     }
     .changelog-dot {
-      left: 16px;
+      left: 0;
       right: auto;
-      transform: none;
     }
   }
 

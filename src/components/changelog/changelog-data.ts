@@ -27,6 +27,78 @@ export interface ChangelogItem {
 
 export const CHANGELOG_DATA: ChangelogItem[] = [
   {
+    id: "2026-09-21-wespeaker-biometrics-elevenlabs-mp3",
+    date: "2026-09-21",
+    formattedDate: "Sep 21, 2026",
+    version: "v0.5.0",
+    title: "WeSpeaker Neural Voice Biometrics, Live Speaker Enrollment & ElevenLabs MP3 Streaming",
+    summary:
+      "Integrated WeSpeaker ResNet-34 ONNX neural speaker embeddings for deep biometric identification, introduced live mid-call speaker enrollment and active caller handoff, added real-time streaming MP3-to-mu-law transcoding for ElevenLabs telephony, and synchronized sub-millisecond personalized caller greetings.",
+    subsystems: ["vox-bridge", "vox-core", "vox-deploy"],
+    category: "biometrics",
+    tags: [
+      "WeSpeaker ONNX",
+      "ResNet-34",
+      "Voice Biometrics",
+      "Speaker Enrollment",
+      "Active Handoff",
+      "ElevenLabs MP3",
+      "Telephony",
+      "Greeting Sync",
+    ],
+    metrics: {
+      label: "Biometric Backbone",
+      value: "ResNet-34 ONNX",
+    },
+    features: [
+      {
+        category: "Neural Voice Biometrics & Identity Handoff",
+        items: [
+          {
+            title: "WeSpeaker ResNet-34 ONNX Integration",
+            description:
+              "Directly embedded deep 256/512-dimensional acoustic feature extraction via ONNX Runtime C++ backend in vox-bridge, replacing baseline Mel-filterbanks with state-of-the-art neural speaker verification.",
+          },
+          {
+            title: "Real-Time Mid-Call Speaker Handoff",
+            description:
+              "Continually compares turn voice embeddings against enrolled speaker profiles. When a voice divergence is detected (cosine similarity < 0.55), automatically intercepts ('It sounds like someone else is speaking. What is your name?') and seamlessly re-routes active user context.",
+          },
+          {
+            title: "Autonomous Conversational Speaker Enrollment",
+            description:
+              "Natural conversational profile enrollment: when a new speaker introduces themselves ('My name is...'), the cognitive engine immediately captures their voiceprint, creates their user profile, and binds their identity in Postgres and Redis.",
+          },
+        ],
+      },
+      {
+        category: "Telephony & Audio Streaming Engine",
+        items: [
+          {
+            title: "ElevenLabs Streaming MP3-to-MuLaw Transcoder",
+            description:
+              "Engineered an in-memory asynchronous audio decoder and resampler using minimp3 and tokio-util, dynamically transcoding 44.1kHz MP3 streaming chunks into 8kHz G.711 mu-law for Twilio telephony compatibility without requiring ElevenLabs Pro PCM tier.",
+          },
+          {
+            title: "Sub-Millisecond Caller Greeting Synchronization",
+            description:
+              "Pre-caches known caller names in Redis (vox:greeting-names) on startup with fallback to Postgres, delivering instant personalized greetings ('Hello Rahul! How can I help you today?') before full LLM deliberation.",
+          },
+          {
+            title: "Adaptive Onboarding Protocol",
+            description:
+              "Redesigned first-time caller prompts to warmly assist callers without gating their immediate requests, gathering user identity in the background through natural dialogue.",
+          },
+        ],
+      },
+    ],
+    highlight: {
+      title: "Zero-Leakage Multi-Speaker Security",
+      description:
+        "By coupling WeSpeaker ResNet-34 neural embeddings with sub-second active speaker triage, Vox automatically prevents multi-user data leakage and securely isolates personal task contexts even when phones are shared.",
+    },
+  },
+  {
     id: "2026-09-19-zero-latency-audio-cache",
     date: "2026-09-19",
     formattedDate: "Sep 19, 2026",

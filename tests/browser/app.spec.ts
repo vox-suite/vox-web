@@ -181,27 +181,18 @@ test("Google sign-in starts an OAuth flow with CSRF and state protection", async
   expect(authorization.searchParams.get("scope")).toBe("openid email profile");
 });
 
-test("changelog page displays timeline, filters milestones, and is accessible", async ({
+test("changelog page displays timeline milestones and is accessible", async ({
   page,
 }, testInfo) => {
   await page.goto("/changelog");
   await expect(
     page.getByRole("heading", { name: "Every milestone, measured." }),
   ).toBeVisible();
+  await expect(page.getByText("Sep 21, 2026")).toBeVisible();
+  await expect(page.locator(".changelog-relative-time").first()).toHaveText("v0.5.0");
+  await expect(page.getByText("WeSpeaker Neural Voice Biometrics", { exact: false })).toBeVisible();
   await expect(page.getByText("Sep 19, 2026")).toBeVisible();
   await expect(page.getByText("Sep 07, 2026")).toBeVisible();
-
-  // Test category filter
-  await page.getByRole("button", { name: "Voice Telephony" }).click();
-  await expect(page.getByText("Sep 19, 2026")).toBeVisible();
-  await expect(page.getByText("Sep 17, 2026")).toBeVisible();
-
-  // Reset category filter to All
-  await page.getByRole("button", { name: "All updates" }).click();
-
-  // Test search
-  await page.getByRole("searchbox", { name: "Search changelog entries" }).fill("VAD");
-  await expect(page.getByText("Edge VAD Instant Barge-In", { exact: false })).toBeVisible();
 
   expect(
     await page.evaluate(
