@@ -171,11 +171,9 @@ export function Hero() {
         without another app to manage.
       </p>
       <Row>
-        <LinkButton href="#follow-through">
+        <LinkButton href="/request-access">Request access</LinkButton>
+        <LinkButton href="#follow-through" variant="secondary">
           See how Vox follows through
-        </LinkButton>
-        <LinkButton href="/changelog" variant="secondary">
-          Read what shipped
         </LinkButton>
       </Row>
       <div className="hero-proof" aria-label="Available Vox capabilities">
@@ -275,12 +273,12 @@ export function FeatureSection() {
     <Section
       id="capabilities"
       title="What Vox can do today."
-      description="The latest Bridge and Core work makes Vox faster in the moment, more useful after the call, and easier to trust."
+      description="Vox is faster in the moment, more useful after the call, and easier to trust."
     >
       <Grid columns={2}>
         {currentCapabilities.map(
-          ({ icon: Icon, badge, title, description, visual }) => (
-            <article className="capability-card" key={title}>
+          ({ icon: Icon, badge, title, description, visual }, index) => (
+            <article className="capability-card" key={title} data-featured={index === 0 || index === currentCapabilities.length - 1 ? "true" : undefined}>
               <div className="capability-card-header">
                 <div className="capability-card-icon" aria-hidden="true">
                   <Icon />
@@ -313,8 +311,7 @@ export function StorySection() {
             next important update back to you.
           </p>
           <p>
-            That can mean a reminder, a WhatsApp update, or a scheduled call—
-            whichever way fits the moment.
+            That can mean a reminder, a WhatsApp update, or a scheduled call—whichever way fits the moment.
           </p>
           <LinkButton href="#recently-shipped" variant="secondary">
             See what changed recently
@@ -391,7 +388,7 @@ export function LatestSection() {
     <Section
       id="recently-shipped"
       title="Built in public, release by release."
-      description="The homepage now reflects working product milestones. The changelog keeps the engineering detail."
+      description="Each version below is live. The full build history is in the changelog."
     >
       <div className="release-list">
         {latestReleases.map((release) => (
@@ -426,7 +423,7 @@ export function ClosingSection() {
         <h2>Make one call. Leave with less to carry.</h2>
         <p>Vox turns conversation into continuity.</p>
         <Row>
-          <LinkButton href="#follow-through">See the full loop</LinkButton>
+          <LinkButton href="/request-access">Request access</LinkButton>
           <LinkButton href="/changelog" variant="secondary">
             Follow the build
           </LinkButton>

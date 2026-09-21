@@ -12,16 +12,19 @@ export function SiteHeader() {
           <Link href="/#principles">Our principles</Link>
           <Link href="/changelog">Changelog</Link>
         </nav>
-        <LinkButton
-          href={
-            process.env.NODE_ENV === "production"
-              ? "https://admin.voxagent.in/login"
-              : "/admin/login"
-          }
-          variant="secondary"
-        >
-          Sign in
-        </LinkButton>
+        <div className="site-nav-ctas">
+          <LinkButton href="/request-access">Request access</LinkButton>
+          <LinkButton
+            href={
+              process.env.NODE_ENV === "production"
+                ? "https://admin.voxagent.in/login"
+                : "/admin/login"
+            }
+            variant="secondary"
+          >
+            Sign in
+          </LinkButton>
+        </div>
       </div>
     </header>
   );
@@ -42,10 +45,10 @@ export function SiteFooter() {
             <Link href="/#capabilities">Capabilities</Link>
             <Link href="/#principles">Our principles</Link>
             <Link href="/changelog">Changelog</Link>
+            <Link href="/request-access">Request access</Link>
           </div>
           <div>
             <small>Vox</small>
-            <Link href="/changelog">Changelog</Link>
             <Link href="/privacy">Privacy</Link>
             <Link
               href={
