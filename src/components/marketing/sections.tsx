@@ -204,7 +204,11 @@ export function PrinciplesSection() {
               "A great assistant lightens your day instead of competing for your attention. Vox gives you time back rather than another screen to check.",
             ],
           ].map(([title, body], index) => (
-            <article className="principle" key={title} data-principle-index={index}>
+            <article
+              className="principle"
+              key={title}
+              data-principle-index={index}
+            >
               <h3>{title}</h3>
               <p>{body}</p>
             </article>

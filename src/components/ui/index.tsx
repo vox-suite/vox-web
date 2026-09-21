@@ -318,9 +318,7 @@ export function AuthFrame({ children }: Children) {
     <main id="main" className="auth-frame">
       <Brand />
       <div className="auth-card">{children}</div>
-      <p className="auth-footer">
-        Vox administration · Access by invitation
-      </p>
+      <p className="auth-footer">Vox administration · Access by invitation</p>
     </main>
   );
 }

@@ -31,7 +31,8 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
     date: "2026-09-21",
     formattedDate: "Sep 21, 2026",
     version: "v0.5.0",
-    title: "WeSpeaker Neural Voice Biometrics, Live Speaker Enrollment & ElevenLabs MP3 Streaming",
+    title:
+      "WeSpeaker Neural Voice Biometrics, Live Speaker Enrollment & ElevenLabs MP3 Streaming",
     summary:
       "Integrated WeSpeaker ResNet-34 ONNX neural speaker embeddings for deep biometric identification, introduced live mid-call speaker enrollment and active caller handoff, added real-time streaming MP3-to-mu-law transcoding for ElevenLabs telephony, and synchronized sub-millisecond personalized caller greetings.",
     subsystems: ["vox-bridge", "vox-core", "vox-deploy"],
@@ -103,12 +104,20 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
     date: "2026-09-19",
     formattedDate: "Sep 19, 2026",
     version: "v0.4.0",
-    title: "Zero-Latency Audio Cache, Domain Fillers & Continuous Turn Biometrics",
+    title:
+      "Zero-Latency Audio Cache, Domain Fillers & Continuous Turn Biometrics",
     summary:
       "Achieved sub-millisecond Time-To-First-Audio (TTFA) on telephony task turns via pre-warmed audio caches, introduced domain-tailored contextual fillers across 10 functional domains, added structured VAD tracing, and enabled continuous turn-by-turn voice biometric extraction.",
     subsystems: ["vox-bridge", "vox-core"],
     category: "voice",
-    tags: ["Audio Cache", "Voice Telephony", "VAD", "Biometrics", "TTFA", "SSE Streaming"],
+    tags: [
+      "Audio Cache",
+      "Voice Telephony",
+      "VAD",
+      "Biometrics",
+      "TTFA",
+      "SSE Streaming",
+    ],
     metrics: {
       label: "Task First Audio Latency",
       value: "< 1ms",
@@ -171,12 +180,20 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
     date: "2026-09-18",
     formattedDate: "Sep 18, 2026",
     version: "v0.3.5",
-    title: "Edge VAD Instant Barge-In, Mel Voiceprints & Jev System 1 Intelligence",
+    title:
+      "Edge VAD Instant Barge-In, Mel Voiceprints & Jev System 1 Intelligence",
     summary:
       "Implemented local edge Voice Activity Detection (VAD) directly on raw G.711 mu-law frames for sub-50ms barge-in interruption, engineered 80-bin Mel-filterbank speaker embeddings, and integrated TypeSafe Jev System 1 for instant semantic triage.",
     subsystems: ["vox-bridge", "vox-core"],
     category: "biometrics",
-    tags: ["Edge VAD", "Barge-In", "Mel Filterbank", "Jev System 1", "Voiceprints", "Identity"],
+    tags: [
+      "Edge VAD",
+      "Barge-In",
+      "Mel Filterbank",
+      "Jev System 1",
+      "Voiceprints",
+      "Identity",
+    ],
     metrics: {
       label: "Local Barge-In Response",
       value: "< 50ms",
@@ -239,7 +256,14 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
       "Overhauled end-to-end telephony latency with AssemblyAI STT silence calibration, TCP_NODELAY connection pooling, Core-to-Bridge SSE streaming, and sentence-level pipelined Sarvam TTS synthesis.",
     subsystems: ["vox-bridge", "vox-core"],
     category: "voice",
-    tags: ["STT Tuning", "Sarvam TTS", "TCP_NODELAY", "Endpointing", "Latency", "Greetings"],
+    tags: [
+      "STT Tuning",
+      "Sarvam TTS",
+      "TCP_NODELAY",
+      "Endpointing",
+      "Latency",
+      "Greetings",
+    ],
     metrics: {
       label: "STT Endpointing Silence",
       value: "200ms",
@@ -282,7 +306,13 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
       "Introduced background cron task execution, automated WhatsApp sweeper, autonomous outbound calling, cross-channel phone and WhatsApp identity resolution, and 10+ core database agent tools.",
     subsystems: ["vox-core", "vox-bridge"],
     category: "core",
-    tags: ["Autonomous Tasks", "WhatsApp", "Cross-Channel", "Outbound Calls", "Database Tools"],
+    tags: [
+      "Autonomous Tasks",
+      "WhatsApp",
+      "Cross-Channel",
+      "Outbound Calls",
+      "Database Tools",
+    ],
     metrics: {
       label: "Core Agent Tools",
       value: "10+ Tools",
@@ -340,7 +370,14 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
       "Migrated web console to Next.js 16 with React 19 and Tailwind CSS v4, implemented secure Google OAuth administration with Redis key inspection, and containerized Caddy reverse proxy.",
     subsystems: ["vox-web", "vox-deploy", "vox-core"],
     category: "web",
-    tags: ["Next.js 16", "React 19", "Tailwind v4", "Admin Console", "Redis Explorer", "Caddy"],
+    tags: [
+      "Next.js 16",
+      "React 19",
+      "Tailwind v4",
+      "Admin Console",
+      "Redis Explorer",
+      "Caddy",
+    ],
     metrics: {
       label: "Admin Inspection Window",
       value: "Bounded O(N)",
@@ -431,7 +468,12 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
       "Built the initial high-throughput Rust telephony bridge for Twilio Media Streams, implemented durable job leasing with PostgreSQL row locks, and configured speech-ready prompting.",
     subsystems: ["vox-bridge", "vox-core"],
     category: "voice",
-    tags: ["Twilio Gateway", "Rust WebSocket", "Durable Leases", "Speech Prompting"],
+    tags: [
+      "Twilio Gateway",
+      "Rust WebSocket",
+      "Durable Leases",
+      "Speech Prompting",
+    ],
     metrics: {
       label: "Telephony Protocol",
       value: "G.711 8kHz",
@@ -474,7 +516,13 @@ export const CHANGELOG_DATA: ChangelogItem[] = [
       "Established the core vision of Vox as a voice-first chief of staff, designed the high-contrast monochrome design language, and launched the public interactive demonstration.",
     subsystems: ["vox-web"],
     category: "web",
-    tags: ["Inception", "Brand", "Design System", "Interactive Demo", "Tailwind v4"],
+    tags: [
+      "Inception",
+      "Brand",
+      "Design System",
+      "Interactive Demo",
+      "Tailwind v4",
+    ],
     metrics: {
       label: "Platform Inception",
       value: "Day 1",

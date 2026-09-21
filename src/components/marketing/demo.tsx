@@ -20,7 +20,8 @@ const examples = [
       "Adapt easily as plans change",
     ],
     user: "My schedule tomorrow is packed. Can you help me find some breathing room?",
-    first: "Let’s take a look. What’s the main thing you want to protect tomorrow?",
+    first:
+      "Let’s take a look. What’s the main thing you want to protect tomorrow?",
     last: "Got it. Let’s move the afternoon sync to Thursday and keep your morning focus block open.",
   },
   {
@@ -112,8 +113,8 @@ export function ConversationDemo() {
           <div className="bubble">{example.first}</div>
           <div className="bubble">{example.last}</div>
           <small>
-            A preview of the voice experience in development. No active call is taking
-            place.
+            A preview of the voice experience in development. No active call is
+            taking place.
           </small>
         </div>
       </div>

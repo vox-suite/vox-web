@@ -15,11 +15,15 @@ export function ChangelogView() {
         <Badge tone="accent">Platform Evolution & Changelog</Badge>
         <h1>Every milestone, measured.</h1>
         <p>
-          Follow the engineering progress of Vox from zero-latency voice telephony and edge
-          signal processing to autonomous multi-agent cognition and biometric security.
+          Follow the engineering progress of Vox from zero-latency voice
+          telephony and edge signal processing to autonomous multi-agent
+          cognition and biometric security.
         </p>
 
-        <div className="changelog-metrics" aria-label="Key Performance Indicators">
+        <div
+          className="changelog-metrics"
+          aria-label="Key Performance Indicators"
+        >
           <div className="changelog-metric-card">
             <div className="changelog-metric-val">&lt; 1ms</div>
             <div className="changelog-metric-label">Task Audio TTFA</div>
@@ -30,7 +34,9 @@ export function ChangelogView() {
           </div>
           <div className="changelog-metric-card">
             <div className="changelog-metric-val">ResNet-34</div>
-            <div className="changelog-metric-label">Neural Voice Biometrics</div>
+            <div className="changelog-metric-label">
+              Neural Voice Biometrics
+            </div>
           </div>
           <div className="changelog-metric-card">
             <div className="changelog-metric-val">200ms</div>
@@ -96,7 +102,9 @@ export function ChangelogView() {
 
               {item.features.map((section, idx) => (
                 <div key={idx} className="changelog-section-group">
-                  <h3 className="changelog-section-title">{section.category}</h3>
+                  <h3 className="changelog-section-title">
+                    {section.category}
+                  </h3>
                   <ul className="changelog-bullets">
                     {section.items.map((feat, fIdx) => (
                       <li key={fIdx} className="changelog-bullet">
@@ -109,8 +117,18 @@ export function ChangelogView() {
 
               {item.highlight && (
                 <div className="changelog-highlight-banner">
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
-                    <Sparkles size={14} style={{ color: "#6366f1" }} aria-hidden="true" />
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.4rem",
+                    }}
+                  >
+                    <Sparkles
+                      size={14}
+                      style={{ color: "#6366f1" }}
+                      aria-hidden="true"
+                    />
                     {item.highlight.title}
                   </span>
                   <p>{item.highlight.description}</p>
@@ -141,7 +159,11 @@ export function ChangelogView() {
           onClick={scrollToTop}
           className="ui-button"
           data-variant="ghost"
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+          }}
         >
           <ArrowUp size={14} aria-hidden="true" />
           Back to top

@@ -189,8 +189,12 @@ test("changelog page displays timeline milestones and is accessible", async ({
     page.getByRole("heading", { name: "Every milestone, measured." }),
   ).toBeVisible();
   await expect(page.getByText("Sep 21, 2026")).toBeVisible();
-  await expect(page.locator(".changelog-relative-time").first()).toHaveText("v0.5.0");
-  await expect(page.getByText("WeSpeaker Neural Voice Biometrics", { exact: false })).toBeVisible();
+  await expect(page.locator(".changelog-relative-time").first()).toHaveText(
+    "v0.5.0",
+  );
+  await expect(
+    page.getByText("WeSpeaker Neural Voice Biometrics", { exact: false }),
+  ).toBeVisible();
   await expect(page.getByText("Sep 19, 2026")).toBeVisible();
   await expect(page.getByText("Sep 07, 2026")).toBeVisible();
 

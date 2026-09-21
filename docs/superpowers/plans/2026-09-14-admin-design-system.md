@@ -6,12 +6,14 @@
 **Spec:** docs/superpowers/specs/2026-09-14-admin-design-system.md
 
 ## Global constraints
+
 - User requested autonomous completion. Execute inline in feature branches; leave reviewable working changes.
 - Pages use shared components without page-specific styling.
 - Google verified identity plus exact allowlist; fail closed when unconfigured.
 - Read-only Redis access; bounded previews and cursor pagination; no browser-side secrets.
 
 ## Tasks
+
 - [x] Migration and design system: replace Vite entry/config with App Router, PostCSS and Next configuration; define tokens and semantic defaults in src/app/globals.css, reusable primitives in src/components/ui, public shell and feature sections in src/components/marketing. Verify lint/build and public browser rendering.
 - [x] Authentication: write tests for missing/unauthorized/unverified identities, exact email allowlisting, same-origin redirects and host routing; implement src/lib/access.ts, src/lib/auth.ts, src/proxy.ts and login route. Verify denied requests and redirects without credentials.
 - [x] Redis boundary: write Core route tests for missing/wrong tokens, malformed cursors, unavailable Redis and actual bounded reads. Implement src/http/admin.rs and reusable Redis connection with a dedicated token; expose no mutation methods. Next.js data routes validate input and recheck sessions before forwarding with no-store and a timeout.

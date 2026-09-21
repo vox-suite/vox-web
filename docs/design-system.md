@@ -11,8 +11,8 @@ Manrope is bundled locally, including a Latin subset. Headings use a shared scal
 ## Composition
 
 ```tsx
-import { Page, Card, Stack, Field, Button } from '@/components/ui';
-import { requireSuperuser } from '@/lib/auth';
+import { Page, Card, Stack, Field, Button } from "@/components/ui";
+import { requireSuperuser } from "@/lib/auth";
 
 export default async function SettingsPage() {
   await requireSuperuser();
@@ -33,20 +33,20 @@ The example shows visual composition; put editable controls in a real form conne
 
 ## Components
 
-| Component | Responsibility |
-| --- | --- |
-| `Page` | Management title, description, actions and content spacing |
-| `Section` | Public content width, vertical rhythm and left-aligned section heading |
-| `Stack`, `Row`, `Grid` | Vertical, wrapping horizontal, and responsive column layouts |
-| `Card` | Related content with optional heading and semantic surface tone |
-| `Text`, `Badge` | Body hierarchy and small explicit state labels |
-| `Button`, `LinkButton` | Actions and navigation, with primary/secondary/ghost variants |
-| `Field`, `Select` | Visible labels, controls, helper text and accessible associations |
-| `DataTable` | Caption, headers and a keyboard-accessible horizontal overflow region |
-| `Notice` | Informational, success or error feedback with appropriate live regions |
-| `EmptyState`, `LoadingState` | Consistent recovery and loading patterns |
-| `CodeBlock` | Bounded, scrollable plain-text data presentation |
-| `Stat`, `ModuleCard` | Overview data and links to management modules |
+| Component                    | Responsibility                                                         |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `Page`                       | Management title, description, actions and content spacing             |
+| `Section`                    | Public content width, vertical rhythm and left-aligned section heading |
+| `Stack`, `Row`, `Grid`       | Vertical, wrapping horizontal, and responsive column layouts           |
+| `Card`                       | Related content with optional heading and semantic surface tone        |
+| `Text`, `Badge`              | Body hierarchy and small explicit state labels                         |
+| `Button`, `LinkButton`       | Actions and navigation, with primary/secondary/ghost variants          |
+| `Field`, `Select`            | Visible labels, controls, helper text and accessible associations      |
+| `DataTable`                  | Caption, headers and a keyboard-accessible horizontal overflow region  |
+| `Notice`                     | Informational, success or error feedback with appropriate live regions |
+| `EmptyState`, `LoadingState` | Consistent recovery and loading patterns                               |
+| `CodeBlock`                  | Bounded, scrollable plain-text data presentation                       |
+| `Stat`, `ModuleCard`         | Overview data and links to management modules                          |
 
 Use the authenticated `/admin/design-system` page as the live component reference. It includes a page composition example.
 
