@@ -1,4 +1,4 @@
-import { Blocks, Database, Palette, Waves } from "lucide-react";
+import { Activity, Blocks, Database, Palette, Waves } from "lucide-react";
 import { Grid, ModuleCard, Notice, Stack } from "@/components/ui";
 import { adminModules, adminHref } from "@/lib/admin-modules";
 export function WorkspaceWelcome() {
@@ -33,6 +33,8 @@ export function ManagementModules({
                 <Database size={22} />
               ) : module.icon === "design" ? (
                 <Palette size={22} />
+              ) : module.icon === "health" ? (
+                <Activity size={22} />
               ) : (
                 <Blocks size={22} />
               )

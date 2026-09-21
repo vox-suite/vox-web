@@ -35,6 +35,7 @@ export default defineConfig({
         SUPERUSER_EMAILS: "admin@example.test",
         VOX_CORE_ADMIN_URL: "http://127.0.0.1:3101",
         VOX_ADMIN_TOKEN: "fixture-admin-token",
+        RATE_LIMIT_MAX: "1000",
       },
     },
   ],

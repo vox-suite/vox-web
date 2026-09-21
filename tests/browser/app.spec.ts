@@ -57,9 +57,20 @@ test("unauthenticated management routes redirect and APIs deny access", async ({
   await expect(
     page.getByRole("button", { name: "Continue with Google" }),
   ).toBeVisible();
+
+  await page.goto("/admin/health");
+  await expect(page).toHaveURL(/\/admin\/login/);
+
   const response = await request.get("/api/admin/redis");
   expect(response.status()).toBe(401);
   expect(response.headers()["cache-control"]).toContain("no-store");
+  expect(response.headers()["x-ratelimit-limit"]).toBeTruthy();
+
+  const healthRes = await request.get("/api/admin/health");
+  expect(healthRes.status()).toBe(401);
+  expect(healthRes.headers()["cache-control"]).toContain("no-store");
+  expect(healthRes.headers()["x-ratelimit-limit"]).toBeTruthy();
+
   expect(
     (
       await request.put("/api/admin/redis", {
@@ -84,9 +95,11 @@ test("signed but unapproved or unverified sessions cannot access data", async ({
 }) => {
   await session(context, "other@example.test");
   expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
+  expect((await page.request.get("/api/admin/health")).status()).toBe(401);
   await context.clearCookies();
   await session(context, "admin@example.test", false);
   expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
+  expect((await page.request.get("/api/admin/health")).status()).toBe(401);
 });
 test("management navigation, Redis search, preview and recovery", async ({
   context,
@@ -192,6 +205,53 @@ test("management navigation, Redis search, preview and recovery", async ({
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/admin\/login/);
   expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
+});
+
+test("system health dashboard displays metrics, container resources and adheres to accessibility", async ({
+  context,
+  page,
+}, testInfo) => {
+  await session(context);
+  await page.goto("/admin/health");
+  await expect(
+    page.getByRole("heading", { name: "System health", exact: true }),
+  ).toBeVisible();
+
+  // Verify key stats are present
+  await expect(page.getByText("CPU usage")).toBeVisible();
+  await expect(page.getByText("RAM in use")).toBeVisible();
+  await expect(page.getByText("Containers", { exact: true })).toBeVisible();
+  await expect(page.getByText("System uptime")).toBeVisible();
+
+  // Verify memory allocation and host cards
+  await expect(page.getByText("Memory allocation")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Container resources" }),
+  ).toBeVisible();
+
+  // Verify rate limit headers were sent with response
+  const response = await page.request.get("/api/admin/health");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["x-ratelimit-limit"]).toBeTruthy();
+  expect(response.headers()["x-ratelimit-remaining"]).toBeTruthy();
+
+  // Verify horizontal scroll width
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  // Verify accessibility
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
+
+  await page.screenshot({
+    path: `artifacts/health-${testInfo.project.name}.png`,
+    fullPage: true,
+  });
 });
 
 test("Google sign-in starts an OAuth flow with CSRF and state protection", async ({

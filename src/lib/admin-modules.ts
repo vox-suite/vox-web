@@ -2,7 +2,7 @@ export type AdminModule = {
   slug: string;
   title: string;
   description: string;
-  icon: "overview" | "database" | "design" | "module";
+  icon: "overview" | "database" | "design" | "module" | "health";
 };
 export const adminModules: AdminModule[] = [
   {
@@ -10,6 +10,12 @@ export const adminModules: AdminModule[] = [
     title: "Overview",
     description: "Your Vox management workspace.",
     icon: "overview",
+  },
+  {
+    slug: "health",
+    title: "System health",
+    description: "Inspect host metrics, RAM usage, and container resources.",
+    icon: "health",
   },
   {
     slug: "redis",

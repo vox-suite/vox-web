@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   Blocks,
   Database,
   LayoutDashboard,
@@ -13,6 +14,7 @@ import { adminModules, adminHref } from "@/lib/admin-modules";
 import { SignOutButton } from "./auth-controls";
 const icons = {
   overview: LayoutDashboard,
+  health: Activity,
   database: Database,
   design: Palette,
   module: Blocks,
