@@ -7,8 +7,8 @@ export function SiteHeader() {
       <div className="site-nav">
         <Brand animated={true} size={34} />
         <nav aria-label="Main navigation">
-          <Link href="/#possibilities">Possibilities</Link>
-          <Link href="/#how-it-works">How it works</Link>
+          <Link href="/#follow-through">How it works</Link>
+          <Link href="/#capabilities">Capabilities</Link>
           <Link href="/#principles">Our principles</Link>
           <Link href="/changelog">Changelog</Link>
         </nav>
@@ -38,8 +38,8 @@ export function SiteFooter() {
         <div className="footer-links">
           <div>
             <small>Discover</small>
-            <Link href="/#possibilities">Possibilities</Link>
-            <Link href="/#how-it-works">How it works</Link>
+            <Link href="/#follow-through">How it works</Link>
+            <Link href="/#capabilities">Capabilities</Link>
             <Link href="/#principles">Our principles</Link>
             <Link href="/changelog">Changelog</Link>
           </div>

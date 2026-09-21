@@ -30,10 +30,21 @@ test("public design is responsive, accessible and interactive", async ({
   await expect(
     page.getByRole("heading", { name: "Your chief of staff, on speed dial." }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Think it through" }).click();
+  await page.getByRole("button", { name: "Delegate a commitment" }).click();
   await expect(
     page.getByText("There’s a lot on my mind this week."),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "A call becomes follow-through." }),
+  ).toBeVisible();
+  await expect(page.getByText("Recognizes who is speaking")).toBeVisible();
+  await expect(page.getByText("Calls back when it matters")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "What Vox can do today." }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Read the latest releases" }),
+  ).toHaveAttribute("href", "/changelog");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -220,11 +231,15 @@ test("system health dashboard displays metrics, container resources and adheres 
   // Verify key stats are present
   await expect(page.getByText("CPU usage")).toBeVisible();
   await expect(page.getByText("RAM in use")).toBeVisible();
-  await expect(page.getByText("Containers", { exact: true })).toBeVisible();
-  await expect(page.getByText("System uptime")).toBeVisible();
+  await expect(page.getByText("Docker engine", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Host uptime", { exact: true }).first(),
+  ).toBeVisible();
 
   // Verify memory allocation and host cards
-  await expect(page.getByText("Memory allocation")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Memory utilization" }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Container resources" }),
   ).toBeVisible();

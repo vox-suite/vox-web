@@ -11,45 +11,49 @@ import {
 import { Badge } from "@/components/ui";
 const examples = [
   {
-    label: "Plan your day",
+    label: "Plan and follow through",
     icon: CalendarDays,
-    title: "Make room for what actually matters.",
+    title: "Turn a crowded day into a plan that holds.",
     details: [
-      "Sort schedules without the friction",
-      "Protect focus time for your priorities",
-      "Adapt easily as plans change",
+      "Understands the trade-off",
+      "Moves the decision into your calendar",
+      "Keeps the next check-in attached",
     ],
-    user: "My schedule tomorrow is packed. Can you help me find some breathing room?",
+    user: "Tomorrow is packed. Protect two hours for the proposal and move anything that can wait.",
     first:
-      "Let’s take a look. What’s the main thing you want to protect tomorrow?",
-    last: "Got it. Let’s move the afternoon sync to Thursday and keep your morning focus block open.",
+      "The client review is fixed. I can move the internal sync to Thursday and hold 9 to 11 for the proposal.",
+    last: "Done. I’ll check in tomorrow morning if anything new conflicts with that block.",
+    outcome: "Calendar updated · follow-up scheduled",
   },
   {
-    label: "Think it through",
+    label: "Delegate a commitment",
     icon: MessageCircle,
-    title: "Turn mental clutter into clear next steps.",
+    title: "Capture the commitment while it is fresh.",
     details: [
-      "Talk it out at your own pace",
-      "Distill thoughts into actionable steps",
-      "Pick up right where you left off",
+      "Keeps the project context",
+      "Creates durable work",
+      "Reports progress across channels",
     ],
     user: "There’s a lot on my mind this week.",
-    first: "I’m here. What’s demanding your attention the most right now?",
-    last: "We can break this down one step at a time. What would bring you the most relief today?",
+    first:
+      "I have it. Should I track the launch brief and remind you Thursday afternoon?",
+    last: "It’s added with a Friday deadline. I’ll send the progress update on WhatsApp Thursday.",
+    outcome: "Task created · cross-channel update arranged",
   },
   {
-    label: "Stay on track",
+    label: "Prepare and call back",
     icon: Sparkles,
-    title: "Turn good intentions into lasting habits.",
+    title: "Let the next important moment come to you.",
     details: [
-      "Transform ideas into realistic plans",
-      "Keep context across every check-in",
-      "Follow through with gentle accountability",
+      "Schedules background preparation",
+      "Keeps evidence with the task",
+      "Calls when the briefing is ready",
     ],
-    user: "I want to get back into running, but I keep putting it off.",
+    user: "Review the open launch items overnight and call me before the 9 AM meeting.",
     first:
-      "Let’s start with something easy that fits your routine. When do you usually have twenty minutes?",
-    last: "Tuesday and Thursday mornings work well. I’ll remind you before breakfast so you're ready to go.",
+      "I’ll check the outstanding tasks and decisions, then prepare a short briefing.",
+    last: "Scheduled. I’ll call at 8:30 AM and flag anything that needs your decision first.",
+    outcome: "Review scheduled · outbound call queued",
   },
 ];
 export function ConversationDemo() {
@@ -112,9 +116,13 @@ export function ConversationDemo() {
           </div>
           <div className="bubble">{example.first}</div>
           <div className="bubble">{example.last}</div>
+          <div className="demo-outcome">
+            <Check size={13} aria-hidden="true" />
+            {example.outcome}
+          </div>
           <small>
-            A preview of the voice experience in development. No active call is
-            taking place.
+            Illustrative conversation based on current Vox capabilities. No
+            active call is taking place.
           </small>
         </div>
       </div>
