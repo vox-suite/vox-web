@@ -1,5 +1,6 @@
 import Image from "next/image";
 import {
+  ArrowRight,
   AudioLines,
   CalendarCheck,
   Check,
@@ -20,24 +21,28 @@ import { ConversationDemo } from "./demo";
 const callPath = [
   {
     icon: Phone,
+    step: "01",
     title: "Call from wherever you are",
     description:
       "Use the phone already in your hand. Known callers get a personal opening without waiting for the rest of the system to wake up.",
   },
   {
     icon: AudioLines,
+    step: "02",
     title: "Speak without learning commands",
     description:
       "Pause, correct yourself, or interrupt. Vox keeps the conversation moving and works out what needs attention.",
   },
   {
     icon: CheckCheck,
+    step: "03",
     title: "Leave with the work in motion",
     description:
       "Decisions become durable tasks, calendar changes, notes, reminders, and scheduled follow-ups—not a transcript you must process later.",
   },
   {
     icon: PhoneCall,
+    step: "04",
     title: "Hear back when it matters",
     description:
       "Vox can track progress across time and reach out again when a commitment changes, a deadline arrives, or you asked for a follow-up.",
@@ -47,39 +52,97 @@ const callPath = [
 const currentCapabilities = [
   {
     icon: Radio,
+    badge: "< 180ms duplex",
     title: "A call that feels interruptible",
     description:
       "Fast openings, streaming speech, and local voice activity detection keep the conversation responsive when you jump in.",
+    visual: (
+      <div className="capability-card-preview" aria-hidden="true">
+        <div className="capability-waveform">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <span className="capability-preview-text">Live barge-in · Streaming VAD</span>
+        <span className="capability-preview-chip">Active</span>
+      </div>
+    ),
   },
   {
     icon: History,
+    badge: "Phone ⇄ WhatsApp",
     title: "Context that survives the call",
     description:
       "Vox carries your projects, preferences, tasks, and prior decisions across phone and WhatsApp conversations.",
+    visual: (
+      <div className="capability-card-preview capability-flow-preview" aria-hidden="true">
+        <span className="capability-flow-step">
+          <Phone size={12} /> Call ended
+        </span>
+        <ArrowRight size={11} className="capability-flow-arrow" />
+        <span className="capability-flow-step">
+          <MessageCircle size={12} /> WhatsApp sync
+        </span>
+      </div>
+    ),
   },
   {
     icon: CalendarCheck,
+    badge: "Auto calendar",
     title: "Work that keeps moving",
     description:
       "Create and update tasks, calendar plans, personal records, reminders, and scheduled work through ordinary conversation.",
+    visual: (
+      <div className="capability-card-preview" aria-hidden="true">
+        <Check size={13} className="capability-preview-check" />
+        <span className="capability-preview-text">Thu 9:00 AM · Proposal block</span>
+        <span className="capability-preview-chip capability-chip-emerald">Added</span>
+      </div>
+    ),
   },
   {
     icon: PhoneCall,
+    badge: "Outbound queue",
     title: "Calls back when it matters",
     description:
       "Schedule follow-ups and outbound calls so urgent updates can come to you instead of waiting behind another dashboard.",
+    visual: (
+      <div className="capability-card-preview" aria-hidden="true">
+        <PhoneCall size={13} className="capability-preview-phone" />
+        <span className="capability-preview-text">Briefing call · Tomorrow 8:30 AM</span>
+        <span className="capability-preview-chip capability-chip-amber">Queued</span>
+      </div>
+    ),
   },
   {
     icon: Fingerprint,
+    badge: "Voice biometrics",
     title: "Recognizes who is speaking",
     description:
       "Voice biometrics help Vox keep personal context with the right speaker, including when a different person takes over the call.",
+    visual: (
+      <div className="capability-card-preview" aria-hidden="true">
+        <Fingerprint size={13} className="capability-preview-fingerprint" />
+        <span className="capability-preview-text">Speaker match: Rahul</span>
+        <span className="capability-preview-chip capability-chip-indigo">Verified</span>
+      </div>
+    ),
   },
   {
     icon: ShieldCheck,
+    badge: "Audit trail",
     title: "A trail for important actions",
     description:
       "Durable status updates and structured audit evidence make consequential work easier to inspect and recover.",
+    visual: (
+      <div className="capability-card-preview" aria-hidden="true">
+        <ShieldCheck size={13} className="capability-preview-shield" />
+        <span className="capability-preview-text">Event #1042 · Signed & durable</span>
+        <span className="capability-preview-chip capability-chip-slate">Logged</span>
+      </div>
+    ),
   },
 ];
 
@@ -116,9 +179,20 @@ export function Hero() {
         </LinkButton>
       </Row>
       <div className="hero-proof" aria-label="Available Vox capabilities">
-        <span>Natural phone calls</span>
-        <span>Continuous memory</span>
-        <span>Proactive follow-up</span>
+        <span className="hero-proof-item">
+          <Phone size={13} aria-hidden="true" className="hero-proof-icon" />
+          Natural phone calls
+        </span>
+        <span className="hero-proof-divider" aria-hidden="true" />
+        <span className="hero-proof-item">
+          <Sparkles size={13} aria-hidden="true" className="hero-proof-icon" />
+          Continuous memory
+        </span>
+        <span className="hero-proof-divider" aria-hidden="true" />
+        <span className="hero-proof-item">
+          <CalendarCheck size={13} aria-hidden="true" className="hero-proof-icon" />
+          Proactive follow-up
+        </span>
       </div>
       <div className="hero-art" aria-hidden="true">
         <Image
@@ -165,16 +239,16 @@ export function FollowThroughSection() {
       description="Vox is built around the whole loop—from the first hello to the update that reaches you later."
     >
       <ol className="call-path">
-        {callPath.map(({ icon: Icon, title, description }, index) => (
+        {callPath.map(({ icon: Icon, step, title, description }) => (
           <li key={title}>
-            <div className="call-path-marker" aria-hidden="true">
-              <Icon />
+            <div className="call-path-top">
+              <div className="call-path-marker" aria-hidden="true">
+                <Icon />
+              </div>
+              <span className="call-path-step-badge">Step {step}</span>
             </div>
-            <div>
-              <span className="call-path-step">{index + 1}</span>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </div>
+            <h3>{title}</h3>
+            <p>{description}</p>
           </li>
         ))}
       </ol>
@@ -204,15 +278,23 @@ export function FeatureSection() {
       description="The latest Bridge and Core work makes Vox faster in the moment, more useful after the call, and easier to trust."
     >
       <Grid columns={2}>
-        {currentCapabilities.map(({ icon: Icon, title, description }) => (
-          <article className="capability-card" key={title}>
-            <Icon aria-hidden="true" />
-            <div>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </div>
-          </article>
-        ))}
+        {currentCapabilities.map(
+          ({ icon: Icon, badge, title, description, visual }) => (
+            <article className="capability-card" key={title}>
+              <div className="capability-card-header">
+                <div className="capability-card-icon" aria-hidden="true">
+                  <Icon />
+                </div>
+                <span className="capability-card-tag">{badge}</span>
+              </div>
+              <div className="capability-card-body">
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+              {visual}
+            </article>
+          ),
+        )}
       </Grid>
     </Section>
   );
