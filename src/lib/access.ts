@@ -72,7 +72,6 @@ export function canonicalAdminRedirect(
     const normalizedHost = host.toLowerCase().split(":")[0];
     const isSubdomain = normalizedHost === canonical.hostname;
 
-    // On the admin subdomain, redirect /admin or /admin/* to clean paths (/ or /*)
     if (isSubdomain) {
       if (/^\/admin(\/|$)/.test(path)) {
         const cleanPath =
@@ -84,7 +83,6 @@ export function canonicalAdminRedirect(
       return null;
     }
 
-    // On other domains (e.g. voxagent.in), redirect /admin to subdomain root and /admin/* to subdomain /*
     if (/^\/admin(\/|$)/.test(path)) {
       const cleanPath =
         path === "/admin" || path === "/admin/"
@@ -93,7 +91,6 @@ export function canonicalAdminRedirect(
       return new URL(cleanPath, canonical.origin).href;
     }
 
-    // Auth endpoints (/api/auth) redirect to canonical admin subdomain
     return new URL(path, canonical.origin).href;
   } catch {
     return null;

@@ -11,7 +11,6 @@ export function ChangelogView() {
 
   return (
     <div className="changelog-page">
-      {/* Hero Header */}
       <header className="changelog-hero">
         <Badge tone="accent">Platform Evolution & Changelog</Badge>
         <h1>Every milestone, measured.</h1>
@@ -20,7 +19,6 @@ export function ChangelogView() {
           signal processing to autonomous multi-agent cognition and biometric security.
         </p>
 
-        {/* Global Key Latency & Architecture Highlights */}
         <div className="changelog-metrics" aria-label="Key Performance Indicators">
           <div className="changelog-metric-card">
             <div className="changelog-metric-val">&lt; 1ms</div>
@@ -49,18 +47,15 @@ export function ChangelogView() {
         </div>
       </header>
 
-      {/* Timeline Entries */}
       <div className="changelog-timeline">
         {CHANGELOG_DATA.map((item) => (
           <article key={item.id} className="changelog-item" id={item.id}>
-            {/* Left Date Rail */}
             <div className="changelog-date-col">
               <div className="changelog-date">{item.formattedDate}</div>
               <div className="changelog-relative-time">{item.version}</div>
               <span className="changelog-dot" aria-hidden="true" />
             </div>
 
-            {/* Right Content Card */}
             <div className="changelog-card">
               <header className="changelog-card-header">
                 <div className="changelog-tags">
@@ -99,7 +94,6 @@ export function ChangelogView() {
                 <p className="changelog-summary">{item.summary}</p>
               </header>
 
-              {/* Feature Categories */}
               {item.features.map((section, idx) => (
                 <div key={idx} className="changelog-section-group">
                   <h3 className="changelog-section-title">{section.category}</h3>
@@ -113,7 +107,6 @@ export function ChangelogView() {
                 </div>
               ))}
 
-              {/* Optional Highlight Callout */}
               {item.highlight && (
                 <div className="changelog-highlight-banner">
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
@@ -128,7 +121,6 @@ export function ChangelogView() {
         ))}
       </div>
 
-      {/* Footer Navigation Strip */}
       <footer
         style={{
           marginTop: "5rem",
