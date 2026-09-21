@@ -244,3 +244,29 @@ test("changelog page displays timeline milestones and is accessible", async ({
     fullPage: true,
   });
 });
+
+test("header brand animates with canvas thinking-orb while footer brand uses static SVG", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  // Header brand has animated canvas orb
+  const headerBrand = page.locator(".site-header .brand");
+  await expect(headerBrand).toBeVisible();
+  const headerCanvas = headerBrand.locator("canvas");
+  await expect(headerCanvas).toBeVisible();
+
+  // Footer brand has static SVG orb with circle dots
+  const footerBrand = page.locator(".site-footer .brand");
+  await expect(footerBrand).toBeVisible();
+  const footerSvg = footerBrand.locator("svg");
+  await expect(footerSvg).toBeVisible();
+  expect(await footerSvg.locator("circle").count()).toBeGreaterThan(100);
+
+  // Favicon svg endpoint serves valid SVG with circles
+  const res = await page.request.get("/vox.svg");
+  expect(res.status()).toBe(200);
+  const svgText = await res.text();
+  expect(svgText).toContain("<svg");
+  expect(svgText).toContain("<circle");
+});

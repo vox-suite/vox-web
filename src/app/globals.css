@@ -206,8 +206,11 @@
     font-weight: 750;
     letter-spacing: -0.09em;
   }
-  .brand svg {
+  .brand svg,
+  .brand canvas {
     color: var(--color-accent);
+    flex-shrink: 0;
+    transform: translateY(0.12em);
   }
   .ui-stack {
     display: flex;

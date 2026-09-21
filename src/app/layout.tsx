@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={spaceGrotesk.variable}>
+    <html lang="en" data-theme="light" className={spaceGrotesk.variable}>
       <body>
         <a className="skip-link" href="#main">
           Skip to content

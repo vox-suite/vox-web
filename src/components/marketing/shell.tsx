@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Brand, LinkButton } from "@/components/ui";
+
 export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-nav">
-        <Brand />
+        <Brand animated={true} size={34} />
         <nav aria-label="Main navigation">
           <Link href="/#possibilities">Possibilities</Link>
           <Link href="/#how-it-works">How it works</Link>
@@ -25,12 +26,13 @@ export function SiteHeader() {
     </header>
   );
 }
+
 export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-top">
         <div>
-          <Brand />
+          <Brand animated={false} size={36} />
           <p>Your chief of staff, on speed dial.</p>
         </div>
         <div className="footer-links">

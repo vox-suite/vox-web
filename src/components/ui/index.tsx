@@ -6,7 +6,8 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
-import { ArrowUpRight, Waves } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { VoxLogo } from "./vox-logo";
 
 type Children = { children: ReactNode };
 export function Stack({
@@ -297,10 +298,24 @@ export function Stat({
     </Card>
   );
 }
-export function Brand({ href = "/" }: { href?: string }) {
+export function Brand({
+  href = "/",
+  animated = false,
+  size = 34,
+  className,
+}: {
+  href?: string;
+  animated?: boolean;
+  size?: number;
+  className?: string;
+}) {
   return (
-    <Link className="brand" href={href} aria-label="Vox home">
-      <Waves aria-hidden="true" size={25} />
+    <Link
+      className={className ? `brand ${className}` : "brand"}
+      href={href}
+      aria-label="Vox home"
+    >
+      <VoxLogo animated={animated} size={size} />
       <span>vox</span>
     </Link>
   );
@@ -360,3 +375,6 @@ export function ColorSwatches() {
     </div>
   );
 }
+
+export { VoxLogo, VoxOrbSvg } from "./vox-logo";
+export type { VoxLogoProps, VoxOrbSvgProps } from "./vox-logo";
