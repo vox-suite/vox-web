@@ -33,6 +33,32 @@ createServer(async (request, response) => {
     response.end("ok");
     return;
   }
+  if (request.url === "/v1/identity/authentications" && request.method === "POST") {
+    const body = await jsonBody(request);
+    if (
+      request.headers["x-vox-host-credential"] !== "fixture-host-credential" ||
+      request.headers["x-vox-host-secret"] !==
+        "fixture-host-secret-fixture-host-secret-0001" ||
+      request.headers["x-vox-host-audience"] !== "vox-host:test:vox-web" ||
+      body?.authentication?.adapter_external_key !== "vox-web-fixture" ||
+      body?.authentication?.proof?.type !== "federated" ||
+      !String(body?.host_context?.host_user_id ?? "").startsWith("vox-account:")
+    ) {
+      response.writeHead(401);
+      response.end();
+      return;
+    }
+    response.setHeader("Content-Type", "application/json");
+    response.end(
+      JSON.stringify({
+        user_context_id: `fixture-context:${body.host_context.host_user_id}`,
+        adapter_external_key: "vox-web-fixture",
+        expires_at: new Date(Date.now() + 600_000).toISOString(),
+        authentication_token: "fixture-token-that-web-must-discard",
+      }),
+    );
+    return;
+  }
   if (request.headers.authorization !== "Bearer fixture-admin-token") {
     response.writeHead(401);
     response.end();

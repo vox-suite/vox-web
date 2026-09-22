@@ -2,7 +2,12 @@
 
 ## What the code provides
 
-One Next.js deployment serves both `voxagent.in` and `admin.voxagent.in`. Clean paths are used on the subdomain (`/`, `/login`, `/redis`, `/design-system`), and any incoming `/admin` paths automatically redirect to the clean routes. Local development continues to work under `/admin` on localhost. Route handlers and server pages enforce permissions, independent of the host rewrite.
+One Next.js deployment serves `voxagent.in`, `app.voxagent.in`, and `admin.voxagent.in`. The consumer app and administration use clean paths on their subdomains; local development uses `/app` and `/admin`. Route handlers and server pages enforce permissions independently of host rewrites.
+
+Consumer authentication has its own PostgreSQL database, Better Auth session
+secret, Google client, SMTP delivery, and Core credentials. Follow
+[`consumer-auth.md`](consumer-auth.md) before adding `app.voxagent.in` or
+enabling new consumer sign-ins.
 
 No credentials or superuser identity are inferred. Missing configuration denies access. Complete these steps with the owner-selected Google account before production use.
 
@@ -56,7 +61,7 @@ Import `vox-web` into Vercel or update its existing project:
 - Build command: `npm run build`.
 - Install command: `npm ci`.
 - Remove the previous `dist` output-directory override and let the Next.js preset manage output.
-- Add `voxagent.in` and `admin.voxagent.in` as domains on the same project.
+- Add `voxagent.in`, `app.voxagent.in`, and `admin.voxagent.in` as domains on the same project.
 - Apply the exact DNS records supplied by Vercel for this project and wait for domain/TLS verification. Do not guess DNS targets.
 - Deploy with the environment variables above. Use separately registered callback URLs for previews if previews require sign-in.
 

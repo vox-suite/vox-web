@@ -208,7 +208,12 @@ export function Hero() {
 
 export function Capabilities() {
   return (
-    <div className="capability-line" aria-label="Core capabilities">
+    <div
+      className="capability-line"
+      aria-label="Core capabilities"
+      role="region"
+      tabIndex={0}
+    >
       <span className="capability-item" data-tone="blue">
         <Phone size={16} aria-hidden="true" />
         Phone and WhatsApp

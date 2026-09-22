@@ -5,6 +5,8 @@ import {
   maySignIn,
   safeCallback,
   adminDestination,
+  consumerDestination,
+  consumerHref,
   parseRedisQuery,
 } from "../src/lib/access";
 
@@ -89,6 +91,27 @@ test("subdomain routing only rewrites the exact admin host", () => {
   assert.equal(adminDestination("admin.voxagent.in", "/admin/login"), null);
   assert.equal(adminDestination("admin.voxagent.in.evil.test", "/"), null);
   assert.equal(adminDestination("voxagent.in", "/"), null);
+});
+
+test("consumer routing isolates app.voxagent.in and keeps local /app paths", () => {
+  assert.equal(consumerDestination("app.voxagent.in", "/"), "/app");
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/sign-in"),
+    "/app/sign-in",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/account"),
+    "/app/account",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/api/account/auth/session"),
+    null,
+  );
+  assert.equal(consumerDestination("app.voxagent.in", "/app"), null);
+  assert.equal(consumerDestination("app.voxagent.in.evil.test", "/"), null);
+  assert.equal(consumerDestination("voxagent.in", "/"), null);
+  assert.equal(consumerHref("app.voxagent.in", "/sign-in"), "/sign-in");
+  assert.equal(consumerHref("localhost", "/sign-in"), "/app/sign-in");
 });
 test("Redis query validation preserves uint64 cursors without number rounding", () => {
   assert.deepEqual(

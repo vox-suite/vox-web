@@ -1,6 +1,6 @@
 # Vox web
 
-Next.js App Router application for the Vox public website and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
+Next.js App Router application for the Vox public website, standalone consumer account, and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
 
 ## Develop
 
@@ -13,6 +13,9 @@ npm run dev
 ```
 
 The website is at http://localhost:3000. Local administration is at `/admin`. Without authentication configuration, the login page explains that setup is incomplete and every management data request is denied.
+Local consumer sign-in is at `/app/sign-in`. Consumer sessions and Core identity
+are separate from administrator access. See `docs/consumer-auth.md` for the
+database migration, Core registration, callback, rollout, and rotation runbook.
 
 ```sh
 npm test
@@ -31,6 +34,8 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/components/ui`: shared layout, controls, feedback, cards, tables and typography.
 - `src/components/marketing`: public website sections and illustrative conversation preview.
 - `src/components/admin`: navigation, management features and sign-in controls.
+- `src/components/consumer`: standalone account sign-in, recovery, identity linking, and session controls.
+- `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
 - `src/lib/admin-modules.ts`: management navigation registry.
 - `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
 - `src/lib/core-admin.ts`: server-only connection to the protected Core admin API.

@@ -17,8 +17,8 @@ export function SiteHeader() {
           <LinkButton
             href={
               process.env.NODE_ENV === "production"
-                ? "https://admin.voxagent.in/login"
-                : "/admin/login"
+                ? "https://app.voxagent.in/sign-in"
+                : "/app/sign-in"
             }
             variant="secondary"
           >
@@ -50,6 +50,15 @@ export function SiteFooter() {
           <div>
             <small>Vox</small>
             <Link href="/privacy">Privacy</Link>
+            <Link
+              href={
+                process.env.NODE_ENV === "production"
+                  ? "https://app.voxagent.in/sign-in"
+                  : "/app/sign-in"
+              }
+            >
+              Sign in
+            </Link>
             <Link
               href={
                 process.env.NODE_ENV === "production"

@@ -1910,6 +1910,22 @@
     color: var(--color-muted);
     text-align: center;
   }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: var(--color-line);
+  }
   .admin-shell {
     display: grid;
     grid-template-columns: 230px minmax(0, 1fr);

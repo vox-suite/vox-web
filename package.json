@@ -5,22 +5,26 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
+    "db:migrate:consumer-auth": "node scripts/migrate-consumer-auth.mjs",
     "generate:page": "node scripts/create-admin-page.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
+    "better-auth": "^1.7.5",
     "lucide-react": "^0.468.0",
     "next": "^16.3.5",
     "next-auth": "^4.24.15",
+    "pg": "^8.23.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "server-only": "^0.0.1",
-    "thinking-orbs": "^0.3.1"
+    "thinking-orbs": "^0.3.1",
+    "vox-nodemailer": "npm:nodemailer@10.0.10"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
@@ -28,6 +32,7 @@
     "@playwright/test": "^1.58.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "eslint": "^9.39.0",

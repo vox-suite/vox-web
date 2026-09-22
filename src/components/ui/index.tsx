@@ -354,12 +354,16 @@ export function LoadingState({
     </div>
   );
 }
-export function AuthFrame({ children }: Children) {
+export function AuthFrame({
+  children,
+  brandHref = "/",
+  footer = "Vox administration · Access by invitation",
+}: Children & { brandHref?: string; footer?: string }) {
   return (
     <main id="main" className="auth-frame">
-      <Brand />
+      <Brand href={brandHref} />
       <div className="auth-card">{children}</div>
-      <p className="auth-footer">Vox administration · Access by invitation</p>
+      <p className="auth-footer">{footer}</p>
     </main>
   );
 }
