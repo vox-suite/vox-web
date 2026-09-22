@@ -276,10 +276,65 @@ export async function getDockerMetrics(): Promise<DockerMetrics> {
 }
 
 /**
+ * Queries remote host system telemetry from VOX_CORE_ADMIN_URL if configured.
+ * Returns null if remote is not configured or unreachable, allowing local fallback.
+ */
+export async function fetchRemoteSystemHealth(): Promise<SystemHealthData | null> {
+  const baseUrl = process.env.VOX_CORE_ADMIN_URL;
+  const token = process.env.VOX_ADMIN_TOKEN;
+
+  if (!baseUrl || !token) {
+    return null;
+  }
+
+  try {
+    const url = new URL("/v1/admin/system", baseUrl);
+    if (
+      url.protocol !== "https:" &&
+      !(
+        url.protocol === "http:" &&
+        ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+      )
+    ) {
+      return null;
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(6000),
+      redirect: "error",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as SystemHealthData;
+    if (data && data.host && data.docker) {
+      return data;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Assembles live system telemetry strictly on-demand.
- * No periodic execution or background daemon is used.
+ * Prioritizes remote EC2 backend telemetry when VOX_CORE_ADMIN_URL is configured,
+ * with local fallback for local development or disconnected instances.
  */
 export async function getSystemHealth(): Promise<SystemHealthData> {
+  const remote = await fetchRemoteSystemHealth();
+  if (remote) {
+    return remote;
+  }
+
   const [cpuUsage, docker] = await Promise.all([
     getCpuUsage(),
     getDockerMetrics(),

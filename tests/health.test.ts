@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  fetchRemoteSystemHealth,
   formatBytes,
   formatUptime,
   getCpuUsage,
@@ -64,4 +65,18 @@ test("getSystemHealth combines host and container metrics", async () => {
   assert.ok(health.host.memory.usedPercent >= 0 && health.host.memory.usedPercent <= 100);
   assert.ok(health.host.memory.totalFormatted.includes("GB") || health.host.memory.totalFormatted.includes("MB"));
   assert.ok(health.docker);
+});
+
+test("fetchRemoteSystemHealth returns null when unconfigured", async () => {
+  const prevUrl = process.env.VOX_CORE_ADMIN_URL;
+  const prevToken = process.env.VOX_ADMIN_TOKEN;
+  try {
+    delete process.env.VOX_CORE_ADMIN_URL;
+    delete process.env.VOX_ADMIN_TOKEN;
+    const res = await fetchRemoteSystemHealth();
+    assert.equal(res, null);
+  } finally {
+    if (prevUrl) process.env.VOX_CORE_ADMIN_URL = prevUrl;
+    if (prevToken) process.env.VOX_ADMIN_TOKEN = prevToken;
+  }
 });
