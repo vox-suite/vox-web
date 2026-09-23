@@ -65,7 +65,9 @@ const currentCapabilities = [
           <span />
           <span />
         </div>
-        <span className="capability-preview-text">Live barge-in · Streaming VAD</span>
+        <span className="capability-preview-text">
+          Live barge-in · Streaming VAD
+        </span>
         <span className="capability-preview-chip">Active</span>
       </div>
     ),
@@ -77,7 +79,10 @@ const currentCapabilities = [
     description:
       "Vox carries your projects, preferences, tasks, and prior decisions across phone and WhatsApp conversations.",
     visual: (
-      <div className="capability-card-preview capability-flow-preview" aria-hidden="true">
+      <div
+        className="capability-card-preview capability-flow-preview"
+        aria-hidden="true"
+      >
         <span className="capability-flow-step">
           <Phone size={12} /> Call ended
         </span>
@@ -97,8 +102,12 @@ const currentCapabilities = [
     visual: (
       <div className="capability-card-preview" aria-hidden="true">
         <Check size={13} className="capability-preview-check" />
-        <span className="capability-preview-text">Thu 9:00 AM · Proposal block</span>
-        <span className="capability-preview-chip capability-chip-emerald">Added</span>
+        <span className="capability-preview-text">
+          Thu 9:00 AM · Proposal block
+        </span>
+        <span className="capability-preview-chip capability-chip-emerald">
+          Added
+        </span>
       </div>
     ),
   },
@@ -111,8 +120,12 @@ const currentCapabilities = [
     visual: (
       <div className="capability-card-preview" aria-hidden="true">
         <PhoneCall size={13} className="capability-preview-phone" />
-        <span className="capability-preview-text">Briefing call · Tomorrow 8:30 AM</span>
-        <span className="capability-preview-chip capability-chip-amber">Queued</span>
+        <span className="capability-preview-text">
+          Briefing call · Tomorrow 8:30 AM
+        </span>
+        <span className="capability-preview-chip capability-chip-amber">
+          Queued
+        </span>
       </div>
     ),
   },
@@ -126,7 +139,9 @@ const currentCapabilities = [
       <div className="capability-card-preview" aria-hidden="true">
         <Fingerprint size={13} className="capability-preview-fingerprint" />
         <span className="capability-preview-text">Speaker match: Rahul</span>
-        <span className="capability-preview-chip capability-chip-indigo">Verified</span>
+        <span className="capability-preview-chip capability-chip-indigo">
+          Verified
+        </span>
       </div>
     ),
   },
@@ -139,8 +154,12 @@ const currentCapabilities = [
     visual: (
       <div className="capability-card-preview" aria-hidden="true">
         <ShieldCheck size={13} className="capability-preview-shield" />
-        <span className="capability-preview-text">Event #1042 · Signed & durable</span>
-        <span className="capability-preview-chip capability-chip-slate">Logged</span>
+        <span className="capability-preview-text">
+          Event #1042 · Signed &amp; durable
+        </span>
+        <span className="capability-preview-chip capability-chip-slate">
+          Logged
+        </span>
       </div>
     ),
   },
@@ -157,50 +176,182 @@ const latestReleases = latestReleaseIds.flatMap((id) => {
   return release ? [release] : [];
 });
 
+export function HeroAppMockup() {
+  return (
+    <div
+      className="hero-app-window"
+      aria-label="Vox Command Center interface preview"
+    >
+      <div className="hero-app-header">
+        <div className="hero-app-traffic-lights" aria-hidden="true">
+          <span className="hero-app-dot hero-app-dot-red" />
+          <span className="hero-app-dot hero-app-dot-yellow" />
+          <span className="hero-app-dot hero-app-dot-green" />
+        </div>
+        <div className="hero-app-title">
+          <span>vox</span>
+          <span className="hero-app-title-sep">/</span>
+          <span>live-duplex-session</span>
+        </div>
+        <div className="hero-app-status">
+          <span className="hero-app-status-indicator" aria-hidden="true" />
+          <span>Connected · &lt; 180ms</span>
+        </div>
+      </div>
+
+      <div className="hero-app-search-bar">
+        <div className="hero-app-search-leading" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <rect
+              x="6"
+              y="0.5"
+              width="7.5"
+              height="7.5"
+              rx="1.5"
+              transform="rotate(45 6 0.5)"
+              fill="var(--color-coral-pulse, #ff6363)"
+            />
+          </svg>
+        </div>
+        <div className="hero-app-search-input">
+          <span>Protect two hours for the proposal and move internal sync to Thursday</span>
+          <span className="hero-app-cursor" aria-hidden="true" />
+        </div>
+        <div className="hero-app-search-badge">
+          <span className="hero-app-pulse-dot" aria-hidden="true" />
+          Live Voice · Rahul
+        </div>
+      </div>
+
+      <div className="hero-app-list" role="list">
+        <div className="hero-app-row hero-app-row-active" role="listitem">
+          <div className="hero-app-row-icon" aria-hidden="true">
+            <CalendarCheck size={14} />
+          </div>
+          <div className="hero-app-row-content">
+            <div className="hero-app-row-title">
+              <strong>Calendar:</strong> Block Thu 9:00 AM – 11:00 AM (Proposal Preparation)
+            </div>
+            <div className="hero-app-row-meta">
+              Moved Internal Sync to Thu 2:00 PM · Zero conflicts detected
+            </div>
+          </div>
+          <div className="hero-app-shortcut">
+            <span>Auto-scheduled</span>
+            <kbd>↵</kbd>
+          </div>
+        </div>
+
+        <div className="hero-app-row" role="listitem">
+          <div className="hero-app-row-icon" aria-hidden="true">
+            <MessageCircle size={14} />
+          </div>
+          <div className="hero-app-row-content">
+            <div className="hero-app-row-title">
+              <strong>WhatsApp:</strong> Dispatch follow-up brief to Rahul
+            </div>
+            <div className="hero-app-row-meta">
+              Scheduled Thursday 4:30 PM · Cross-channel notification
+            </div>
+          </div>
+          <div className="hero-app-shortcut">
+            <kbd>⌘1</kbd>
+          </div>
+        </div>
+
+        <div className="hero-app-row" role="listitem">
+          <div className="hero-app-row-icon" aria-hidden="true">
+            <Fingerprint size={14} />
+          </div>
+          <div className="hero-app-row-content">
+            <div className="hero-app-row-title">
+              <strong>Biometrics:</strong> Speaker verified (Rahul)
+            </div>
+            <div className="hero-app-row-meta">
+              ResNet-34 neural voice biometrics · 99.4% confidence match
+            </div>
+          </div>
+          <div className="hero-app-shortcut">
+            <kbd>⌘2</kbd>
+          </div>
+        </div>
+
+        <div className="hero-app-row" role="listitem">
+          <div className="hero-app-row-icon" aria-hidden="true">
+            <PhoneCall size={14} />
+          </div>
+          <div className="hero-app-row-content">
+            <div className="hero-app-row-title">
+              <strong>Outbound Call:</strong> Morning Review Briefing
+            </div>
+            <div className="hero-app-row-meta">
+              Queued for Tomorrow 8:30 AM · Jev System One arbitration
+            </div>
+          </div>
+          <div className="hero-app-shortcut">
+            <kbd>⌘3</kbd>
+          </div>
+        </div>
+      </div>
+
+      <div className="hero-app-footer">
+        <div className="hero-app-footer-item">
+          <kbd>↵</kbd> <span>Run Action</span>
+        </div>
+        <div className="hero-app-footer-item">
+          <kbd>⌘K</kbd> <span>Actions</span>
+        </div>
+        <div className="hero-app-footer-item">
+          <kbd>⌥↵</kbd> <span>Quick Call</span>
+        </div>
+        <div className="hero-app-footer-item">
+          <kbd>Esc</kbd> <span>Hang Up</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Hero() {
   return (
     <section className="hero">
+      <div className="hero-atmosphere" aria-hidden="true">
+        <div className="hero-glow-blue" />
+        <div className="hero-beam-coral" />
+      </div>
+
       <Badge tone="accent">The assistant you can call</Badge>
-      <h1>
+
+      <h1 className="hero-headline">
         Your chief of staff,
         <br />
-        <span>on speed dial.</span>
+        <span className="hero-headline-accent">on speed dial.</span>
       </h1>
-      <p>
+
+      <p className="hero-subhead">
         Call to untangle the day, put decisions into motion, and stay ahead
         without another app to manage.
       </p>
+
       <Row>
         <LinkButton href="/request-access">Request access</LinkButton>
         <LinkButton href="#follow-through" variant="secondary">
           See how Vox follows through
         </LinkButton>
       </Row>
-      <div className="hero-proof" aria-label="Available Vox capabilities">
-        <span className="hero-proof-item">
-          <Phone size={13} aria-hidden="true" className="hero-proof-icon" />
-          Natural phone calls
-        </span>
-        <span className="hero-proof-divider" aria-hidden="true" />
-        <span className="hero-proof-item">
-          <Sparkles size={13} aria-hidden="true" className="hero-proof-icon" />
-          Continuous memory
-        </span>
-        <span className="hero-proof-divider" aria-hidden="true" />
-        <span className="hero-proof-item">
-          <CalendarCheck size={13} aria-hidden="true" className="hero-proof-icon" />
-          Proactive follow-up
-        </span>
+
+      <div className="hero-meta-strip" aria-label="Core specifications">
+        <span>v1.104.21</span>
+        <span className="hero-meta-pipe" aria-hidden="true">|</span>
+        <span>PSTN Telephony &amp; WhatsApp</span>
+        <span className="hero-meta-pipe" aria-hidden="true">|</span>
+        <span>&lt; 180ms duplex</span>
+        <span className="hero-meta-pipe" aria-hidden="true">|</span>
+        <span>Autonomous follow-through</span>
       </div>
-      <div className="hero-art" aria-hidden="true">
-        <Image
-          src="/artwork/signal-ring.svg"
-          alt=""
-          width={1160}
-          height={436}
-          priority
-          sizes="(max-width: 720px) 100vw, 960px"
-        />
+
+      <div className="hero-art">
+        <HeroAppMockup />
       </div>
     </section>
   );
@@ -208,21 +359,34 @@ export function Hero() {
 
 export function Capabilities() {
   return (
-    <div className="capability-line" aria-label="Core capabilities">
+    <div
+      className="capability-line"
+      aria-label="Core capabilities"
+      role="region"
+      tabIndex={0}
+    >
       <span className="capability-item" data-tone="blue">
-        <Phone size={16} aria-hidden="true" />
+        <span className="capability-item-icon" aria-hidden="true">
+          <Phone size={15} />
+        </span>
         Phone and WhatsApp
       </span>
       <span className="capability-item" data-tone="purple">
-        <MessageCircle size={16} aria-hidden="true" />
+        <span className="capability-item-icon" aria-hidden="true">
+          <MessageCircle size={15} />
+        </span>
         Natural conversation
       </span>
       <span className="capability-item" data-tone="amber">
-        <Sparkles size={16} aria-hidden="true" />
+        <span className="capability-item-icon" aria-hidden="true">
+          <Sparkles size={15} />
+        </span>
         Proactive follow-through
       </span>
       <span className="capability-item" data-tone="emerald">
-        <Fingerprint size={16} aria-hidden="true" />
+        <span className="capability-item-icon" aria-hidden="true">
+          <Fingerprint size={15} />
+        </span>
         Speaker-aware privacy
       </span>
     </div>
@@ -241,7 +405,7 @@ export function FollowThroughSection() {
           <li key={title}>
             <div className="call-path-top">
               <div className="call-path-marker" aria-hidden="true">
-                <Icon />
+                <Icon size={16} />
               </div>
               <span className="call-path-step-badge">Step {step}</span>
             </div>
@@ -278,10 +442,18 @@ export function FeatureSection() {
       <Grid columns={2}>
         {currentCapabilities.map(
           ({ icon: Icon, badge, title, description, visual }, index) => (
-            <article className="capability-card" key={title} data-featured={index === 0 || index === currentCapabilities.length - 1 ? "true" : undefined}>
+            <article
+              className="capability-card"
+              key={title}
+              data-featured={
+                index === 0 || index === currentCapabilities.length - 1
+                  ? "true"
+                  : undefined
+              }
+            >
               <div className="capability-card-header">
                 <div className="capability-card-icon" aria-hidden="true">
-                  <Icon />
+                  <Icon size={18} />
                 </div>
                 <span className="capability-card-tag">{badge}</span>
               </div>
@@ -311,7 +483,8 @@ export function StorySection() {
             next important update back to you.
           </p>
           <p>
-            That can mean a reminder, a WhatsApp update, or a scheduled call—whichever way fits the moment.
+            That can mean a reminder, a WhatsApp update, or a scheduled
+            call—whichever way fits the moment.
           </p>
           <LinkButton href="#recently-shipped" variant="secondary">
             See what changed recently
@@ -351,7 +524,8 @@ export function PrinciplesSection() {
     >
       <div className="principles">
         <div className="principles-art" aria-hidden="true">
-          <Fingerprint />
+          <div className="principles-art-glow" />
+          <Fingerprint size={120} strokeWidth={1} />
         </div>
         <div>
           {[

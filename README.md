@@ -1,6 +1,6 @@
 # Vox web
 
-Next.js App Router application for the Vox public website and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
+Next.js App Router application for the Vox public website, standalone consumer account, and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
 
 ## Develop
 
@@ -13,6 +13,9 @@ npm run dev
 ```
 
 The website is at http://localhost:3000. Local administration is at `/admin`. Without authentication configuration, the login page explains that setup is incomplete and every management data request is denied.
+Local consumer sign-in is at `/app/sign-in`. Consumer sessions and Core identity
+are separate from administrator access. See `docs/consumer-auth.md` for the
+database migration, Core registration, callback, rollout, and rotation runbook.
 
 ```sh
 npm test
@@ -31,6 +34,8 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/components/ui`: shared layout, controls, feedback, cards, tables and typography.
 - `src/components/marketing`: public website sections and illustrative conversation preview.
 - `src/components/admin`: navigation, management features and sign-in controls.
+- `src/components/consumer`: standalone account sign-in, recovery, identity linking, and session controls.
+- `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
 - `src/lib/admin-modules.ts`: management navigation registry.
 - `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
 - `src/lib/core-admin.ts`: server-only connection to the protected Core admin API.
@@ -50,17 +55,16 @@ Call `requireSuperuser()` in server pages that retrieve data. Every new API hand
 
 See `docs/deployment.md` for exact Google callback, domain mapping and backend routing. This source change alone does not provision a domain or enable production sign-in.
 
-| Variable               | Purpose                                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
-| `NEXTAUTH_URL`         | `https://admin.voxagent.in` in production; `http://localhost:3000` locally                         |
-| `NEXTAUTH_SECRET`      | Cryptographically random session secret, at least 32 bytes; identical across web instances         |
-| `GOOGLE_CLIENT_ID`     | Google OAuth web application client ID                                                             |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret, server-only                                                            |
-| `SUPERUSER_EMAILS`     | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone                  |
-| `VOX_CORE_ADMIN_URL`   | HTTPS origin routing `/v1/admin/redis` to Core; loopback HTTP is accepted locally                  |
-| `VOX_ADMIN_TOKEN`      | Dedicated shared admin credential, also configured in Core; separate from the normal service token |
+| Variable                       | Purpose                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`     | Supabase project URL                                                                               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`| Supabase anon key for browser/server auth                                                          |
+| `SUPERUSER_EMAILS`             | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone                  |
+| `VOX_ADMIN_ORIGIN`             | Canonical admin origin (`https://admin.voxagent.in`) for host redirects                            |
+| `VOX_CORE_ADMIN_URL`           | HTTPS origin routing `/v1/admin/redis` to Core; loopback HTTP is accepted locally                  |
+| `VOX_ADMIN_TOKEN`              | Dedicated shared admin credential, also configured in Core; separate from `VOX_AUTH_TOKEN`         |
 
-Redis stays on the backend private network. Web instances are stateless; there is no local session database or in-memory authorization cache. Changes to the allowlist apply on subsequent requests after environment configuration is rolled out. Signing out clears the browser cookie; rotate the shared secret to invalidate all sessions immediately.
+Admin Google sign-in is configured in the Supabase dashboard (Auth → Providers → Google). Redirect URLs must include `https://admin.voxagent.in/auth/callback` and `http://localhost:3000/auth/callback`. Redis stays on the backend private network. Web instances are stateless; there is no local session database. Changes to the allowlist apply on subsequent requests after environment configuration is rolled out. Signing out clears the Supabase session cookies.
 
 ## Redis explorer behavior and limits
 

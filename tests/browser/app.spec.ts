@@ -1,20 +1,17 @@
 import { test, expect, type BrowserContext } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { encode } from "next-auth/jwt";
+import { encodeAdminE2ESession } from "../../src/lib/access";
 
 async function session(
   context: BrowserContext,
   email = "admin@example.test",
   googleVerified = true,
 ) {
-  const value = await encode({
-    token: { email, name: "Test administrator", googleVerified },
-    secret: "isolated-playwright-secret-not-for-production",
-    maxAge: 3600,
-  });
+  const secret = "isolated-playwright-secret-not-for-production";
+  const value = encodeAdminE2ESession(email, secret, googleVerified);
   await context.addCookies([
     {
-      name: "next-auth.session-token",
+      name: "vox-admin-session",
       value,
       domain: "127.0.0.1",
       path: "/",
@@ -197,10 +194,10 @@ test("management navigation, Redis search, preview and recovery", async ({
   ).toBeVisible();
   await page
     .getByRole("navigation", { name: "Administration" })
-    .getByRole("link", { name: "Design system" })
+    .getByRole("link", { name: "Overview" })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Design system", exact: true }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   expect(
     (
@@ -210,7 +207,7 @@ test("management navigation, Redis search, preview and recovery", async ({
     ).violations,
   ).toEqual([]);
   await page.screenshot({
-    path: `artifacts/design-system-${testInfo.project.name}.png`,
+    path: `artifacts/overview-${testInfo.project.name}.png`,
     fullPage: true,
   });
   await page.getByRole("button", { name: "Sign out" }).click();
@@ -228,7 +225,6 @@ test("system health dashboard displays metrics, container resources and adheres 
     page.getByRole("heading", { name: "System health", exact: true }),
   ).toBeVisible();
 
-  // Verify key stats are present
   await expect(page.getByText("CPU usage")).toBeVisible();
   await expect(page.getByText("RAM in use")).toBeVisible();
   await expect(page.getByText("Docker engine", { exact: true })).toBeVisible();
@@ -236,7 +232,6 @@ test("system health dashboard displays metrics, container resources and adheres 
     page.getByText("Host uptime", { exact: true }).first(),
   ).toBeVisible();
 
-  // Verify memory allocation and host cards
   await expect(
     page.getByRole("heading", { name: "Memory utilization" }),
   ).toBeVisible();
@@ -244,20 +239,17 @@ test("system health dashboard displays metrics, container resources and adheres 
     page.getByRole("heading", { name: "Container resources" }),
   ).toBeVisible();
 
-  // Verify rate limit headers were sent with response
   const response = await page.request.get("/api/admin/health");
   expect(response.status()).toBe(200);
   expect(response.headers()["x-ratelimit-limit"]).toBeTruthy();
   expect(response.headers()["x-ratelimit-remaining"]).toBeTruthy();
 
-  // Verify horizontal scroll width
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
 
-  // Verify accessibility
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -269,23 +261,140 @@ test("system health dashboard displays metrics, container resources and adheres 
   });
 });
 
-test("Google sign-in starts an OAuth flow with CSRF and state protection", async ({
-  request,
+test("admin login is configured for Supabase Google sign-in", async ({
+  page,
 }) => {
-  const csrf = await request.get("/api/auth/csrf");
-  const { csrfToken } = await csrf.json();
-  expect(csrfToken).toBeTruthy();
-  const response = await request.post("/api/auth/signin/google", {
-    form: { csrfToken, callbackUrl: "/admin", json: "true" },
-  });
-  const { url } = await response.json();
-  const authorization = new URL(url);
-  expect(authorization.hostname).toBe("accounts.google.com");
-  expect(authorization.searchParams.get("redirect_uri")).toBe(
-    "http://127.0.0.1:3100/api/auth/callback/google",
+  await page.goto("/admin/login");
+  await expect(
+    page.getByRole("button", { name: "Continue with Google" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Access is limited to approved superusers."),
+  ).toBeVisible();
+  await expect(page.getByText("Sign-in is not available yet")).toHaveCount(0);
+});
+
+test("consumer email sign-in, recovery, and revocation use the real database boundary", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    !process.env.VOX_WEB_TEST_DATABASE_URL,
+    "requires isolated PostgreSQL",
   );
+  const email = `consumer-${testInfo.project.name}@example.test`;
+  const clientIp =
+    testInfo.project.name === "mobile" ? "192.0.2.22" : "192.0.2.21";
+  await page.context().setExtraHTTPHeaders({ "x-forwarded-for": clientIp });
+  const oauth = await request.post(
+    "http://localhost:3100/api/account/auth/sign-in/social",
+    {
+      headers: {
+        Origin: "http://localhost:3100",
+        "x-forwarded-for": clientIp,
+      },
+      data: {
+        provider: "google",
+        callbackURL: "/app",
+        disableRedirect: true,
+      },
+    },
+  );
+  expect(oauth.status()).toBe(200);
+  const oauthBody = (await oauth.json()) as { url: string };
+  const authorization = new URL(oauthBody.url);
+  expect(authorization.hostname).toBe("accounts.google.com");
   expect(authorization.searchParams.get("state")).toBeTruthy();
-  expect(authorization.searchParams.get("scope")).toBe("openid email profile");
+  expect(authorization.searchParams.get("code_challenge")).toBeTruthy();
+  expect(authorization.searchParams.get("scope")).toContain("openid");
+  expect(authorization.searchParams.get("redirect_uri")).toBe(
+    "http://localhost:3100/api/account/auth/callback/google",
+  );
+  await page.goto("http://localhost:3100/app/sign-in");
+  await expect(
+    page.getByRole("heading", { name: "Pick up where you left off." }),
+  ).toBeVisible();
+  await page.getByLabel("Email address").fill(email);
+  await page.getByRole("button", { name: "Continue with email" }).click();
+  await expect(page.getByText("If this address can sign in")).toBeVisible();
+  const delivered = await expect
+    .poll(async () => {
+      const response = await request.get(
+        `http://127.0.0.1:3103/latest?email=${encodeURIComponent(email)}`,
+      );
+      return (await response.json()).code as string | null;
+    })
+    .not.toBeNull();
+  void delivered;
+  const codeResponse = await request.get(
+    `http://127.0.0.1:3103/latest?email=${encodeURIComponent(email)}`,
+  );
+  const { code } = (await codeResponse.json()) as { code: string };
+  await page.getByLabel("Eight-digit code").fill(code);
+  await page.getByRole("button", { name: "Verify and sign in" }).click();
+  await expect(page.getByRole("heading", { name: /Welcome/ })).toBeVisible();
+  await expect(page.getByText(email)).toBeVisible();
+  const publicSessionResponse = await page.request.get(
+    "http://localhost:3100/api/account/auth/get-session",
+  );
+  expect(publicSessionResponse.status()).toBe(200);
+  const publicSession = (await publicSessionResponse.json()) as Record<
+    string,
+    unknown
+  >;
+  expect(Object.keys(publicSession).sort()).toEqual([
+    "accountId",
+    "authenticationMethod",
+    "coreUserContextId",
+    "email",
+    "expiresAt",
+    "image",
+    "name",
+    "recoveryEnabled",
+  ]);
+  expect(publicSession.email).toBe(email);
+  expect(publicSession.authenticationMethod).toBe("email-otp");
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await page.getByRole("button", { name: "Enable email recovery" }).click();
+  const recoveryCode = await expect
+    .poll(async () => {
+      const response = await request.get(
+        `http://127.0.0.1:3103/latest?email=${encodeURIComponent(email)}`,
+      );
+      const body = (await response.json()) as { code: string | null };
+      return body.code === code ? null : body.code;
+    })
+    .not.toBeNull();
+  void recoveryCode;
+  const recoveryResponse = await request.get(
+    `http://127.0.0.1:3103/latest?email=${encodeURIComponent(email)}`,
+  );
+  const recovery = (await recoveryResponse.json()) as { code: string };
+  await page.getByLabel("Eight-digit recovery code").fill(recovery.code);
+  await page.getByRole("button", { name: "Verify recovery code" }).click();
+  await expect(page.getByText("Email recovery is enabled")).toBeVisible();
+  await page.getByRole("button", { name: "Sign out everywhere" }).click();
+  await expect(page).toHaveURL(/\/app\/sign-in$/);
+});
+
+test("consumer and administrator sessions grant no authority to one another", async ({
+  context,
+  page,
+}) => {
+  test.skip(
+    !process.env.VOX_WEB_TEST_DATABASE_URL,
+    "requires isolated PostgreSQL",
+  );
+  await session(context);
+  await page.goto("http://localhost:3100/app");
+  await expect(page).toHaveURL(/\/app\/sign-in/);
+  expect((await page.request.get("/api/admin/redis")).status()).toBe(200);
 });
 
 test("changelog page displays timeline milestones and is accessible", async ({
@@ -325,20 +434,17 @@ test("header brand animates with canvas thinking-orb while footer brand uses sta
 }) => {
   await page.goto("/");
 
-  // Header brand has animated canvas orb
   const headerBrand = page.locator(".site-header .brand");
   await expect(headerBrand).toBeVisible();
   const headerCanvas = headerBrand.locator("canvas");
   await expect(headerCanvas).toBeVisible();
 
-  // Footer brand has static SVG orb with circle dots
   const footerBrand = page.locator(".site-footer .brand");
   await expect(footerBrand).toBeVisible();
   const footerSvg = footerBrand.locator("svg");
   await expect(footerSvg).toBeVisible();
   expect(await footerSvg.locator("circle").count()).toBeGreaterThan(100);
 
-  // Favicon svg endpoint serves valid SVG with circles
   const res = await page.request.get("/vox.svg");
   expect(res.status()).toBe(200);
   const svgText = await res.text();

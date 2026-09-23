@@ -117,6 +117,9 @@ export function Badge({
 }: Children & { tone?: "neutral" | "positive" | "accent" | "warning" }) {
   return (
     <span className="ui-badge" data-tone={tone}>
+      {tone === "accent" && (
+        <span className="ui-badge-dot" aria-hidden="true" />
+      )}
       {children}
     </span>
   );
@@ -301,7 +304,7 @@ export function Stat({
 export function Brand({
   href = "/",
   animated = false,
-  size = 34,
+  size = 28,
   className,
 }: {
   href?: string;
@@ -315,8 +318,21 @@ export function Brand({
       href={href}
       aria-label="Vox home"
     >
+      <span className="brand-coral-diamond" aria-hidden="true">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <rect
+            x="5"
+            y="0.5"
+            width="6"
+            height="6"
+            rx="1"
+            transform="rotate(45 5 0.5)"
+            fill="var(--color-coral-pulse, #ff6363)"
+          />
+        </svg>
+      </span>
       <VoxLogo animated={animated} size={size} />
-      <span>vox</span>
+      <span className="brand-name">vox</span>
     </Link>
   );
 }
@@ -354,19 +370,23 @@ export function LoadingState({
     </div>
   );
 }
-export function AuthFrame({ children }: Children) {
+export function AuthFrame({
+  children,
+  brandHref = "/",
+  footer = "Vox administration · Access by invitation",
+}: Children & { brandHref?: string; footer?: string }) {
   return (
     <main id="main" className="auth-frame">
-      <Brand />
+      <Brand href={brandHref} />
       <div className="auth-card">{children}</div>
-      <p className="auth-footer">Vox administration · Access by invitation</p>
+      <p className="auth-footer">{footer}</p>
     </main>
   );
 }
 export function ColorSwatches() {
   return (
     <div className="ui-swatches">
-      {["paper", "ink", "soft", "subtle", "contrast"].map((tone) => (
+      {["void-black", "ink", "obsidian", "graphite", "ash", "mist", "coral-pulse"].map((tone) => (
         <div key={tone}>
           <span data-swatch={tone} />
           <small>{tone}</small>

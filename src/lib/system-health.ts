@@ -109,11 +109,6 @@ function sampleCpuTimes(): { idle: number; total: number } {
   return { idle, total };
 }
 
-/**
- * On-demand CPU usage calculation.
- * Measures delta across a brief 100ms sample window when requested.
- * No persistent background jobs or intervals.
- */
 export async function getCpuUsage(): Promise<number> {
   const start = sampleCpuTimes();
   return new Promise<number>((resolve) => {
@@ -133,19 +128,12 @@ export async function getCpuUsage(): Promise<number> {
   });
 }
 
-/**
- * On-demand Docker container telemetry.
- * Invoked strictly when the health endpoint is hit.
- * Gathers ps and stats dynamically with no periodic background polling or caching.
- */
 export async function getDockerMetrics(): Promise<DockerMetrics> {
   try {
     const [psResult, statsResult] = await Promise.all([
-      execFileAsync(
-        "docker",
-        ["ps", "-a", "--format", "{{json .}}"],
-        { timeout: 4000 },
-      )
+      execFileAsync("docker", ["ps", "-a", "--format", "{{json .}}"], {
+        timeout: 4000,
+      })
         .then((r) =>
           r.stdout
             .trim()
@@ -223,36 +211,38 @@ export async function getDockerMetrics(): Promise<DockerMetrics> {
       Ports?: string;
     };
 
-    const containers: ContainerStats[] = (psResult || []).map((c: RawDockerPs) => {
-      const id = c.ID || "";
-      const name = c.Names || id;
-      const stat = statsMap.get(id) || statsMap.get(name);
-      const isRunning = (c.State || "").toLowerCase() === "running";
+    const containers: ContainerStats[] = (psResult || []).map(
+      (c: RawDockerPs) => {
+        const id = c.ID || "";
+        const name = c.Names || id;
+        const stat = statsMap.get(id) || statsMap.get(name);
+        const isRunning = (c.State || "").toLowerCase() === "running";
 
-      let memUsage = "—";
-      let memLimit = "—";
-      if (stat?.MemUsage) {
-        const parts = stat.MemUsage.split(" / ");
-        memUsage = parts[0] || "—";
-        memLimit = parts[1] || "—";
-      }
+        let memUsage = "—";
+        let memLimit = "—";
+        if (stat?.MemUsage) {
+          const parts = stat.MemUsage.split(" / ");
+          memUsage = parts[0] || "—";
+          memLimit = parts[1] || "—";
+        }
 
-      return {
-        id,
-        name,
-        image: c.Image || "unknown",
-        state: c.State || (isRunning ? "running" : "unknown"),
-        status: c.Status || (isRunning ? "Up" : "Exited"),
-        ports: c.Ports || undefined,
-        cpuPercent: stat?.CPUPerc || (isRunning ? "0.0%" : "—"),
-        memUsage,
-        memLimit,
-        memPercent: stat?.MemPerc || "—",
-        netIO: stat?.NetIO || "—",
-        blockIO: stat?.BlockIO || "—",
-        pids: stat?.PIDs || (isRunning ? 1 : "—"),
-      };
-    });
+        return {
+          id,
+          name,
+          image: c.Image || "unknown",
+          state: c.State || (isRunning ? "running" : "unknown"),
+          status: c.Status || (isRunning ? "Up" : "Exited"),
+          ports: c.Ports || undefined,
+          cpuPercent: stat?.CPUPerc || (isRunning ? "0.0%" : "—"),
+          memUsage,
+          memLimit,
+          memPercent: stat?.MemPerc || "—",
+          netIO: stat?.NetIO || "—",
+          blockIO: stat?.BlockIO || "—",
+          pids: stat?.PIDs || (isRunning ? 1 : "—"),
+        };
+      },
+    );
 
     const runningCount = containers.filter(
       (c) => c.state.toLowerCase() === "running",
@@ -267,7 +257,8 @@ export async function getDockerMetrics(): Promise<DockerMetrics> {
   } catch (error) {
     return {
       available: false,
-      error: error instanceof Error ? error.message : "Failed to inspect Docker",
+      error:
+        error instanceof Error ? error.message : "Failed to inspect Docker",
       totalContainers: 0,
       runningContainers: 0,
       containers: [],
@@ -275,10 +266,6 @@ export async function getDockerMetrics(): Promise<DockerMetrics> {
   }
 }
 
-/**
- * Queries remote host system telemetry from VOX_CORE_ADMIN_URL if configured.
- * Returns null if remote is not configured or unreachable, allowing local fallback.
- */
 export async function fetchRemoteSystemHealth(): Promise<SystemHealthData | null> {
   const baseUrl = process.env.VOX_CORE_ADMIN_URL;
   const token = process.env.VOX_ADMIN_TOKEN;
@@ -324,11 +311,6 @@ export async function fetchRemoteSystemHealth(): Promise<SystemHealthData | null
   }
 }
 
-/**
- * Assembles live system telemetry strictly on-demand.
- * Prioritizes remote EC2 backend telemetry when VOX_CORE_ADMIN_URL is configured,
- * with local fallback for local development or disconnected instances.
- */
 export async function getSystemHealth(): Promise<SystemHealthData> {
   const remote = await fetchRemoteSystemHealth();
   if (remote) {

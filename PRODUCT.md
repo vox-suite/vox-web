@@ -32,7 +32,7 @@ Users call from a mobile phone or send WhatsApp messages. Sessions are short and
 - **Outbound calls** placed by Vox when a deadline arrives or a commitment changes
 - **Speaker recognition** via voice biometrics to maintain per-identity context
 - **Audit trail** for consequential actions with durable status updates
-- Stack: Next.js 16 (App Router), React 19, Tailwind CSS v4, next-auth, TypeScript, thinking-orbs
+- Stack: Next.js 16 (App Router), React 19, Tailwind CSS v4, Supabase Auth, TypeScript, thinking-orbs
 
 ## Brand Commitments
 

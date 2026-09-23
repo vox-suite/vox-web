@@ -110,6 +110,7 @@ The signal appears only when the system is alive. The indigo-violet-cyan spectra
 Density is medium. The spacing scale runs generous but not lavish — `1.75rem` card padding, `clamp(4.5rem, 10vw, 8rem)` between sections. Typography uses a single typeface family (Manrope Variable) for all text, reserving Space Grotesk for button labels and numeric displays to create a quiet instrumental hierarchy without switching families in prose.
 
 **Key Characteristics:**
+
 - White infrastructure; spectral energy is the signal, not the atmosphere
 - Square corners by default — only interactive controls (6px) and conversation bubbles (12px) earn curves
 - Single typeface (Manrope Variable), tightly tracked at −0.045em on headings
@@ -122,20 +123,24 @@ Density is medium. The spacing scale runs generous but not lavish — `1.75rem` 
 A near-monochrome palette governed by neutral infrastructure, with a three-color spectral accent (indigo, violet, cyan) as the system's energy signal.
 
 ### Primary
+
 - **Ink** (#111111): Default body text, borders on interactive elements, primary button background at rest, admin active-nav background. Near-black rather than absolute black — prevents harshness against paper.
 - **Indigo** (#4f46e5): The primary interactive signal. Active button hover gradient start, focus rings, changelog dots, sidebar active-nav border, footer link hover, `.ui-module-link` text. The most saturated color in the system visible at rest.
 - **Indigo Deep** (#4338ca): Button hover gradient terminus. Always paired with Indigo as the downward gradient endpoint.
 
 ### Secondary
+
 - **Indigo Light** (#6366f1): Focus outline color, lighter active states, changelog bullet markers (→), changelog dots at rest, notice left-accent border. The softer expression of the indigo signal.
 - **Violet** (#7c3aed): The gradient's midpoint. Present in the hero headline gradient, closing section glow, and footer wordmark hover. Never used alone in UI components.
 - **Cyan** (#06b6d4): The gradient's cool terminus. Always the final stop in spectral gradients. Never used alone in components.
 
 ### Tertiary
+
 - **Emerald** (#10b981): Success and confirmation signal. Status dots, completed-action indicators, positive demo outcomes. Strictly semantic — never decorative.
 - **Danger** (#9f1239): Destructive actions and error states. Uses `#fff1f2` as its surface pair.
 
 ### Neutral
+
 - **Paper** (#ffffff): Page background and all card surfaces at rest.
 - **Muted** (#656565): Secondary text, supporting copy, placeholder text. Meets AA contrast on white.
 - **Line** (#d8d8d8): All borders and dividers, including the vertical rail.
@@ -154,6 +159,7 @@ A near-monochrome palette governed by neutral infrastructure, with a three-color
 **Character:** A single-typeface system that earns variety through weight and size rather than family changes. Manrope's tight, humanist letterforms work at both headline scale (weight 650, −0.065em tracking) and body reading size (weight 400, 1.65 line-height). Space Grotesk is a deliberate intruder — its geometric personality marks button labels and numeric displays as interactive or data elements.
 
 ### Hierarchy
+
 - **Display** (weight 650, `clamp(2.75rem, 5.2vw, 4.7rem)`, line-height 1.02, tracking −0.065em): Hero headline only. The `<span>` within carries the spectral gradient. Never used on interior pages.
 - **Headline** (weight 600, `clamp(1.7rem, 3vw, 2.6rem)`, line-height 1.15, tracking −0.045em): Section titles on marketing and changelog pages.
 - **Title** (weight 600, `1.2rem`, line-height 1.3, tracking −0.025em): Card headings, admin page sub-headings, component titles.
@@ -169,6 +175,7 @@ The page container uses a maximum width of 1160px (`--page-width`), centered wit
 Section vertical rhythm uses `padding-block: clamp(4.5rem, 10vw, 8rem)`, scaling fluidly with viewport. Card and grid gaps use `1rem` at their densest. The admin layout is a 230px fixed sidebar with a fluid content column.
 
 **Breakpoints:**
+
 - `1000px` — Grid columns collapse; demo hides context panel; 4-column grids become 2-column; sidebar narrows to 195px
 - `720px` — Site navigation links hide; hero reduces padding; most multi-column grids stack; card padding reduces to `1.25rem`
 
@@ -187,6 +194,7 @@ Interactive elevation is spectral: buttons carry a hairline `0 1px 3px rgba(0,0,
 Square corners (radius: 0) are the system default. Cards, badges, containers, code blocks, admin panels, input fields, and the demo frame all use `border-radius: 0`. This is the system's most formal gesture — a professional tool that does not soften its edges.
 
 Two exceptions are precisely scoped:
+
 - **Interactive controls** (buttons): `6px` radius. Enough curve to distinguish a pressable element from a structural container without breaking the system's formality.
 - **Conversational elements** (`.bubble`, chat messages): `0.75rem` (12px) radius. Signals "this came from a person, not the system."
 
@@ -259,6 +267,7 @@ Never apply the dot-grid to interactive surfaces, cards, or text-heavy container
 ## Do's and Don'ts
 
 ### Do:
+
 - **Do** use the spectral gradient (`linear-gradient(135deg, #4f46e5, #7c3aed, #06b6d4)`) only for hero text highlights, interactive hover glows, and the closing dark section. One significant instance per view.
 - **Do** apply `border-inline: 1px solid var(--color-line)` to every page-level content container to maintain the vertical rail.
 - **Do** use radius: 0 for all containers, cards, badges, and information displays.
@@ -268,6 +277,7 @@ Never apply the dot-grid to interactive surfaces, cards, or text-heavy container
 - **Do** keep badge text in monospace to maintain its metadata-versus-prose distinction.
 
 ### Don't:
+
 - **Don't** add ambient shadows to cards or containers at rest — shadows are hover and interaction feedback only.
 - **Don't** use the spectral gradient as a background pattern, texture, or repeated element.
 - **Don't** round cards, containers, badges, or admin panels — only interactive controls (6px) and conversation bubbles (12px) earn curves.

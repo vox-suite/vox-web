@@ -1,3 +1,5 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 export function isSuperuser(
   email: string | null | undefined,
   allowlist: string | undefined,
@@ -20,6 +22,41 @@ export function maySignIn(
     isSuperuser(profile.email, allowlist)
   );
 }
+
+export function encodeAdminE2ESession(
+  email: string,
+  secret: string,
+  googleVerified = true,
+) {
+  const payload = Buffer.from(
+    JSON.stringify({ email, googleVerified }),
+    "utf8",
+  ).toString("base64url");
+  const signature = createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+export function decodeAdminE2ESession(raw: string, secret: string) {
+  const [payload, signature] = raw.split(".");
+  if (!payload || !signature) return null;
+  const expected = createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  const left = Buffer.from(signature);
+  const right = Buffer.from(expected);
+  if (left.length !== right.length || !timingSafeEqual(left, right)) return null;
+  try {
+    return JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      email?: string;
+      googleVerified?: boolean;
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function safeCallback(url: string, baseUrl: string) {
   const isSubdomain =
     new URL(baseUrl).hostname.toLowerCase() === "admin.voxagent.in";
@@ -39,9 +76,21 @@ export function safeCallback(url: string, baseUrl: string) {
 }
 export function adminDestination(host: string, path: string) {
   if (host.toLowerCase().split(":")[0] !== "admin.voxagent.in") return null;
-  if (/^\/(admin|api|_next)(\/|$)/.test(path) || path.includes("."))
+  if (/^\/(admin|auth|api|_next)(\/|$)/.test(path) || path.includes("."))
     return null;
   return path === "/" ? "/admin" : `/admin${path}`;
+}
+
+export function consumerDestination(host: string, path: string) {
+  if (host.toLowerCase().split(":")[0] !== "app.voxagent.in") return null;
+  if (/^\/(app|admin|auth|api|_next)(\/|$)/.test(path) || path.includes("."))
+    return null;
+  return path === "/" ? "/app" : `/app${path}`;
+}
+
+export function consumerHref(host: string | null | undefined, path: string) {
+  const hostname = host?.toLowerCase().split(":")[0];
+  return hostname === "app.voxagent.in" ? path : `/app${path}`;
 }
 export function parseRedisQuery(params: URLSearchParams) {
   const cursor = params.get("cursor") ?? "0";
@@ -60,7 +109,7 @@ export function canonicalAdminRedirect(
   path: string,
   origin: string | undefined,
 ) {
-  if (!origin || !/^\/(admin|api\/auth)(\/|$)/.test(path)) return null;
+  if (!origin || !/^\/(admin|auth)(\/|$)/.test(path)) return null;
   try {
     const canonical = new URL(origin);
     if (

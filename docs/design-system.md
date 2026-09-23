@@ -63,7 +63,7 @@ Use the authenticated `/admin/design-system` page as the live component referenc
 
 - [Tailwind theme variables](https://tailwindcss.com/docs/theme)
 - [Next.js authentication guidance](https://nextjs.org/docs/app/guides/authentication)
-- [Google provider and verified email](https://next-auth.js.org/providers/google)
+- [Supabase Auth Google provider](https://supabase.com/docs/guides/auth/social-login/auth-google)
 
 ## Artwork
 

@@ -23,21 +23,21 @@ export default function PrivacyPage() {
           <h2>1. Public Website & Telephony</h2>
           <Text>
             The public website introduces the Vox product. Fonts are self-hosted
-            locally at build time without third-party IP leakage. The website does
-            not activate your microphone, initiate calls, or inspect accounts
-            without your explicit action.
+            locally at build time without third-party IP leakage. The website
+            does not activate your microphone, initiate calls, or inspect
+            accounts without your explicit action.
           </Text>
 
           <h2>2. Children&apos;s Privacy (COPPA Compliance)</h2>
           <Text>
-            Vox is directed to business professionals and is strictly not intended
-            for children under the age of 13. We do not knowingly collect or
-            maintain personal information from persons under 13 years of age.
-            If we learn that personal data of persons under 13 has been collected
-            without verified parental consent, we will promptly delete that
-            information. Contact{" "}
-            <a href="mailto:privacy@voxagent.in">privacy@voxagent.in</a> with any
-            inquiries.
+            Vox is directed to business professionals and is strictly not
+            intended for children under the age of 13. We do not knowingly
+            collect or maintain personal information from persons under 13 years
+            of age. If we learn that personal data of persons under 13 has been
+            collected without verified parental consent, we will promptly delete
+            that information. Contact{" "}
+            <a href="mailto:privacy@voxagent.in">privacy@voxagent.in</a> with
+            any inquiries.
           </Text>
 
           <h2>3. Session Replay & Wiretapping Protection (CIPA)</h2>
@@ -52,7 +52,8 @@ export default function PrivacyPage() {
           <Text>
             All marketing, launch, and waitlist announcement emails sent by Vox
             contain an explicit opt-out / unsubscribe mechanism and our physical
-            mailing address. You can unsubscribe at any time with a single click.
+            mailing address. You can unsubscribe at any time with a single
+            click.
           </Text>
 
           <h2>5. Subscriptions & Renewal Terms (California ARL)</h2>
@@ -65,18 +66,18 @@ export default function PrivacyPage() {
 
           <h2>6. DMCA & Copyright Safe Harbor</h2>
           <Text>
-            Vox respects intellectual property rights in compliance with 17 U.S.C.
-            § 512. Inquiries regarding alleged copyright infringement or notices
-            under the Digital Millennium Copyright Act should be addressed to our
-            Designated Copyright Agent at{" "}
+            Vox respects intellectual property rights in compliance with 17
+            U.S.C. § 512. Inquiries regarding alleged copyright infringement or
+            notices under the Digital Millennium Copyright Act should be
+            addressed to our Designated Copyright Agent at{" "}
             <a href="mailto:dmca@voxagent.in">dmca@voxagent.in</a>.
           </Text>
 
           <h2>7. Administration Sign-in & Data Retention</h2>
           <Text>
             Administrators sign in via Google OAuth. Sessions are protected by
-            encrypted, HTTP-only session cookies. Authorized administrators access
-            only data strictly necessary for maintenance and support.
+            encrypted, HTTP-only session cookies. Authorized administrators
+            access only data strictly necessary for maintenance and support.
           </Text>
 
           <LinkButton href="/" variant="secondary">

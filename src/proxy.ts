@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { adminDestination, canonicalAdminRedirect } from "./lib/access";
+import {
+  adminDestination,
+  canonicalAdminRedirect,
+  consumerDestination,
+} from "./lib/access";
 import { checkRateLimit, getClientIp } from "./lib/rate-limit";
 
 export function proxy(request: NextRequest) {
@@ -29,7 +33,7 @@ export function proxy(request: NextRequest) {
   const canonical = canonicalAdminRedirect(
     request.headers.get("host") ?? "",
     request.nextUrl.pathname,
-    process.env.NEXTAUTH_URL,
+    process.env.VOX_ADMIN_ORIGIN,
   );
   if (canonical) {
     const response = NextResponse.redirect(canonical + request.nextUrl.search);
@@ -42,16 +46,23 @@ export function proxy(request: NextRequest) {
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
   }
-  const path = adminDestination(
+  const adminPath = adminDestination(
     request.headers.get("host") ?? "",
     request.nextUrl.pathname,
   );
+  const consumerPath = consumerDestination(
+    request.headers.get("host") ?? "",
+    request.nextUrl.pathname,
+  );
+  const path = adminPath ?? consumerPath;
   const response = path
     ? NextResponse.rewrite(new URL(path + request.nextUrl.search, request.url))
     : NextResponse.next();
   if (
     path ||
-    /^\/(admin|api\/admin|api\/auth)(\/|$)/.test(request.nextUrl.pathname)
+    /^\/(admin|app|api\/admin|auth|api\/account)(\/|$)/.test(
+      request.nextUrl.pathname,
+    )
   ) {
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");

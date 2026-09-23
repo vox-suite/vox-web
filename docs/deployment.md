@@ -2,13 +2,18 @@
 
 ## What the code provides
 
-One Next.js deployment serves both `voxagent.in` and `admin.voxagent.in`. Clean paths are used on the subdomain (`/`, `/login`, `/redis`, `/design-system`), and any incoming `/admin` paths automatically redirect to the clean routes. Local development continues to work under `/admin` on localhost. Route handlers and server pages enforce permissions, independent of the host rewrite.
+One Next.js deployment serves `voxagent.in`, `app.voxagent.in`, and `admin.voxagent.in`. The consumer app and administration use clean paths on their subdomains; local development uses `/app` and `/admin`. Route handlers and server pages enforce permissions independently of host rewrites.
+
+Consumer authentication has its own PostgreSQL database, Better Auth session
+secret, Google client, SMTP delivery, and Core credentials. Follow
+[`consumer-auth.md`](consumer-auth.md) before adding `app.voxagent.in` or
+enabling new consumer sign-ins.
 
 No credentials or superuser identity are inferred. Missing configuration denies access. Complete these steps with the owner-selected Google account before production use.
 
 ## 1. Deploy Core with Redis administration
 
-Deploy the matching `vox-core` change containing `/v1/admin/redis`. Configure `VOX_ADMIN_TOKEN` in the backend's protected environment file with a new random credential. Keep it distinct from `VOX_CORE_SERVICE_TOKEN`. Existing Compose `env_file` handling passes it to Core; no Redis port publication is necessary.
+Deploy the matching `vox-core` change containing `/v1/admin/redis`. Configure `VOX_ADMIN_TOKEN` in the backend's protected environment file with a new random credential. Keep it distinct from `VOX_AUTH_TOKEN`. Existing Compose `env_file` handling passes it to Core; no Redis port publication is necessary.
 
 Core needs its existing `REDIS_URL`. Redis 7+ is required; the existing Redis 8 deployment meets this requirement. Restart Core after changing its environment.
 
@@ -31,16 +36,22 @@ location = /v1/admin/redis {
 
 The dedicated bearer token remains required by Core. Do not expose Redis or other Core routes. Disabling query-string access logging avoids recording searched keys; substitute an approved redacted log format if operational logging is required.
 
-## 2. Configure Google OAuth
+## 2. Configure Supabase Auth for administration
 
-Create an OAuth web application in the owner's Google Cloud project. Configure the consent screen and any required test users or publishing settings. Register:
+Enable Google under Supabase Auth → Providers. Use the same Supabase project as consumer auth. Add redirect URLs:
 
-- Production authorized redirect URI: `https://admin.voxagent.in/api/auth/callback/google`
-- Local authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+- Production: `https://admin.voxagent.in/auth/callback`
+- Local: `http://localhost:3000/auth/callback`
 
-Enter that client's ID and secret into the web hosting environment. The app requests only `openid email profile`; it does not request calendar, contacts or Gmail access. The callback checks Google's verified email and the exact superuser allowlist.
+Also allow those callback URLs in the Google Cloud OAuth client that Supabase uses.
 
-Set `NEXTAUTH_URL=https://admin.voxagent.in`, a cryptographically random `NEXTAUTH_SECRET` of at least 32 bytes, and `SUPERUSER_EMAILS` to the intended Google email(s), separated by commas. Keep all variables server-side, without a `NEXT_PUBLIC_` prefix. Configure the same session secret and allowlist across web replicas.
+Set in the web hosting environment:
+
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPERUSER_EMAILS` to the intended Google email(s), comma-separated
+- `VOX_ADMIN_ORIGIN=https://admin.voxagent.in`
+
+Only allowlisted, verified Google accounts can open `/admin`. Missing configuration denies access.
 
 ## 3. Connect web to Core
 
@@ -56,7 +67,7 @@ Import `vox-web` into Vercel or update its existing project:
 - Build command: `npm run build`.
 - Install command: `npm ci`.
 - Remove the previous `dist` output-directory override and let the Next.js preset manage output.
-- Add `voxagent.in` and `admin.voxagent.in` as domains on the same project.
+- Add `voxagent.in`, `app.voxagent.in`, and `admin.voxagent.in` as domains on the same project.
 - Apply the exact DNS records supplied by Vercel for this project and wait for domain/TLS verification. Do not guess DNS targets.
 - Deploy with the environment variables above. Use separately registered callback URLs for previews if previews require sign-in.
 

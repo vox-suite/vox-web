@@ -6,9 +6,7 @@
       {
         "rule": "gradient-text",
         "value": "*",
-        "files": [
-          "src/app/globals.css"
-        ],
+        "files": ["src/app/globals.css"],
         "createdAt": "2026-09-21T17:30:37.363Z",
         "reason": "DESIGN.md: spectral gradient on hero h1 span is the documented brand signal"
       },
@@ -21,9 +19,7 @@
       {
         "rule": "side-tab",
         "value": "*",
-        "files": [
-          "src/app/globals.css"
-        ],
+        "files": ["src/app/globals.css"],
         "createdAt": "2026-09-21T17:32:22.458Z",
         "reason": "DESIGN.md: left-accent 3px border is the notice component's documented signature — editorial annotation pattern, not a card tab"
       }

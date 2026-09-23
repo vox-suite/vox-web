@@ -1,8 +1,16 @@
 "use client";
-import { signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { Button, Notice, Stack } from "@/components/ui";
+import { createClient } from "@/lib/supabase/client";
+
+function adminHome() {
+  return window.location.host.startsWith("admin.") ? "/" : "/admin";
+}
+
+function adminLogin() {
+  return window.location.host.startsWith("admin.") ? "/login" : "/admin/login";
+}
 
 export function GoogleSignIn({ disabled = false }: { disabled?: boolean }) {
   const [pending, setPending] = useState(false);
@@ -15,12 +23,18 @@ export function GoogleSignIn({ disabled = false }: { disabled?: boolean }) {
           setPending(true);
           setError(false);
           try {
-            const callbackUrl =
-              typeof window !== "undefined" &&
-              window.location.host.startsWith("admin.")
-                ? "/"
-                : "/admin";
-            await signIn("google", { callbackUrl });
+            const supabase = createClient();
+            const { error: oauthError } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/auth/callback?next=${adminHome()}`,
+                queryParams: { prompt: "select_account" },
+              },
+            });
+            if (oauthError) {
+              setError(true);
+              setPending(false);
+            }
           } catch {
             setError(true);
             setPending(false);
@@ -46,17 +60,15 @@ export function GoogleSignIn({ disabled = false }: { disabled?: boolean }) {
     </Stack>
   );
 }
+
 export function SignOutButton() {
   return (
     <Button
       variant="ghost"
-      onClick={() => {
-        const callbackUrl =
-          typeof window !== "undefined" &&
-          window.location.host.startsWith("admin.")
-            ? "/login"
-            : "/admin/login";
-        void signOut({ callbackUrl });
+      onClick={async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        window.location.assign(adminLogin());
       }}
     >
       <LogOut size={15} aria-hidden="true" />

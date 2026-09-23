@@ -5,6 +5,8 @@ import {
   maySignIn,
   safeCallback,
   adminDestination,
+  consumerDestination,
+  consumerHref,
   parseRedisQuery,
 } from "../src/lib/access";
 
@@ -84,11 +86,37 @@ test("subdomain routing only rewrites the exact admin host", () => {
   assert.equal(adminDestination("admin.voxagent.in", "/"), "/admin");
   assert.equal(adminDestination("admin.voxagent.in", "/redis"), "/admin/redis");
   assert.equal(adminDestination("admin.voxagent.in", "/login"), "/admin/login");
+  assert.equal(adminDestination("admin.voxagent.in", "/auth/callback"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/api/admin/redis"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/admin"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/admin/login"), null);
   assert.equal(adminDestination("admin.voxagent.in.evil.test", "/"), null);
   assert.equal(adminDestination("voxagent.in", "/"), null);
+});
+
+test("consumer routing isolates app.voxagent.in and keeps local /app paths", () => {
+  assert.equal(consumerDestination("app.voxagent.in", "/"), "/app");
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/sign-in"),
+    "/app/sign-in",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/account"),
+    "/app/account",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/auth/callback"),
+    null,
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/api/account/auth/session"),
+    null,
+  );
+  assert.equal(consumerDestination("app.voxagent.in", "/app"), null);
+  assert.equal(consumerDestination("app.voxagent.in.evil.test", "/"), null);
+  assert.equal(consumerDestination("voxagent.in", "/"), null);
+  assert.equal(consumerHref("app.voxagent.in", "/sign-in"), "/sign-in");
+  assert.equal(consumerHref("localhost", "/sign-in"), "/app/sign-in");
 });
 test("Redis query validation preserves uint64 cursors without number rounding", () => {
   assert.deepEqual(
@@ -104,6 +132,16 @@ test("Redis query validation preserves uint64 cursors without number rounding", 
   assert.throws(() =>
     parseRedisQuery(new URLSearchParams({ match: "x".repeat(257) })),
   );
+});
+
+test("admin e2e session encoding rejects tampering", async () => {
+  const { decodeAdminE2ESession, encodeAdminE2ESession, isSuperuser } =
+    await import("../src/lib/access");
+  const secret = "test-secret";
+  const token = encodeAdminE2ESession("admin@example.test", secret);
+  assert.equal(decodeAdminE2ESession(token, secret)?.email, "admin@example.test");
+  assert.equal(decodeAdminE2ESession(token.slice(0, -1) + "x", secret), null);
+  assert.equal(isSuperuser("admin@example.test", "admin@example.test"), true);
 });
 
 test("public-domain admin entry uses the OAuth cookie host", async () => {

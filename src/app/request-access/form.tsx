@@ -109,7 +109,16 @@ export function RequestAccessForm() {
         disabled={state === "submitting"}
       />
 
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.8125rem", color: "var(--color-fg-muted, #666)", margin: "0.75rem 0" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "0.5rem",
+          fontSize: "0.8125rem",
+          color: "var(--color-fg-muted, #666)",
+          margin: "0.75rem 0",
+        }}
+      >
         <input
           type="checkbox"
           id="age_consent"
@@ -118,16 +127,25 @@ export function RequestAccessForm() {
           disabled={state === "submitting"}
           style={{ marginTop: "0.15rem", cursor: "pointer" }}
         />
-        <label htmlFor="age_consent" style={{ cursor: "pointer", lineHeight: 1.4 }}>
-          I confirm that I am at least 18 years old (or 13+ with parental authorization) and accept the{" "}
+        <label
+          htmlFor="age_consent"
+          style={{ cursor: "pointer", lineHeight: 1.4 }}
+        >
+          I confirm that I am at least 18 years old (or 13+ with parental
+          authorization) and accept the{" "}
           <a href="/privacy" style={{ textDecoration: "underline" }}>
             Privacy Policy
-          </a>.
+          </a>
+          .
         </label>
       </div>
 
       <div className="request-access-actions">
-        <Button type="submit" variant="primary" disabled={state === "submitting"}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={state === "submitting"}
+        >
           {state === "submitting" ? "Sending…" : "Request access"}
         </Button>
         {state === "error" && (

@@ -4,45 +4,304 @@
   "title": "Design System: Vox",
   "extensions": {
     "colorMeta": {
-      "paper":         { "role": "neutral",   "displayName": "Paper White",       "canonical": "#ffffff",  "tonalRamp": ["#e5e5e5","#d4d4d4","#a3a3a3","#737373","#525252","#404040","#262626","#111111"] },
-      "ink":           { "role": "primary",   "displayName": "Near-Black Ink",    "canonical": "#111111",  "tonalRamp": ["#111111","#27272a","#3f3f46","#52525b","#71717a","#a1a1aa","#d4d4d8","#f4f4f5"] },
-      "muted":         { "role": "neutral",   "displayName": "Editorial Muted",   "canonical": "#656565",  "tonalRamp": ["#1a1a1a","#2e2e2e","#404040","#525252","#656565","#888888","#b0b0b0","#d8d8d8"] },
-      "line":          { "role": "neutral",   "displayName": "Rule Line",         "canonical": "#d8d8d8",  "tonalRamp": ["#404040","#525252","#737373","#a3a3a3","#d4d4d4","#e5e5e5","#f0f0f0","#fafafa"] },
-      "soft":          { "role": "neutral",   "displayName": "Soft Ground",       "canonical": "#f7f7f7",  "tonalRamp": ["#d4d4d4","#e0e0e0","#e8e8e8","#eeeeee","#f2f2f2","#f5f5f5","#f7f7f7","#ffffff"] },
-      "subtle":        { "role": "neutral",   "displayName": "Subtle Surface",    "canonical": "#eeeeee",  "tonalRamp": ["#c0c0c0","#cccccc","#d8d8d8","#e0e0e0","#e8e8e8","#eeeeee","#f5f5f5","#fafafa"] },
-      "indigo":        { "role": "primary",   "displayName": "Indigo Signal",     "canonical": "#4f46e5",  "tonalRamp": ["#1e1b4b","#312e81","#3730a3","#4338ca","#4f46e5","#6366f1","#818cf8","#e0e7ff"] },
-      "indigo-deep":   { "role": "primary",   "displayName": "Indigo Deep",       "canonical": "#4338ca",  "tonalRamp": ["#1e1b4b","#2d2a8a","#3730a3","#3f3abf","#4338ca","#5a55d8","#7c79ea","#c7c5f8"] },
-      "indigo-light":  { "role": "secondary", "displayName": "Indigo Light",      "canonical": "#6366f1",  "tonalRamp": ["#312e81","#3730a3","#4f46e5","#6366f1","#818cf8","#a5b4fc","#c7d2fe","#e0e7ff"] },
-      "violet":        { "role": "secondary", "displayName": "Violet Gradient",   "canonical": "#7c3aed",  "tonalRamp": ["#2e1065","#4c1d95","#5b21b6","#6d28d9","#7c3aed","#8b5cf6","#a78bfa","#ede9fe"] },
-      "cyan":          { "role": "tertiary",  "displayName": "Cyan Terminus",     "canonical": "#06b6d4",  "tonalRamp": ["#083344","#164e63","#155e75","#0e7490","#0891b2","#06b6d4","#22d3ee","#cffafe"] },
-      "emerald":       { "role": "tertiary",  "displayName": "Confirmation Green","canonical": "#10b981",  "tonalRamp": ["#064e3b","#065f46","#047857","#059669","#10b981","#34d399","#6ee7b7","#d1fae5"] },
-      "danger":        { "role": "tertiary",  "displayName": "Danger Rose",       "canonical": "#9f1239",  "tonalRamp": ["#4c0519","#881337","#9f1239","#be123c","#e11d48","#fb7185","#fda4af","#ffe4e6"] },
-      "danger-surface":{ "role": "tertiary",  "displayName": "Danger Surface",    "canonical": "#fff1f2",  "tonalRamp": ["#fda4af","#fecdd3","#fed7d7","#fee2e2","#fff1f2","#fff5f5","#fff8f8","#ffffff"] }
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#e5e5e5",
+          "#d4d4d4",
+          "#a3a3a3",
+          "#737373",
+          "#525252",
+          "#404040",
+          "#262626",
+          "#111111"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Near-Black Ink",
+        "canonical": "#111111",
+        "tonalRamp": [
+          "#111111",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#f4f4f5"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Editorial Muted",
+        "canonical": "#656565",
+        "tonalRamp": [
+          "#1a1a1a",
+          "#2e2e2e",
+          "#404040",
+          "#525252",
+          "#656565",
+          "#888888",
+          "#b0b0b0",
+          "#d8d8d8"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Rule Line",
+        "canonical": "#d8d8d8",
+        "tonalRamp": [
+          "#404040",
+          "#525252",
+          "#737373",
+          "#a3a3a3",
+          "#d4d4d4",
+          "#e5e5e5",
+          "#f0f0f0",
+          "#fafafa"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Soft Ground",
+        "canonical": "#f7f7f7",
+        "tonalRamp": [
+          "#d4d4d4",
+          "#e0e0e0",
+          "#e8e8e8",
+          "#eeeeee",
+          "#f2f2f2",
+          "#f5f5f5",
+          "#f7f7f7",
+          "#ffffff"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Surface",
+        "canonical": "#eeeeee",
+        "tonalRamp": [
+          "#c0c0c0",
+          "#cccccc",
+          "#d8d8d8",
+          "#e0e0e0",
+          "#e8e8e8",
+          "#eeeeee",
+          "#f5f5f5",
+          "#fafafa"
+        ]
+      },
+      "indigo": {
+        "role": "primary",
+        "displayName": "Indigo Signal",
+        "canonical": "#4f46e5",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#e0e7ff"
+        ]
+      },
+      "indigo-deep": {
+        "role": "primary",
+        "displayName": "Indigo Deep",
+        "canonical": "#4338ca",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#2d2a8a",
+          "#3730a3",
+          "#3f3abf",
+          "#4338ca",
+          "#5a55d8",
+          "#7c79ea",
+          "#c7c5f8"
+        ]
+      },
+      "indigo-light": {
+        "role": "secondary",
+        "displayName": "Indigo Light",
+        "canonical": "#6366f1",
+        "tonalRamp": [
+          "#312e81",
+          "#3730a3",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe",
+          "#e0e7ff"
+        ]
+      },
+      "violet": {
+        "role": "secondary",
+        "displayName": "Violet Gradient",
+        "canonical": "#7c3aed",
+        "tonalRamp": [
+          "#2e1065",
+          "#4c1d95",
+          "#5b21b6",
+          "#6d28d9",
+          "#7c3aed",
+          "#8b5cf6",
+          "#a78bfa",
+          "#ede9fe"
+        ]
+      },
+      "cyan": {
+        "role": "tertiary",
+        "displayName": "Cyan Terminus",
+        "canonical": "#06b6d4",
+        "tonalRamp": [
+          "#083344",
+          "#164e63",
+          "#155e75",
+          "#0e7490",
+          "#0891b2",
+          "#06b6d4",
+          "#22d3ee",
+          "#cffafe"
+        ]
+      },
+      "emerald": {
+        "role": "tertiary",
+        "displayName": "Confirmation Green",
+        "canonical": "#10b981",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#6ee7b7",
+          "#d1fae5"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger Rose",
+        "canonical": "#9f1239",
+        "tonalRamp": [
+          "#4c0519",
+          "#881337",
+          "#9f1239",
+          "#be123c",
+          "#e11d48",
+          "#fb7185",
+          "#fda4af",
+          "#ffe4e6"
+        ]
+      },
+      "danger-surface": {
+        "role": "tertiary",
+        "displayName": "Danger Surface",
+        "canonical": "#fff1f2",
+        "tonalRamp": [
+          "#fda4af",
+          "#fecdd3",
+          "#fed7d7",
+          "#fee2e2",
+          "#fff1f2",
+          "#fff5f5",
+          "#fff8f8",
+          "#ffffff"
+        ]
+      }
     },
     "typographyMeta": {
-      "display":  { "displayName": "Display",  "purpose": "Hero headline only. Carries spectral gradient on <span>." },
-      "headline": { "displayName": "Headline", "purpose": "Section titles on marketing and changelog pages." },
-      "title":    { "displayName": "Title",    "purpose": "Card headings, admin sub-headings, component titles." },
-      "body":     { "displayName": "Body",     "purpose": "All running prose. Max 65–72ch in reading contexts." },
-      "label":    { "displayName": "Label",    "purpose": "Button text, form labels, numeric stat values, changelog dates. Space Grotesk only." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline only. Carries spectral gradient on <span>."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles on marketing and changelog pages."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings, admin sub-headings, component titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running prose. Max 65–72ch in reading contexts."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Button text, form labels, numeric stat values, changelog dates. Space Grotesk only."
+      }
     },
     "shadows": [
-      { "name": "button-rest",    "value": "0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)", "purpose": "Primary and secondary button at rest. Hairline structural definition." },
-      { "name": "button-hover",   "value": "0 6px 20px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.25)", "purpose": "Primary button hover — the spectral lift glow." },
-      { "name": "card-hover",     "value": "0 8px 30px rgba(99, 102, 241, 0.12)", "purpose": "Module card and changelog card hover. Diffuse indigo ambient." },
-      { "name": "featured-card",  "value": "0 18px 55px rgba(79, 70, 229, 0.12)", "purpose": "Permanently elevated feature card (follow-up card). Use sparingly." }
+      {
+        "name": "button-rest",
+        "value": "0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
+        "purpose": "Primary and secondary button at rest. Hairline structural definition."
+      },
+      {
+        "name": "button-hover",
+        "value": "0 6px 20px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
+        "purpose": "Primary button hover — the spectral lift glow."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 8px 30px rgba(99, 102, 241, 0.12)",
+        "purpose": "Module card and changelog card hover. Diffuse indigo ambient."
+      },
+      {
+        "name": "featured-card",
+        "value": "0 18px 55px rgba(79, 70, 229, 0.12)",
+        "purpose": "Permanently elevated feature card (follow-up card). Use sparingly."
+      }
     ],
     "motion": [
-      { "name": "spring",   "value": "cubic-bezier(0.16, 1, 0.3, 1)",  "purpose": "Button hover lift, feature card transforms. Snappy with a natural settle." },
-      { "name": "standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)",   "purpose": "Default easing for color and border transitions." },
-      { "name": "fast",     "value": "0.2s",  "purpose": "Text color hover, border color changes." },
-      { "name": "normal",   "value": "0.25s", "purpose": "Card and icon transitions." },
-      { "name": "slow",     "value": "0.35s", "purpose": "Art sections, radial glow opacity." }
+      {
+        "name": "spring",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Button hover lift, feature card transforms. Snappy with a natural settle."
+      },
+      {
+        "name": "standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default easing for color and border transitions."
+      },
+      {
+        "name": "fast",
+        "value": "0.2s",
+        "purpose": "Text color hover, border color changes."
+      },
+      {
+        "name": "normal",
+        "value": "0.25s",
+        "purpose": "Card and icon transitions."
+      },
+      {
+        "name": "slow",
+        "value": "0.35s",
+        "purpose": "Art sections, radial glow opacity."
+      }
     ],
     "breakpoints": [
-      { "name": "tablet",  "value": "1000px", "purpose": "Grid columns collapse; demo context hides; 4-col → 2-col; admin sidebar narrows to 195px." },
-      { "name": "mobile",  "value": "720px",  "purpose": "Site nav hides; hero reduces padding; multi-column grids stack; card padding 1.25rem." },
-      { "name": "changelog","value": "900px", "purpose": "Changelog timeline collapses date column into inline flow." }
+      {
+        "name": "tablet",
+        "value": "1000px",
+        "purpose": "Grid columns collapse; demo context hides; 4-col → 2-col; admin sidebar narrows to 195px."
+      },
+      {
+        "name": "mobile",
+        "value": "720px",
+        "purpose": "Site nav hides; hero reduces padding; multi-column grids stack; card padding 1.25rem."
+      },
+      {
+        "name": "changelog",
+        "value": "900px",
+        "purpose": "Changelog timeline collapses date column into inline flow."
+      }
     ]
   },
   "components": [
@@ -131,11 +390,31 @@
       "Hover is when the world turns on: every transition moves from neutral to spectral"
     ],
     "rules": [
-      { "name": "The Signal Rule",        "body": "The spectral indigo-violet-cyan gradient is reserved for moments of activation: hero text span, interactive hover glows, the closing dark section. It does not appear as ambient decoration. Its rarity is its meaning.", "section": "colors" },
-      { "name": "The Flat-at-Rest Rule",  "body": "Surfaces have no ambient elevation shadow. Shadows appear only as interaction feedback — hover, focus, or intentional visual lift of a featured element.", "section": "elevation" },
-      { "name": "The Square Frame Rule",  "body": "All containers and information elements use radius: 0. Only things a person presses (6px) or things a person said (12px) get curved corners. Rounding must be earned by function.", "section": "shapes" },
-      { "name": "The Rail Rule",          "body": "Every page-level container carries border-inline: 1px solid var(--color-line). This vertical frame is the primary spatial organizing device. The empty gutter is the design.", "section": "layout" },
-      { "name": "The Single-Family Rule", "body": "All text is Manrope Variable. Space Grotesk appears only on button labels, numeric stat values, and changelog dates. Do not import additional typefaces.", "section": "typography" }
+      {
+        "name": "The Signal Rule",
+        "body": "The spectral indigo-violet-cyan gradient is reserved for moments of activation: hero text span, interactive hover glows, the closing dark section. It does not appear as ambient decoration. Its rarity is its meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat-at-Rest Rule",
+        "body": "Surfaces have no ambient elevation shadow. Shadows appear only as interaction feedback — hover, focus, or intentional visual lift of a featured element.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Square Frame Rule",
+        "body": "All containers and information elements use radius: 0. Only things a person presses (6px) or things a person said (12px) get curved corners. Rounding must be earned by function.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Rail Rule",
+        "body": "Every page-level container carries border-inline: 1px solid var(--color-line). This vertical frame is the primary spatial organizing device. The empty gutter is the design.",
+        "section": "layout"
+      },
+      {
+        "name": "The Single-Family Rule",
+        "body": "All text is Manrope Variable. Space Grotesk appears only on button labels, numeric stat values, and changelog dates. Do not import additional typefaces.",
+        "section": "typography"
+      }
     ],
     "dos": [
       "Do use the spectral gradient (indigo → violet → cyan) only for hero text highlights, interactive hover glows, and the closing dark section. One significant instance per view.",

@@ -85,9 +85,7 @@ export function SystemHealthDashboard() {
   }, []);
 
   if (loading && !data) {
-    return (
-      <LoadingState label="Gathering system telemetry…" />
-    );
+    return <LoadingState label="Gathering system telemetry…" />;
   }
 
   if (error && !data) {
@@ -117,7 +115,6 @@ export function SystemHealthDashboard() {
 
   return (
     <Stack gap="large">
-      {/* Action Header */}
       <Row spread>
         <Stack gap="small">
           <Text muted small>
@@ -144,7 +141,6 @@ export function SystemHealthDashboard() {
         </Notice>
       )}
 
-      {/* System Resources Overview */}
       <Card
         title="Host system metrics"
         description="CPU, memory and operating system environment"
@@ -172,7 +168,6 @@ export function SystemHealthDashboard() {
         </Grid>
       </Card>
 
-      {/* CPU Breakdown */}
       <Grid columns={2}>
         <Card
           title="CPU & load"
@@ -202,7 +197,6 @@ export function SystemHealthDashboard() {
           </Stack>
         </Card>
 
-        {/* Memory Breakdown */}
         <Card
           title="Memory utilization"
           description="Host and node process memory"
@@ -229,14 +223,14 @@ export function SystemHealthDashboard() {
             <Row spread>
               <Text muted>Node.js heap used</Text>
               <Text>
-                {host.process.heapUsedFormatted} / {host.process.heapTotalFormatted}
+                {host.process.heapUsedFormatted} /{" "}
+                {host.process.heapTotalFormatted}
               </Text>
             </Row>
           </Stack>
         </Card>
       </Grid>
 
-      {/* Process & Environment Details */}
       <Card
         title="Runtime details"
         description="Node process environment and system release"
@@ -260,7 +254,6 @@ export function SystemHealthDashboard() {
         </Grid>
       </Card>
 
-      {/* Containers Table */}
       <Card
         title="Container resources"
         description="Real-time Docker engine resource utilization"

@@ -65,8 +65,7 @@ export function checkRateLimit(
     cleanupExpired(now, windowMs);
   }
 
-  // Segment by pathname prefix if needed, e.g. auth vs general
-  const bucketKey = pathname?.startsWith("/api/auth")
+  const bucketKey = pathname?.startsWith("/auth") || pathname?.startsWith("/api/auth")
     ? `auth:${key}`
     : `global:${key}`;
 

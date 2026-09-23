@@ -50,7 +50,6 @@ test("rate limiting allows requests within limit and rejects once exceeded", () 
   assert.equal(r4.remaining, 0);
   assert.ok(r4.retryAfter && r4.retryAfter > 0);
 
-  // Different IP should still have capacity
   const other = checkRateLimit("192.168.1.20", "/api/admin/health", {
     limit,
     windowMs,
@@ -65,15 +64,14 @@ test("auth endpoints bucket separately from general traffic", () => {
   const limit = 2;
   const windowMs = 10_000;
 
-  checkRateLimit(ip, "/api/auth/session", { limit, windowMs });
-  checkRateLimit(ip, "/api/auth/session", { limit, windowMs });
-  const authBlocked = checkRateLimit(ip, "/api/auth/session", {
+  checkRateLimit(ip, "/auth/callback", { limit, windowMs });
+  checkRateLimit(ip, "/auth/callback", { limit, windowMs });
+  const authBlocked = checkRateLimit(ip, "/auth/callback", {
     limit,
     windowMs,
   });
   assert.equal(authBlocked.success, false);
 
-  // General endpoint for same IP is not yet consumed
   const general = checkRateLimit(ip, "/admin/health", { limit, windowMs });
   assert.equal(general.success, true);
 });

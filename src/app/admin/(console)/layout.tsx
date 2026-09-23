@@ -6,5 +6,5 @@ export default async function ConsoleLayout({
   children: React.ReactNode;
 }) {
   const user = await requireSuperuser();
-  return <AdminShell email={user.email!}>{children}</AdminShell>;
+  return <AdminShell user={user}>{children}</AdminShell>;
 }

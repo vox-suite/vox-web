@@ -5,7 +5,7 @@ export interface ChangelogItem {
   version: string;
   title: string;
   summary: string;
-  subsystems: ("vox-bridge" | "vox-core" | "vox-web" | "vox-deploy")[];
+  subsystems: ("vox-desktop" | "vox-bridge" | "vox-core" | "vox-web" | "vox-deploy")[];
   category: "voice" | "core" | "biometrics" | "web" | "infra";
   tags: string[];
   metrics?: {
@@ -26,6 +26,96 @@ export interface ChangelogItem {
 }
 
 export const CHANGELOG_DATA: ChangelogItem[] = [
+  {
+    id: "2026-09-23-vox-desktop-core-worker-unified-pipeline",
+    date: "2026-09-23",
+    formattedDate: "Sep 23, 2026",
+    version: "v0.6.0",
+    title:
+      "Vox Desktop Client, Dual-Process vox-core-worker Runtime & Unified System Architecture",
+    summary:
+      "Introduced Vox Desktop—a native cross-platform client built with Tauri v2, Dioxus, and CPAL audio streaming; transitioned Vox Core to a dual-process architecture separating authenticated API streaming (vox-core-api) from durable asynchronous background workers (vox-core-worker); implemented minimal Redis caching with 100ms deadlines; and unified end-to-end execution flow across Telephony, Desktop, Bridge, Jev System One, Core, and Workers.",
+    subsystems: ["vox-desktop", "vox-core", "vox-bridge", "vox-web"],
+    category: "core",
+    tags: [
+      "Vox Desktop",
+      "Tauri v2",
+      "Dioxus & Rust",
+      "CPAL Audio",
+      "PKCE Deep Link",
+      "Dual-Process Core",
+      "vox-core-worker",
+      "PostgreSQL FOR UPDATE SKIP LOCKED",
+      "Minimal Redis Cache",
+      "Unified Architecture",
+    ],
+    metrics: {
+      label: "Architecture Backbone",
+      value: "Dual-Process + Tauri v2",
+    },
+    features: [
+      {
+        category: "Native Desktop Client (vox-desktop)",
+        items: [
+          {
+            title: "Tauri v2 + Dioxus Rust Architecture",
+            description:
+              "Engineered native desktop application for macOS, Windows, and Linux. Manages low-latency OS audio capture via CPAL with 20ms chunking, bidirectional binary streaming over /bridge/desktop/voice/stream, and local PCM speaker playback.",
+          },
+          {
+            title: "Deep-Linked PKCE OAuth Authentication",
+            description:
+              "Integrated custom OS deep-link URL scheme vox://auth/callback directly with Supabase Google OAuth, securing tokens via PKCE verification and storing session secrets in native OS Keychain.",
+          },
+          {
+            title: "Short-Lived Session Ticket Exchange",
+            description:
+              "Implemented ticket-based WebSocket negotiation via POST /bridge/desktop/sessions, granting desktop clients authorized streaming access to vox-bridge without distributing permanent API keys.",
+          },
+        ],
+      },
+      {
+        category: "Vox Core Dual-Process Runtime & Durable Workers",
+        items: [
+          {
+            title: "vox-core-api vs vox-core-worker Process Separation",
+            description:
+              "Transitioned Vox Core container into a dual-process runtime. vox-core-api serves real-time SSE token streams and authenticated host assertions, while vox-core-worker runs a 30s background loop leasing durable jobs via PostgreSQL FOR UPDATE SKIP LOCKED.",
+          },
+          {
+            title: "Durable Task Queue & Schedule Advancement",
+            description:
+              "Autonomous background workers execute scheduled calendar reminders, dispatch external webhooks, and summarize completed conversations into long-term context completely out-of-band.",
+          },
+          {
+            title: "Minimal Redis User Cache with 100ms Deadline",
+            description:
+              "Redis caching now strictly stores minimal user profiles (vox:user:{id} with name + channels) and channel indexes (vox:channel:{channel}:{external_id}) with AOF persistence. Strict 100ms timeout ensures telephony greetings never wait on slow cache lookups.",
+          },
+        ],
+      },
+      {
+        category: "Unified System & Pipeline Architecture",
+        items: [
+          {
+            title: "End-to-End System Flow Canvas",
+            description:
+              "Unified the interactive architecture visualization across 8 distinct pipeline stages: Client Ingress, Acoustic Ingress & STT, Identity & Cache, Jev Turn Intelligence, Vox Core Dual-Process Engine, Chunker & TTS, Egress & Transport, and Post-Session Analytics.",
+          },
+          {
+            title: "Interactive Desktop Voice Session Simulation",
+            description:
+              "Added step-by-step trace scenario for native desktop client audio sessions demonstrating PKCE token verification, bidirectional PCM streaming, and background worker job leasing.",
+          },
+        ],
+      },
+    ],
+    highlight: {
+      title: "Full-Stack Convergence",
+      description:
+        "From native OS microphone capture in Rust/Tauri v2 to sub-100ms Jev arbitration and durable PostgreSQL background workers, Vox now operates as a unified multi-channel voice intelligence platform.",
+    },
+  },
   {
     id: "2026-09-21-wespeaker-biometrics-elevenlabs-mp3",
     date: "2026-09-21",

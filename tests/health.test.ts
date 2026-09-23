@@ -60,10 +60,18 @@ test("getSystemHealth combines host and container metrics", async () => {
   assert.ok(health.host);
   assert.ok(health.host.hostname);
   assert.ok(health.host.cpu.cores >= 1);
-  assert.ok(health.host.cpu.usagePercent >= 0 && health.host.cpu.usagePercent <= 100);
+  assert.ok(
+    health.host.cpu.usagePercent >= 0 && health.host.cpu.usagePercent <= 100,
+  );
   assert.ok(health.host.memory.totalBytes > 0);
-  assert.ok(health.host.memory.usedPercent >= 0 && health.host.memory.usedPercent <= 100);
-  assert.ok(health.host.memory.totalFormatted.includes("GB") || health.host.memory.totalFormatted.includes("MB"));
+  assert.ok(
+    health.host.memory.usedPercent >= 0 &&
+      health.host.memory.usedPercent <= 100,
+  );
+  assert.ok(
+    health.host.memory.totalFormatted.includes("GB") ||
+      health.host.memory.totalFormatted.includes("MB"),
+  );
   assert.ok(health.docker);
 });
 
