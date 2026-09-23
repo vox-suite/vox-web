@@ -3,6 +3,9 @@ import {
   RecoveryEnrollment,
   SessionControls,
 } from "@/components/consumer/account-controls";
+import { ConnectionsManager } from "@/components/consumer/connections-manager";
+import { GrantsManager } from "@/components/consumer/grants-manager";
+import { TasksView } from "@/components/consumer/tasks-view";
 import { AuthFrame, Badge, Card, Stack, Text } from "@/components/ui";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { consumerHref } from "@/lib/access";
@@ -22,7 +25,7 @@ export default async function ConsumerHomePage() {
   return (
     <AuthFrame
       brandHref="/app"
-      footer="Vox account · Canonical identity protected by Core"
+      footer="Vox account · Canonical identity and authority protected by Core"
     >
       <Stack gap="large">
         <Stack>
@@ -30,6 +33,9 @@ export default async function ConsumerHomePage() {
           <h1>Welcome{account.name ? `, ${account.name}` : ""}.</h1>
           <Text muted>{account.email}</Text>
         </Stack>
+        <TasksView />
+        <ConnectionsManager />
+        <GrantsManager />
         <Card
           title="Email recovery"
           description="Enable this explicitly before email codes may recover a Google account."
@@ -49,3 +55,4 @@ export default async function ConsumerHomePage() {
     </AuthFrame>
   );
 }
+
