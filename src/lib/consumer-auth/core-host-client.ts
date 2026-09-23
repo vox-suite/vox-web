@@ -29,6 +29,81 @@ export type FederatedIdentityCredential = {
 
 type FederatedClock = AssertionClock & { expiresAtSeconds: number };
 
+export type Connection = {
+  id: string;
+  integration_external_key: string;
+  external_account_reference: string;
+  account_display_id: string | null;
+  credential_custody: "platform_held" | "external_operator";
+  authorization_state: "pending" | "authorized" | "expired" | "revoked" | "cancelled" | "failed";
+  authorized_capabilities: string[];
+  expires_at: string | null;
+  failure_code: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InitiateConnectionRequest = {
+  integration_external_key: string;
+  credential_custody: "platform_held" | "external_operator";
+  requested_capabilities?: string[];
+  redirect_uri?: string | null;
+};
+
+export type InitiateConnectionResponse = {
+  session_id: string;
+  integration_external_key: string;
+  state_token: string;
+  authorization_url: string;
+  expires_at: string;
+};
+
+export type VerifyConnectionCallbackRequest = {
+  session_id: string;
+  state_token: string;
+  authorization: {
+    integration_external_key: string;
+    external_account_reference: string;
+    account_display_id?: string | null;
+    credential_custody: "platform_held" | "external_operator";
+    authorization_state: "authorized" | "failed";
+    authorized_capabilities?: string[];
+    expires_at?: string | null;
+    failure_code?: string | null;
+  };
+};
+
+export type CapabilityGrant = {
+  id: string;
+  agent_external_key: string;
+  connection_id: string;
+  capability_external_key: string;
+};
+
+export type CreateGrantRequest = {
+  agent_external_key: string;
+  connection_id: string;
+  capability_external_key: string;
+};
+
+export type DurableTask = {
+  id: string;
+  title: string;
+  instruction: string;
+  agent_external_key: string | null;
+  state: "queued" | "running" | "waiting_for_clarification" | "waiting_for_approval" | "waiting_for_connection" | "completed" | "cancelled" | "failed";
+  run_id: string;
+  wait_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StartTaskRequest = {
+  title: string;
+  instruction: string;
+  agent_external_key?: string | null;
+};
+
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
@@ -186,4 +261,164 @@ export class VoxCoreHostClient {
     }
     return { userContextId };
   }
+
+  private async signedPost<T>(
+    path: string,
+    accountId: string,
+    body: Record<string, unknown>,
+    method = "POST",
+  ): Promise<T> {
+    const hostUserId = `vox-account:${accountId}`;
+    const hostContext: HostContext = {
+      hostUserId,
+      organizationExternalKey: null,
+    };
+    const issuedAtSeconds = this.dependencies.now();
+    const assertion = createHostAssertion(
+      this.config.hostCredential,
+      hostContext,
+      { issuedAtSeconds, nonce: this.dependencies.nonce() },
+    );
+    const response = await this.dependencies.fetch(
+      new URL(path, this.config.baseUrl),
+      {
+        method,
+        headers: {
+          ...assertion.headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      throw new Error(`Core request to ${path} failed (${response.status}): ${errText}`);
+    }
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    return (await response.json()) as T;
+  }
+
+  async listConnections(accountId: string): Promise<Connection[]> {
+    return this.signedPost<Connection[]>("/v1/connections/list", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
+  async initiateConnection(
+    accountId: string,
+    initiation: InitiateConnectionRequest,
+  ): Promise<InitiateConnectionResponse> {
+    return this.signedPost<InitiateConnectionResponse>("/v1/connections/initiate", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      initiation,
+    });
+  }
+
+  async verifyConnectionCallback(
+    accountId: string,
+    callback: VerifyConnectionCallbackRequest,
+  ): Promise<Connection> {
+    return this.signedPost<Connection>("/v1/connections/callback", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      callback,
+    });
+  }
+
+  async disconnectConnection(accountId: string, connectionId: string): Promise<Connection> {
+    return this.signedPost<Connection>(
+      `/v1/connections/${encodeURIComponent(connectionId)}/disconnect`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async listEffectiveGrants(accountId: string, agentKey: string): Promise<CapabilityGrant[]> {
+    return this.signedPost<CapabilityGrant[]>(
+      `/v1/agents/${encodeURIComponent(agentKey)}/effective-capability-grants`,
+      accountId,
+      {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    );
+  }
+
+  async createGrant(accountId: string, grant: CreateGrantRequest): Promise<CapabilityGrant> {
+    return this.signedPost<CapabilityGrant>("/v1/capability-grants", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      grant,
+    });
+  }
+
+  async revokeGrant(accountId: string, grant: CreateGrantRequest): Promise<void> {
+    return this.signedPost<void>(
+      "/v1/capability-grants",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        grant,
+      },
+      "DELETE",
+    );
+  }
+
+  async startTask(accountId: string, task: StartTaskRequest): Promise<DurableTask> {
+    return this.signedPost<DurableTask>("/v1/durable-tasks", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      task,
+    });
+  }
+
+  async getTask(accountId: string, taskId: string): Promise<DurableTask> {
+    return this.signedPost<DurableTask>(
+      `/v1/durable-tasks/${encodeURIComponent(taskId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async cancelTask(accountId: string, taskId: string): Promise<DurableTask> {
+    return this.signedPost<DurableTask>(
+      `/v1/durable-tasks/${encodeURIComponent(taskId)}/cancel`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
 }
+

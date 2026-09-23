@@ -13,6 +13,7 @@ import { SmtpAuthEmailSender } from "./email";
 type Runtime = {
   auth: ReturnType<typeof betterAuth>;
   accounts: ConsumerAccountAuthority;
+  coreClient: VoxCoreHostClient;
   pool: Pool;
   emailSender: SmtpAuthEmailSender;
   entryEnabled: boolean;
@@ -38,9 +39,10 @@ export function getConsumerAuthRuntime(): Runtime | null {
   const database = new Kysely<Record<string, never>>({
     dialect: new PostgresDialect({ pool }),
   });
+  const coreClient = new VoxCoreHostClient(config.core);
   const accounts = new ConsumerAccountAuthority(
     pool,
-    new VoxCoreHostClient(config.core),
+    coreClient,
   );
   const emailSender = new SmtpAuthEmailSender(
     config.emailFrom,
@@ -69,11 +71,20 @@ export function getConsumerAuthRuntime(): Runtime | null {
   runtime = {
     auth,
     accounts,
+    coreClient,
     pool,
     emailSender,
     entryEnabled: config.entryEnabled,
   };
   return runtime;
+}
+
+export function getCoreHostClient(): VoxCoreHostClient | null {
+  const rt = getConsumerAuthRuntime();
+  if (rt) return rt.coreClient;
+  const config = readConsumerAuthConfig();
+  if (!config.enabled) return null;
+  return new VoxCoreHostClient(config.core);
 }
 
 export function resetConsumerAuthRuntimeForTests() {
