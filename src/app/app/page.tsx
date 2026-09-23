@@ -8,6 +8,7 @@ import { ExtensionsManager } from "@/components/consumer/extensions-manager";
 import { GrantsManager } from "@/components/consumer/grants-manager";
 import { ProposalsManager } from "@/components/consumer/proposals-manager";
 import { TasksView } from "@/components/consumer/tasks-view";
+import { UnifiedJourneys } from "@/components/consumer/unified-journeys";
 import { AuthFrame, Badge, Card, Stack, Text } from "@/components/ui";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { consumerHref } from "@/lib/access";
@@ -35,6 +36,7 @@ export default async function ConsumerHomePage() {
           <h1>Welcome{account.name ? `, ${account.name}` : ""}.</h1>
           <Text muted>{account.email}</Text>
         </Stack>
+        <UnifiedJourneys />
         <TasksView />
         <ProposalsManager />
         <ConnectionsManager />
