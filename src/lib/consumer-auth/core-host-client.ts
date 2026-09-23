@@ -201,6 +201,150 @@ export type UpdateExtensionRequest = {
   capabilities?: ExtensionCapability[];
 };
 
+export type UberTrip = {
+  trip_id: string;
+  request_time: string;
+  status: string;
+  distance_miles: number;
+  start_city: string | null;
+  pickup_latitude?: number | null;
+  pickup_longitude?: number | null;
+  dropoff_latitude?: number | null;
+  dropoff_longitude?: number | null;
+};
+
+export type UberHistoryResponse = {
+  trips: UberTrip[];
+  total_trips: number;
+  retrieved_at: string;
+  freshness_seconds: number;
+};
+
+export type UberReadRequest = {
+  connection_id: string;
+  agent_external_key?: string;
+  offset?: number;
+  limit?: number;
+  include_city?: boolean;
+};
+
+export type LodgingProperty = {
+  property_id: string;
+  name: string;
+  location: string;
+  star_rating: number;
+  price_amount_minor: number;
+  currency: string;
+  available_rate_plans: Array<{
+    rate_plan_id: string;
+    room_name: string;
+    refundable: boolean;
+    cancellation_deadline: string | null;
+  }>;
+};
+
+export type LodgingSearchRequest = {
+  connection_id: string;
+  agent_external_key?: string;
+  destination: string;
+  check_in: string;
+  check_out: string;
+  occupancy: number;
+};
+
+export type LodgingSearchResponse = {
+  properties: LodgingProperty[];
+  total_results: number;
+};
+
+export type LodgingBookingRequest = {
+  connection_id: string;
+  agent_external_key?: string;
+  booking_request: {
+    property_id: string;
+    rate_plan_id: string;
+    guest_name: string;
+    check_in: string;
+    check_out: string;
+    total_amount_minor: number;
+    currency: string;
+  };
+};
+
+export type LodgingBooking = {
+  booking_id: string;
+  expedia_booking_ref: string;
+  property_id: string;
+  status: "confirmed" | "reconciling" | "cancelled" | "failed";
+  check_in: string;
+  check_out: string;
+  total_amount_minor: number;
+  currency: string;
+  cancellation_policy: string;
+  created_at: string;
+};
+
+export type LodgingCancelResponse = {
+  booking_id: string;
+  expedia_booking_ref: string;
+  property_id: string;
+  status: "cancelled" | "reconciling";
+  refund_amount_minor: number;
+  currency: string;
+  cancelled_at: string;
+};
+
+export type AmazonHandoffRequest = {
+  asin: string;
+  locale?: string;
+  quantity?: number;
+  partner_tag?: string;
+};
+
+export type ZomatoHandoffRequest = {
+  res_id?: string | null;
+  order_id?: string | null;
+  handoff_type?: "CartAndCheckout" | "TrackOrder" | "ViewRestaurant";
+};
+
+export type UberHandoffRequest = {
+  pickup_latitude: number;
+  pickup_longitude: number;
+  dropoff_latitude: number;
+  dropoff_longitude: number;
+  product_id?: string | null;
+  fare_id?: string | null;
+};
+
+export type HandoffResponse = {
+  provider: string;
+  action: string;
+  handoff_url: string;
+  status: string;
+  completed: boolean;
+  disclaimer: string;
+};
+
+export type MultiServiceJourneyItem = {
+  service: string;
+  service_type: "connected_read" | "consequential_write" | "labelled_handoff";
+  provider: "uber" | "expedia" | "amazon" | "zomato";
+  action: string;
+  status: "confirmed" | "completed" | "handoff_created" | "pending" | "reconciling" | "failed" | "unknown";
+  authoritative_reference?: string | null;
+  payment_status?: "not_applicable" | "authorized_in_escrow" | "settled" | "refunded" | "failed";
+  handoff_url?: string | null;
+  summary: string;
+  completed: boolean;
+};
+
+export type MultiServiceJourney = {
+  journey_id: string;
+  title: string;
+  items: MultiServiceJourneyItem[];
+  created_at: string;
+};
+
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
@@ -668,6 +812,169 @@ export class VoxCoreHostClient {
         },
       },
       "DELETE",
+    );
+  }
+
+  async readUberHistory(
+    accountId: string,
+    request: UberReadRequest,
+  ): Promise<UberHistoryResponse> {
+    return this.signedPost<UberHistoryResponse>(
+      "/v1/connected-reads/uber",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: request.agent_external_key ?? "saathi",
+        connection_id: request.connection_id,
+        offset: request.offset ?? 0,
+        limit: request.limit ?? 10,
+        include_city: request.include_city ?? true,
+      },
+    );
+  }
+
+  async searchLodging(
+    accountId: string,
+    request: LodgingSearchRequest,
+  ): Promise<LodgingSearchResponse> {
+    return this.signedPost<LodgingSearchResponse>(
+      "/v1/lodging/search",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: request.agent_external_key ?? "saathi",
+        connection_id: request.connection_id,
+        destination: request.destination,
+        check_in: request.check_in,
+        check_out: request.check_out,
+        occupancy: request.occupancy,
+      },
+    );
+  }
+
+  async bookLodging(
+    accountId: string,
+    request: LodgingBookingRequest,
+  ): Promise<LodgingBooking> {
+    return this.signedPost<LodgingBooking>(
+      "/v1/lodging/bookings",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: request.agent_external_key ?? "saathi",
+        connection_id: request.connection_id,
+        booking_request: request.booking_request,
+      },
+    );
+  }
+
+  async cancelLodgingBooking(
+    accountId: string,
+    bookingId: string,
+    connectionId: string,
+    reason?: string,
+    agentExternalKey?: string,
+  ): Promise<LodgingCancelResponse> {
+    return this.signedPost<LodgingCancelResponse>(
+      `/v1/lodging/bookings/${encodeURIComponent(bookingId)}/cancel`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: agentExternalKey ?? "saathi",
+        connection_id: connectionId,
+        reason: reason ?? "Consumer requested cancellation",
+      },
+    );
+  }
+
+  async createAmazonHandoff(
+    accountId: string,
+    connectionId: string,
+    handoff: AmazonHandoffRequest,
+    agentExternalKey?: string,
+  ): Promise<HandoffResponse> {
+    return this.signedPost<HandoffResponse>(
+      "/v1/handoffs/amazon",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: agentExternalKey ?? "saathi",
+        connection_id: connectionId,
+        handoff: {
+          asin: handoff.asin,
+          locale: handoff.locale ?? "US",
+          quantity: handoff.quantity ?? 1,
+          partner_tag: handoff.partner_tag ?? "vox-20",
+        },
+      },
+    );
+  }
+
+  async createZomatoHandoff(
+    accountId: string,
+    connectionId: string,
+    handoff: ZomatoHandoffRequest,
+    agentExternalKey?: string,
+  ): Promise<HandoffResponse> {
+    return this.signedPost<HandoffResponse>(
+      "/v1/handoffs/zomato",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: agentExternalKey ?? "saathi",
+        connection_id: connectionId,
+        handoff: {
+          res_id: handoff.res_id ?? null,
+          order_id: handoff.order_id ?? null,
+          handoff_type: handoff.handoff_type ?? "ViewRestaurant",
+        },
+      },
+    );
+  }
+
+  async createUberRideHandoff(
+    accountId: string,
+    connectionId: string,
+    handoff: UberHandoffRequest,
+    agentExternalKey?: string,
+  ): Promise<HandoffResponse> {
+    return this.signedPost<HandoffResponse>(
+      "/v1/handoffs/uber",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        agent_external_key: agentExternalKey ?? "saathi",
+        connection_id: connectionId,
+        handoff: {
+          pickup_latitude: handoff.pickup_latitude,
+          pickup_longitude: handoff.pickup_longitude,
+          dropoff_latitude: handoff.dropoff_latitude,
+          dropoff_longitude: handoff.dropoff_longitude,
+          product_id: handoff.product_id ?? null,
+          fare_id: handoff.fare_id ?? null,
+        },
+      },
     );
   }
 }
