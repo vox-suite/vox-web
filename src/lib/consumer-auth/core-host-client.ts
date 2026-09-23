@@ -146,6 +146,61 @@ export type CreateProposalRequest = {
   replaces_proposal_id?: string | null;
 };
 
+export type ExtensionProtocol = "mcp" | "direct";
+export type ExtensionEffect = "read" | "write" | "mixed";
+export type ConformanceStatus = "pending" | "passed" | "failed";
+export type ConsentStatus = "consented" | "consent_required";
+export type LifecycleState = "installed" | "active" | "quarantined" | "disabled" | "removed";
+
+export type ExtensionOperator = {
+  operator_id: string;
+  operator_name: string;
+  support_email?: string | null;
+  terms_url?: string | null;
+};
+
+export type ExtensionCapability = {
+  external_key: string;
+  display_name: string;
+  effect: ExtensionEffect;
+  consequential?: boolean;
+  data_recipients?: string[];
+  access_needs?: string[];
+  optional_guarantees?: Record<string, unknown>;
+};
+
+export type RemoteExtension = {
+  id: string;
+  external_key: string;
+  display_name: string;
+  protocol: ExtensionProtocol;
+  endpoint_url: string;
+  operator: ExtensionOperator;
+  current_version: number;
+  conformance_status: ConformanceStatus;
+  operator_enabled: boolean;
+  consent_status: ConsentStatus;
+  lifecycle_state: LifecycleState;
+  created_at: string;
+  updated_at: string;
+  capabilities?: ExtensionCapability[];
+};
+
+export type InstallExtensionRequest = {
+  external_key: string;
+  display_name: string;
+  protocol: ExtensionProtocol;
+  endpoint_url: string;
+  operator: ExtensionOperator;
+  capabilities: ExtensionCapability[];
+};
+
+export type UpdateExtensionRequest = {
+  endpoint_url?: string;
+  operator?: ExtensionOperator;
+  capabilities?: ExtensionCapability[];
+};
+
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
@@ -491,6 +546,128 @@ export class VoxCoreHostClient {
         },
         details,
       },
+    );
+  }
+
+  async listExtensions(accountId: string): Promise<RemoteExtension[]> {
+    return this.signedPost<RemoteExtension[]>("/v1/remote-extensions/list", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
+  async getExtension(accountId: string, extensionId: string): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async installExtension(
+    accountId: string,
+    extension: InstallExtensionRequest,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>("/v1/remote-extensions", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      extension,
+    });
+  }
+
+  async updateExtension(
+    accountId: string,
+    extensionId: string,
+    extension: UpdateExtensionRequest,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        extension,
+      },
+      "PUT",
+    );
+  }
+
+  async setExtensionEnabled(
+    accountId: string,
+    extensionId: string,
+    enabled: boolean,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/enable`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        enabled,
+      },
+    );
+  }
+
+  async renewExtensionConsent(
+    accountId: string,
+    extensionId: string,
+    version: number,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/renew-consent`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        version,
+      },
+    );
+  }
+
+  async quarantineExtension(
+    accountId: string,
+    extensionId: string,
+    version: number,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/quarantine`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        version,
+      },
+    );
+  }
+
+  async removeExtension(accountId: string, extensionId: string): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+      "DELETE",
     );
   }
 }
