@@ -252,3 +252,68 @@ test("durable task start, get, and cancel call Core endpoints", async () => {
   assert.equal(capturedCancelUrl, "https://core.vox.test/v1/durable-tasks/task-999/cancel");
   assert.equal(cancelled.state, "cancelled");
 });
+
+test("action proposal creation and exact-match approval call Core endpoints", async () => {
+  let capturedProposalUrl = "";
+  let capturedApproveUrl = "";
+  let capturedApproveBody: any = null;
+
+  const client = new VoxCoreHostClient(testConfig, {
+    fetch: async (input, init) => {
+      const url = String(input);
+      const body = JSON.parse(String(init?.body || "{}"));
+      if (url.endsWith("/v1/action-proposals")) {
+        capturedProposalUrl = url;
+        return Response.json({
+          id: "prop-123",
+          capability_external_key: "travel.book",
+          expires_at: "2026-09-24T00:00:00Z",
+          approval_id: null,
+          state: "pending",
+          details: body.proposal.details,
+        }, { status: 201 });
+      }
+      if (url.endsWith("/approve")) {
+        capturedApproveUrl = url;
+        capturedApproveBody = body;
+        return Response.json({
+          id: "prop-123",
+          capability_external_key: "travel.book",
+          expires_at: "2026-09-24T00:00:00Z",
+          approval_id: "appr-456",
+          state: "approved",
+          details: body.details,
+        });
+      }
+      return new Response("Not found", { status: 404 });
+    },
+    now: () => 1_795_622_400,
+    nonce: () => "mock-nonce-6",
+  });
+
+  const proposal = await client.createProposal("user-1", {
+    task_id: "task-1",
+    task_run_id: "run-1",
+    agent_external_key: "planner",
+    capability_external_key: "travel.book",
+    details: {
+      title: "Flight Booking BLR to DEL",
+      provider: "Indigo Airlines",
+      price: 4500,
+      currency: "INR",
+      fees: 250,
+      data_recipients: ["airline.api"],
+    },
+    expires_at: "2026-09-24T00:00:00Z",
+  });
+
+  assert.equal(capturedProposalUrl, "https://core.vox.test/v1/action-proposals");
+  assert.equal(proposal.id, "prop-123");
+  assert.equal(proposal.details.title, "Flight Booking BLR to DEL");
+
+  const approved = await client.approveProposal("user-1", "prop-123", proposal.details);
+  assert.equal(capturedApproveUrl, "https://core.vox.test/v1/action-proposals/prop-123/approve");
+  assert.equal(approved.state, "approved");
+  assert.equal(approved.approval_id, "appr-456");
+  assert.deepEqual(capturedApproveBody?.details, proposal.details);
+});
