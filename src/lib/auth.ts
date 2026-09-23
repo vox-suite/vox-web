@@ -36,7 +36,9 @@ export function authConfigured() {
 }
 
 function e2eSecret() {
-  return process.env.VOX_ADMIN_E2E_SECRET?.trim() || null;
+  const secret = process.env.VOX_ADMIN_E2E_SECRET?.trim();
+  if (!secret || process.env.NODE_ENV === "production") return null;
+  return secret;
 }
 
 async function e2eSuperuser(): Promise<AdminUser | null> {

@@ -1,0 +1,201 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  isSuperuser,
+  maySignIn,
+  safeCallback,
+  adminDestination,
+  consumerDestination,
+  consumerHref,
+  parseRedisQuery,
+} from "../src/lib/access";
+
+test("superuser access is exact, case-insensitive, and fails closed", () => {
+  assert.equal(isSuperuser("owner@example.com", ""), false);
+  assert.equal(isSuperuser(undefined, "owner@example.com"), false);
+  assert.equal(
+    isSuperuser("OWNER@example.com", " owner@example.com, second@example.com "),
+    true,
+  );
+  assert.equal(
+    isSuperuser("owner@example.com.evil.test", "owner@example.com"),
+    false,
+  );
+});
+test("only verified Google profiles may authenticate", () => {
+  assert.equal(
+    maySignIn(
+      "google",
+      { email: "owner@example.com", email_verified: true },
+      "owner@example.com",
+    ),
+    true,
+  );
+  assert.equal(
+    maySignIn(
+      "google",
+      { email: "owner@example.com", email_verified: false },
+      "owner@example.com",
+    ),
+    false,
+  );
+  assert.equal(
+    maySignIn(
+      "other",
+      { email: "owner@example.com", email_verified: true },
+      "owner@example.com",
+    ),
+    false,
+  );
+  assert.equal(
+    maySignIn(
+      "google",
+      { email: "other@example.com", email_verified: true },
+      "owner@example.com",
+    ),
+    false,
+  );
+});
+test("callbacks cannot leave the application", () => {
+  assert.equal(
+    safeCallback("https://evil.test", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    safeCallback("//evil.test", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    safeCallback("/admin/redis", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/redis",
+  );
+  assert.equal(
+    safeCallback("/redis", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/redis",
+  );
+  assert.equal(
+    safeCallback("/\\evil.test", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    safeCallback("https://evil.test", "http://localhost:3000"),
+    "http://localhost:3000/admin",
+  );
+});
+test("subdomain routing only rewrites the exact admin host", () => {
+  assert.equal(adminDestination("admin.voxagent.in", "/"), "/admin");
+  assert.equal(adminDestination("admin.voxagent.in", "/redis"), "/admin/redis");
+  assert.equal(adminDestination("admin.voxagent.in", "/login"), "/admin/login");
+  assert.equal(adminDestination("admin.voxagent.in", "/auth/callback"), null);
+  assert.equal(adminDestination("admin.voxagent.in", "/api/admin/redis"), null);
+  assert.equal(adminDestination("admin.voxagent.in", "/admin"), null);
+  assert.equal(adminDestination("admin.voxagent.in", "/admin/login"), null);
+  assert.equal(adminDestination("admin.voxagent.in.evil.test", "/"), null);
+  assert.equal(adminDestination("voxagent.in", "/"), null);
+});
+
+test("consumer routing isolates app.voxagent.in and keeps local /app paths", () => {
+  assert.equal(consumerDestination("app.voxagent.in", "/"), "/app");
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/sign-in"),
+    "/app/sign-in",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/account"),
+    "/app/account",
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/auth/callback"),
+    null,
+  );
+  assert.equal(
+    consumerDestination("app.voxagent.in", "/api/account/auth/session"),
+    null,
+  );
+  assert.equal(consumerDestination("app.voxagent.in", "/app"), null);
+  assert.equal(consumerDestination("app.voxagent.in.evil.test", "/"), null);
+  assert.equal(consumerDestination("voxagent.in", "/"), null);
+  assert.equal(consumerHref("app.voxagent.in", "/sign-in"), "/sign-in");
+  assert.equal(consumerHref("localhost", "/sign-in"), "/app/sign-in");
+});
+test("Redis query validation preserves uint64 cursors without number rounding", () => {
+  assert.deepEqual(
+    parseRedisQuery(
+      new URLSearchParams("cursor=18446744073709551615&match=vox:*"),
+    ),
+    { cursor: "18446744073709551615", match: "vox:*" },
+  );
+  assert.throws(() => parseRedisQuery(new URLSearchParams("cursor=-1")));
+  assert.throws(() =>
+    parseRedisQuery(new URLSearchParams("cursor=18446744073709551616")),
+  );
+  assert.throws(() =>
+    parseRedisQuery(new URLSearchParams({ match: "x".repeat(257) })),
+  );
+});
+
+test("admin e2e session encoding rejects tampering", async () => {
+  const { decodeAdminE2ESession, encodeAdminE2ESession, isSuperuser } =
+    await import("../src/lib/access");
+  const secret = "test-secret";
+  const token = encodeAdminE2ESession("admin@example.test", secret);
+  assert.equal(decodeAdminE2ESession(token, secret)?.email, "admin@example.test");
+  assert.equal(decodeAdminE2ESession(token.slice(0, -1) + "x", secret), null);
+  assert.equal(isSuperuser("admin@example.test", "admin@example.test"), true);
+});
+
+test("public-domain admin entry uses the OAuth cookie host", async () => {
+  const { canonicalAdminRedirect } = await import("../src/lib/access");
+  assert.equal(
+    canonicalAdminRedirect(
+      "voxagent.in",
+      "/admin/login",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/login",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "voxagent.in",
+      "/admin",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    canonicalAdminRedirect("voxagent.in", "/", "https://admin.voxagent.in"),
+    null,
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "admin.voxagent.in",
+      "/admin/login",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/login",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "admin.voxagent.in",
+      "/admin",
+      "https://admin.voxagent.in",
+    ),
+    "https://admin.voxagent.in/",
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "admin.voxagent.in",
+      "/login",
+      "https://admin.voxagent.in",
+    ),
+    null,
+  );
+  assert.equal(
+    canonicalAdminRedirect(
+      "localhost:3000",
+      "/admin/login",
+      "http://localhost:3000",
+    ),
+    null,
+  );
+});
