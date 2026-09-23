@@ -5,6 +5,7 @@ import {
 } from "@/components/consumer/account-controls";
 import { ConnectionsManager } from "@/components/consumer/connections-manager";
 import { GrantsManager } from "@/components/consumer/grants-manager";
+import { ProposalsManager } from "@/components/consumer/proposals-manager";
 import { TasksView } from "@/components/consumer/tasks-view";
 import { AuthFrame, Badge, Card, Stack, Text } from "@/components/ui";
 import { currentConsumer } from "@/lib/consumer-auth/session";
@@ -34,6 +35,7 @@ export default async function ConsumerHomePage() {
           <Text muted>{account.email}</Text>
         </Stack>
         <TasksView />
+        <ProposalsManager />
         <ConnectionsManager />
         <GrantsManager />
         <Card

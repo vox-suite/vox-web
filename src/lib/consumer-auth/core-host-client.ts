@@ -104,6 +104,48 @@ export type StartTaskRequest = {
   agent_external_key?: string | null;
 };
 
+export type MaterialProposalDetails = {
+  title?: string;
+  provider?: string;
+  account_reference?: string;
+  recipient?: string;
+  location?: string;
+  time?: string;
+  content?: string;
+  price?: number;
+  currency?: string;
+  fees?: number;
+  data_recipients?: string[];
+  grouped_actions?: Array<{
+    action_id: string;
+    description: string;
+    provider?: string;
+    price?: number;
+    fees?: number;
+    outcome?: string;
+  }>;
+  [key: string]: unknown;
+};
+
+export type ActionProposal = {
+  id: string;
+  capability_external_key: string;
+  expires_at: string;
+  approval_id?: string | null;
+  state?: "pending" | "approved" | "superseded" | "expired" | "consumed";
+  details: MaterialProposalDetails;
+};
+
+export type CreateProposalRequest = {
+  task_id: string;
+  task_run_id: string;
+  agent_external_key: string;
+  capability_external_key: string;
+  details: MaterialProposalDetails;
+  expires_at: string;
+  replaces_proposal_id?: string | null;
+};
+
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
@@ -417,6 +459,37 @@ export class VoxCoreHostClient {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,
         },
+      },
+    );
+  }
+
+  async createProposal(
+    accountId: string,
+    proposal: CreateProposalRequest,
+  ): Promise<ActionProposal> {
+    return this.signedPost<ActionProposal>("/v1/action-proposals", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      proposal,
+    });
+  }
+
+  async approveProposal(
+    accountId: string,
+    proposalId: string,
+    details: Record<string, unknown>,
+  ): Promise<ActionProposal> {
+    return this.signedPost<ActionProposal>(
+      `/v1/action-proposals/${encodeURIComponent(proposalId)}/approve`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        details,
       },
     );
   }
