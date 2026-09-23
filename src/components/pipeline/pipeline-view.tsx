@@ -151,20 +151,20 @@ export function PipelineView({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden select-none bg-[var(--color-void-black,#040506)] ${
+      className={`relative select-none overflow-hidden bg-void-black ${
         className
           ? className
-          : `w-full h-[860px] min-h-[650px] border border-[#2f3031] ${
+          : `h-[860px] min-h-[650px] w-full border border-slate ${
               initialFullscreen ? "h-screen border-none" : ""
             }`
       }`}
     >
       {showHeader && (
         <div className="absolute z-10 pointer-events-none select-none max-w-xl p-5">
-          <h1 className="text-xl font-medium tracking-tight text-white font-sans">
+          <h1 className="font-sans text-xl font-medium tracking-tight text-pure-white">
             Vox System &amp; Pipeline Architecture
           </h1>
-          <p className="text-xs text-[#9c9c9d] mt-1 leading-relaxed font-sans">
+          <p className="mt-1 font-sans text-xs leading-relaxed text-ash">
             Interactive architecture and execution flow diagram connecting Vox Desktop,
             Telephony, Bridge, Jev System One, Core Engine, and Background Workers.
           </p>
@@ -228,15 +228,13 @@ export function PipelineView({
         />
       )}
 
-      {containerRef.current && (
-        <InspectorDrawer
-          node={selectedNode}
-          edges={edges}
-          nodes={nodes}
-          onClose={() => setSelectedNodeId(null)}
-          onSelectNode={setSelectedNodeId}
-        />
-      )}
+      <InspectorDrawer
+        node={selectedNode}
+        edges={edges}
+        nodes={nodes}
+        onClose={() => setSelectedNodeId(null)}
+        onSelectNode={setSelectedNodeId}
+      />
     </div>
   );
 }

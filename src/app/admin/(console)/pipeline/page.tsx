@@ -1,14 +1,7 @@
-import { PipelineView } from "@/components/pipeline/pipeline-view";
+import { AdminPipelineConsole } from "@/components/pipeline/admin-pipeline-console";
 import { requireSuperuser } from "@/lib/auth";
 
 export default async function AdminPipelinePage() {
   await requireSuperuser();
-  return (
-    <div className="h-[calc(100vh-56px)] w-full overflow-hidden bg-[var(--color-void-black)]">
-      <PipelineView
-        showHeader
-        className="w-full h-full border-none shadow-none"
-      />
-    </div>
-  );
+  return <AdminPipelineConsole />;
 }

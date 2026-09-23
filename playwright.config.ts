@@ -43,7 +43,6 @@ export default defineConfig({
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "fixture-anon-key",
         SUPERUSER_EMAILS: "admin@example.test",
         VOX_ADMIN_E2E_SECRET: "isolated-playwright-secret-not-for-production",
-        VOX_ADMIN_ORIGIN: "https://admin.voxagent.in",
         VOX_CORE_ADMIN_URL: "http://127.0.0.1:3101",
         VOX_ADMIN_TOKEN: "fixture-admin-token",
         RATE_LIMIT_MAX: "1000",

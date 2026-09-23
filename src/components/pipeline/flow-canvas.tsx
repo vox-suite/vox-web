@@ -25,7 +25,6 @@ import {
   Activity,
   Sliders,
   CheckCircle2,
-  HelpCircle,
   Monitor,
   Cpu,
   Layers,
@@ -294,9 +293,9 @@ export function FlowCanvas({
     desktop:   "text-[#38bdf8]",
     bridge:    "text-[#22d3ee]",
     jev:       "text-[#c084fc]",
-    core:      "text-[#59d499]",
+    core:      "text-success-green",
     storage:   "text-[#a5b4fc]",
-    tts:       "text-[#ff6363]",
+    tts:       "text-coral-pulse",
     worker:    "text-[#fbbf24]",
   };
 
@@ -443,14 +442,14 @@ export function FlowCanvas({
               <text
                 x={stage.bounds.x + 18}
                 y={stage.bounds.y + 44}
-                className="text-[14px] font-sans font-medium fill-[#ffffff]"
+                className="fill-pure-white font-sans text-[14px] font-medium"
               >
                 {stage.title}
               </text>
               <text
                 x={stage.bounds.x + 18}
                 y={stage.bounds.y + 60}
-                className="text-[10px] font-mono fill-[#9c9c9d]"
+                className="fill-ash font-mono text-[10px]"
               >
                 {stage.subtitle}
               </text>
@@ -537,7 +536,7 @@ export function FlowCanvas({
                       x={0}
                       y={4}
                       textAnchor="middle"
-                      className="text-[10px] font-mono font-medium fill-[#e6e6e6]"
+                      className="fill-mist font-mono text-[10px] font-medium"
                     >
                       {edge.label}
                     </text>
@@ -550,7 +549,6 @@ export function FlowCanvas({
 
         {nodes.map((node) => {
           const isSelected = selectedNodeId === node.id;
-          const isHovered = hoveredNodeId === node.id;
           const isTraceActive = activeTraceStep?.nodeId === node.id;
           const IconComponent = ICON_MAP[node.icon] || Zap;
 
@@ -573,13 +571,13 @@ export function FlowCanvas({
               }}
             >
               <div
-                className={`relative w-full h-full bg-[#07080a] p-3 flex flex-col justify-between border transition-all duration-150 rounded-[8px] overflow-hidden ${
+                className={`relative flex h-full w-full flex-col justify-between overflow-hidden rounded-md border bg-ink p-3 transition-all duration-150 ${
                   isSelected
-                    ? "border-[#ff6363] ring-2 ring-[#ff6363]/40 shadow-[0_0_24px_rgba(255,99,99,0.25)]"
-                    : "border-[#363739] hover:border-[#6a6b6c] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+                    ? "border-coral-pulse shadow-subtle-3 ring-2 ring-coral-pulse/40"
+                    : "border-border-edge hover:border-smoke hover:shadow-subtle-3"
                 } ${
                   isTraceActive
-                    ? "animate-pulse ring-2 ring-offset-2 ring-[#ff6363]"
+                    ? "animate-pulse ring-2 ring-coral-pulse ring-offset-2"
                     : ""
                 }`}
                 style={{
@@ -587,51 +585,49 @@ export function FlowCanvas({
                     "rgba(255, 255, 255, 0.05) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.4) 0px -1px 0px 0px inset",
                 }}
               >
-                {/* Header row: subsystem tag, protocol, latency */}
-                <div className="flex items-center justify-between shrink-0 mb-1.5">
-                  <div className="flex items-center gap-1.5 min-w-0">
+                <div className="mb-1.5 flex shrink-0 items-center justify-between">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <span
-                      className={`text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 border border-[#363739] bg-[#111214] rounded-[4px] shrink-0 ${subsystemChipColor[node.subsystem] || "text-white"}`}
+                      className={`shrink-0 rounded-md border border-border-edge bg-obsidian px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${subsystemChipColor[node.subsystem] || "text-pure-white"}`}
                     >
                       {node.subsystem}
                     </span>
-                    <span className="text-[10px] font-mono text-[#9c9c9d] truncate">
+                    <span className="truncate font-mono text-[10px] text-ash">
                       {node.protocol}
                     </span>
                   </div>
 
-                  <span className="text-[10px] font-mono font-bold bg-[#1b1c1e] text-[#ff6363] border border-[#363739] px-1.5 py-0.5 rounded-[4px] shrink-0 ml-1">
+                  <span className="ml-1 shrink-0 rounded-md border border-border-edge bg-graphite px-1.5 py-0.5 font-mono text-[10px] font-bold text-coral-pulse">
                     {node.latency}
                   </span>
                 </div>
 
-                {/* Title and Icon row */}
-                <div className="flex items-start gap-2 shrink-0 mb-1.5">
-                  <div className="p-1.5 border border-[#363739] bg-[#111214] rounded-[6px] text-white shrink-0">
+                <div className="mb-1.5 flex shrink-0 items-start gap-2">
+                  <div className="shrink-0 rounded-md border border-border-edge bg-obsidian p-1.5 text-pure-white">
                     <IconComponent size={14} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-semibold font-sans text-white leading-tight truncate">
+                    <h4 className="truncate font-sans text-xs font-semibold leading-tight text-pure-white">
                       {node.title}
                     </h4>
-                    <p className="text-[10px] font-mono text-[#9c9c9d] truncate">
+                    <p className="truncate font-mono text-[10px] text-ash">
                       {node.subtitle}
                     </p>
                   </div>
                 </div>
 
-                {/* Description: full 2-3 lines rendered without truncation or cut-off */}
-                <p className="text-[11px] text-[#9c9c9d] leading-[1.35] line-clamp-3">
+                <p className="line-clamp-3 text-[11px] leading-[1.35] text-ash">
                   {node.description}
                 </p>
 
-                {/* Footer inspect link: anchored at bottom with clear margin */}
                 {node.details.codeReference && (
-                  <div className="mt-auto pt-2 border-t border-[#2f3031] flex items-center justify-between text-[10px] font-mono text-[#9c9c9d] shrink-0">
-                    <span className="truncate max-w-[175px]">
+                  <div className="mt-auto flex shrink-0 items-center justify-between border-t border-slate pt-2 font-mono text-[10px] text-ash">
+                    <span className="max-w-[175px] truncate">
                       {node.details.sourceFile}
                     </span>
-                    <span className="text-[#ff6363] font-medium shrink-0 ml-1">Inspect →</span>
+                    <span className="ml-1 shrink-0 font-medium text-coral-pulse">
+                      Inspect →
+                    </span>
                   </div>
                 )}
               </div>

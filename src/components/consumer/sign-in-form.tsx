@@ -77,8 +77,13 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
       >
         Continue with Google
       </Button>
-      <div className="auth-divider" aria-hidden="true">
-        <span>or</span>
+      <div
+        className="relative flex items-center py-1"
+        aria-hidden="true"
+      >
+        <div className="h-px flex-1 bg-border-edge" />
+        <span className="px-3 font-mono text-xs text-smoke">or</span>
+        <div className="h-px flex-1 bg-border-edge" />
       </div>
       <form onSubmit={stage === "email" ? sendCode : verifyCode}>
         <Stack>

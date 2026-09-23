@@ -4,32 +4,34 @@ import { RequestAccessForm } from "./form";
 
 export function RequestAccessSection() {
   return (
-    <div className="request-access-section">
-      <div className="request-access-grid">
-        <div className="request-access-copy">
+    <div className="mx-auto max-w-[1200px] px-6 py-16 md:px-8 md:py-24">
+      <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="space-y-6">
           <Badge tone="accent">Limited access</Badge>
-          <h1>Get early access to Vox.</h1>
-          <p>
-            A voice-first assistant reachable by phone call. Vox keeps work
-            moving after the conversation ends — tasks, calendar changes,
-            follow-ups, and outbound calls when a commitment changes.
+          <h1 className="text-heading-lg font-normal tracking-[0.22px] text-pure-white">
+            Get early access to Vox.
+          </h1>
+          <p className="max-w-lg text-body-lg text-ash">
+            A voice-first assistant reachable by phone call. Vox keeps work moving after the
+            conversation ends — tasks, calendar changes, follow-ups, and outbound calls when a
+            commitment changes.
           </p>
-          <ul className="request-access-list" aria-label="What to expect">
-            <li>
-              <Check size={15} aria-hidden="true" />
+          <ul className="space-y-3" aria-label="What to expect">
+            <li className="flex items-start gap-3 text-sm text-ash">
+              <Check size={15} className="mt-0.5 shrink-0 text-mist" aria-hidden="true" />
               We review every request personally
             </li>
-            <li>
-              <Check size={15} aria-hidden="true" />
+            <li className="flex items-start gap-3 text-sm text-ash">
+              <Check size={15} className="mt-0.5 shrink-0 text-mist" aria-hidden="true" />
               Early access users help shape what ships next
             </li>
-            <li>
-              <Check size={15} aria-hidden="true" />
+            <li className="flex items-start gap-3 text-sm text-ash">
+              <Check size={15} className="mt-0.5 shrink-0 text-mist" aria-hidden="true" />
               Works on your existing phone — no new app required
             </li>
           </ul>
         </div>
-        <div className="request-access-card">
+        <div className="rounded-2xl border border-border-edge bg-ink p-6 shadow-key-window md:p-8">
           <RequestAccessForm />
         </div>
       </div>

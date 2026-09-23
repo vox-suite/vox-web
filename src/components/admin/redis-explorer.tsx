@@ -35,6 +35,7 @@ import {
   type RedisPage,
   type RedisDetail,
 } from "@/lib/redis";
+import { cn } from "@/lib/utils";
 
 async function request<T>(
   method: "GET" | "PUT" | "DELETE",
@@ -72,7 +73,6 @@ export function RedisExplorer() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Accordion state: openKey is null by default (collapsed by default)
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [activeMenuKey, setActiveMenuKey] = useState<string | null>(null);
 
@@ -91,8 +91,8 @@ export function RedisExplorer() {
 
   useEffect(() => {
     const controller = new AbortController();
-    request<RedisPage>
-      ("GET",
+    request<RedisPage>(
+      "GET",
       `/api/admin/redis?${new URLSearchParams({ match: query.match, cursor: query.cursor })}`,
       undefined,
       controller.signal,
@@ -117,12 +117,11 @@ export function RedisExplorer() {
     }
   }, [detail, openKey]);
 
-  // Close 3-dot dropdown menu on click outside or escape
   useEffect(() => {
     if (!activeMenuKey) return;
     function handleDocumentClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
-      if (!target?.closest(".redis-menu-container")) {
+      if (!target?.closest("[data-redis-menu-root]")) {
         setActiveMenuKey(null);
       }
     }
@@ -274,14 +273,14 @@ export function RedisExplorer() {
       <Card>
         <Stack>
           <form
-            className="redis-search-form"
+            className="flex flex-col gap-4 md:flex-row md:items-end"
             onSubmit={(event) => {
               event.preventDefault();
               setHistory([]);
               browse("0", search || "*");
             }}
           >
-            <div className="redis-search-field">
+            <div className="min-w-0 flex-1">
               <Field
                 id="redis-search"
                 name="match"
@@ -293,7 +292,7 @@ export function RedisExplorer() {
                 autoComplete="off"
               />
             </div>
-            <div className="redis-search-actions">
+            <div className="flex shrink-0 flex-wrap gap-2">
               <Button type="submit" disabled={loading}>
                 <Search size={15} aria-hidden="true" />
                 Search
@@ -363,7 +362,7 @@ export function RedisExplorer() {
 
             {page.entries.length ? (
               <div
-                className="redis-accordion-list"
+                className="flex flex-col gap-2"
                 role="region"
                 aria-label="Redis keys accordion"
               >
@@ -374,25 +373,22 @@ export function RedisExplorer() {
                   return (
                     <div
                       key={entry.key}
-                      className={`redis-accordion-item ${isExpanded ? "is-expanded" : ""}`}
+                      className={cn(
+                        "overflow-hidden rounded-2xl border border-border-edge bg-ink shadow-subtle-3 transition-colors",
+                        isExpanded && "border-smoke/40",
+                      )}
                     >
-                      <div
-                        className="redis-accordion-header"
-                        onClick={() => void toggleAccordion(entry.key)}
-                        role="button"
-                        tabIndex={0}
-                        aria-expanded={isExpanded}
-                        aria-controls={`redis-panel-${index}`}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            void toggleAccordion(entry.key);
-                          }
-                        }}
-                      >
-                        <div className="redis-accordion-title">
+                      <div className="flex items-center gap-2 px-4 py-3">
+                        <button
+                          type="button"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md text-left transition-colors hover:bg-graphite/60"
+                          onClick={() => void toggleAccordion(entry.key)}
+                          aria-label={entry.key}
+                          aria-expanded={isExpanded}
+                          aria-controls={`redis-panel-${index}`}
+                        >
                           <span
-                            className="redis-accordion-icon"
+                            className="shrink-0 text-ash"
                             aria-hidden="true"
                           >
                             {isExpanded ? (
@@ -401,23 +397,21 @@ export function RedisExplorer() {
                               <ChevronRight size={16} />
                             )}
                           </span>
-                          <span className="redis-key-label">{entry.key}</span>
-                        </div>
+                          <span className="truncate font-mono text-sm text-mist">
+                            {entry.key}
+                          </span>
+                        </button>
 
-                        <div
-                          className="redis-accordion-meta"
-                          onClick={(event) => event.stopPropagation()}
-                        >
+                        <div className="flex shrink-0 items-center gap-2">
                           <Badge tone="neutral">{entry.type}</Badge>
-                          <div className="redis-menu-container">
+                          <div className="relative" data-redis-menu-root>
                             <button
                               type="button"
-                              className="redis-menu-trigger"
+                              className="rounded-md p-1.5 text-ash transition-colors hover:bg-obsidian hover:text-pure-white"
                               aria-label={`Actions for ${entry.key}`}
                               aria-haspopup="menu"
                               aria-expanded={isMenuOpen}
-                              onClick={(event) => {
-                                event.stopPropagation();
+                              onClick={() => {
                                 setActiveMenuKey(
                                   isMenuOpen ? null : entry.key,
                                 );
@@ -428,7 +422,7 @@ export function RedisExplorer() {
 
                             {isMenuOpen && (
                               <div
-                                className="redis-dropdown-menu"
+                                className="absolute right-0 top-full z-20 mt-1 min-w-[11rem] rounded-md border border-border-edge bg-graphite py-1 shadow-subtle-3"
                                 role="menu"
                                 aria-label="Key actions"
                               >
@@ -436,7 +430,7 @@ export function RedisExplorer() {
                                   <button
                                     type="button"
                                     role="menuitem"
-                                    className="redis-dropdown-item"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-mist transition-colors hover:bg-obsidian"
                                     onClick={() =>
                                       void openInEditMode(entry.key)
                                     }
@@ -448,7 +442,7 @@ export function RedisExplorer() {
                                 <button
                                   type="button"
                                   role="menuitem"
-                                  className="redis-dropdown-item redis-dropdown-item-danger"
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-coral-pulse transition-colors hover:bg-ember-hush"
                                   onClick={() =>
                                     void openInDeleteMode(entry.key)
                                   }
@@ -465,7 +459,7 @@ export function RedisExplorer() {
                       {isExpanded && (
                         <div
                           id={`redis-panel-${index}`}
-                          className="redis-accordion-content"
+                          className="border-t border-border-edge bg-obsidian px-4 py-4"
                         >
                           {detailLoading && (
                             <LoadingState label="Reading entry…" />
@@ -482,8 +476,12 @@ export function RedisExplorer() {
 
                           {detail && detail.key === entry.key && (
                             <Stack>
-                              <div className="redis-detail-heading">
-                                <h2 ref={detailHeading} tabIndex={-1}>
+                              <div className="flex items-start justify-between gap-3">
+                                <h2
+                                  ref={detailHeading}
+                                  tabIndex={-1}
+                                  className="min-w-0 break-all font-mono text-base text-pure-white"
+                                >
                                   {detail.key}
                                 </h2>
                                 <Button
@@ -507,22 +505,30 @@ export function RedisExplorer() {
                                 />
                               ) : (
                                 <>
-                                  <dl className="redis-details">
-                                    <div>
-                                      <dt>Type</dt>
-                                      <dd>
+                                  <dl className="grid gap-3 sm:grid-cols-3">
+                                    <div className="rounded-md border border-border-edge bg-ink p-3">
+                                      <dt className="font-mono text-[10px] uppercase tracking-wide text-smoke">
+                                        Type
+                                      </dt>
+                                      <dd className="mt-1">
                                         <Badge tone="accent">
                                           {detail.type}
                                         </Badge>
                                       </dd>
                                     </div>
-                                    <div>
-                                      <dt>Expiry at read time</dt>
-                                      <dd>{expiry(detail.ttl)}</dd>
+                                    <div className="rounded-md border border-border-edge bg-ink p-3">
+                                      <dt className="font-mono text-[10px] uppercase tracking-wide text-smoke">
+                                        Expiry at read time
+                                      </dt>
+                                      <dd className="mt-1 font-mono text-sm text-mist">
+                                        {expiry(detail.ttl)}
+                                      </dd>
                                     </div>
-                                    <div>
-                                      <dt>Size</dt>
-                                      <dd>
+                                    <div className="rounded-md border border-border-edge bg-ink p-3">
+                                      <dt className="font-mono text-[10px] uppercase tracking-wide text-smoke">
+                                        Size
+                                      </dt>
+                                      <dd className="mt-1 font-mono text-sm text-mist">
                                         {detail.size.toLocaleString()}{" "}
                                         {detail.type === "string"
                                           ? "bytes"

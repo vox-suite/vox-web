@@ -10,6 +10,7 @@ import {
   Pause,
   Download,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ToolbarProps {
   zoom: number;
@@ -33,14 +34,15 @@ export function Toolbar({
   onExportSvg,
 }: ToolbarProps) {
   return (
-    <div className="absolute bottom-6 right-6 z-20 flex items-center gap-1.5 pointer-events-auto bg-[#07080a] border border-[#363739] shadow-[rgba(0,0,0,0.6)_0px_8px_24px] rounded-[8px] p-1.5">
+    <div className="pointer-events-auto absolute bottom-6 right-6 z-20 flex items-center gap-1.5 rounded-md border border-border-edge bg-ink p-1.5 shadow-subtle-3">
       <button
         onClick={onToggleSimulation}
-        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold transition-all rounded-[6px] border ${
+        className={cn(
+          "flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-mono text-xs font-semibold transition-all",
           isSimulating
-            ? "bg-[#ff6363] text-white border-[#ff6363]"
-            : "bg-[#111214] hover:bg-[#1b1c1e] text-[#e6e6e6] hover:text-white border-[#363739] hover:border-[#6a6b6c]"
-        }`}
+            ? "border-coral-pulse bg-coral-pulse text-pure-white"
+            : "border-border-edge bg-obsidian text-mist hover:border-smoke hover:bg-graphite hover:text-pure-white",
+        )}
         title={isSimulating ? "Pause Simulation" : "Simulate Flow Trace"}
       >
         {isSimulating ? (
@@ -51,23 +53,23 @@ export function Toolbar({
         <span>{isSimulating ? "PAUSE" : "SIMULATE"}</span>
       </button>
 
-      <div className="h-4 w-[1px] bg-[#2f3031] mx-0.5" />
+      <div className="mx-0.5 h-4 w-px bg-slate" />
 
-      <div className="flex items-center border border-[#363739] rounded-[6px] px-1 py-0.5 bg-[#111214]">
+      <div className="flex items-center rounded-md border border-border-edge bg-obsidian px-1 py-0.5">
         <button
           onClick={onZoomOut}
-          className="p-1 text-[#9c9c9d] hover:text-white hover:bg-[#1b1c1e] rounded-[4px] transition-colors"
+          className="rounded-md p-1 text-ash transition-colors hover:bg-graphite hover:text-pure-white"
           title="Zoom Out"
           aria-label="Zoom Out"
         >
           <ZoomOut size={14} />
         </button>
-        <span className="text-[11px] font-mono font-medium text-white w-11 text-center select-none">
+        <span className="w-11 select-none text-center font-mono text-[11px] font-medium text-pure-white">
           {Math.round(zoom * 100)}%
         </span>
         <button
           onClick={onZoomIn}
-          className="p-1 text-[#9c9c9d] hover:text-white hover:bg-[#1b1c1e] rounded-[4px] transition-colors"
+          className="rounded-md p-1 text-ash transition-colors hover:bg-graphite hover:text-pure-white"
           title="Zoom In"
           aria-label="Zoom In"
         >
@@ -77,7 +79,7 @@ export function Toolbar({
 
       <button
         onClick={onFitView}
-        className="p-1.5 text-[#9c9c9d] hover:text-white hover:bg-[#111214] border border-transparent hover:border-[#363739] rounded-[6px] transition-colors"
+        className="rounded-md border border-transparent p-1.5 text-ash transition-colors hover:border-border-edge hover:bg-obsidian hover:text-pure-white"
         title="Fit View"
         aria-label="Fit View"
       >
@@ -86,7 +88,7 @@ export function Toolbar({
 
       <button
         onClick={onResetView}
-        className="p-1.5 text-[#9c9c9d] hover:text-white hover:bg-[#111214] border border-transparent hover:border-[#363739] rounded-[6px] transition-colors"
+        className="rounded-md border border-transparent p-1.5 text-ash transition-colors hover:border-border-edge hover:bg-obsidian hover:text-pure-white"
         title="Reset View"
         aria-label="Reset View"
       >
@@ -95,10 +97,10 @@ export function Toolbar({
 
       {onExportSvg && (
         <>
-          <div className="h-4 w-[1px] bg-[#2f3031] mx-0.5" />
+          <div className="mx-0.5 h-4 w-px bg-slate" />
           <button
             onClick={onExportSvg}
-            className="p-1.5 text-[#9c9c9d] hover:text-white hover:bg-[#111214] border border-transparent hover:border-[#363739] rounded-[6px] transition-colors"
+            className="rounded-md border border-transparent p-1.5 text-ash transition-colors hover:border-border-edge hover:bg-obsidian hover:text-pure-white"
             title="Export SVG"
             aria-label="Export SVG"
           >

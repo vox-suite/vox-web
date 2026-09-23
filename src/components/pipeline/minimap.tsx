@@ -53,15 +53,15 @@ export function Minimap({
   };
 
   return (
-    <div className="absolute bottom-6 right-6 z-20 bg-[#07080a]/95 backdrop-blur-md border border-[#363739] shadow-[rgba(0,0,0,0.6)_0px_8px_24px] rounded-[8px] p-2 flex flex-col gap-1.5 select-none">
-      <div className="flex items-center justify-between text-[11px] font-mono font-medium text-[#9c9c9d] px-1 border-b border-[#2f3031] pb-1">
+    <div className="absolute bottom-6 right-6 z-20 flex select-none flex-col gap-1.5 rounded-md border border-border-edge bg-ink/95 p-2 shadow-subtle-3 backdrop-blur-md">
+      <div className="flex items-center justify-between border-b border-slate px-1 pb-1 font-mono text-[11px] font-medium text-ash">
         <span>MINIMAP</span>
-        <span className="text-white">{Math.round(zoom * 100)}%</span>
+        <span className="text-pure-white">{Math.round(zoom * 100)}%</span>
       </div>
       <svg
         width={mapWidth}
         height={mapHeight}
-        className="cursor-crosshair bg-[#040506] border border-[#2f3031] rounded-[4px]"
+        className="cursor-crosshair rounded-md border border-slate bg-void-black"
         onClick={handleMinimapClick}
       >
         {stages.map((stage) => (
@@ -88,7 +88,7 @@ export function Minimap({
               y={node.y * scaleY}
               width={node.width * scaleX}
               height={node.height * scaleY}
-              fill={isSelected ? "#ff6363" : "#363739"}
+              fill={isSelected ? "var(--color-coral-pulse)" : "var(--color-border-edge)"}
               fillOpacity={isSelected ? 1 : 0.75}
               rx={1}
             />
@@ -100,9 +100,9 @@ export function Minimap({
           y={viewRectY}
           width={Math.max(16, viewRectW)}
           height={Math.max(12, viewRectH)}
-          fill="#ff6363"
+          fill="var(--color-coral-pulse)"
           fillOpacity={0.12}
-          stroke="#ff6363"
+          stroke="var(--color-coral-pulse)"
           strokeWidth={1.5}
           strokeDasharray="3 3"
         />
