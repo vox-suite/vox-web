@@ -204,8 +204,8 @@ test("honest provider handoff: handoffs explicitly report completed: false", asy
         handoff_url: "https://amazon.com/gp/cart/view.html?ref=vox",
         status: "handoff_created",
         completed: false,
-        disclaimer:
-          "Vox has not completed this purchase. Review and pay on Amazon.",
+        label: "Open Amazon Cart",
+        disclaimer: "Vox has not completed this purchase. Review and pay on Amazon.",
       });
     },
     now: () => 1_795_622_400,

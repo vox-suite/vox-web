@@ -16,8 +16,6 @@ export function GrantsManager() {
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
       const [grantsRes, connRes] = await Promise.all([
         fetch(`/api/account/grants?agentKey=${encodeURIComponent(agentKey)}`),
         fetch("/api/account/connections"),
@@ -36,9 +34,7 @@ export function GrantsManager() {
   }, [agentKey]);
 
   useEffect(() => {
-    (async () => {
-      await loadData();
-    })();
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   async function handleGrant(connectionId: string, capability: string) {
