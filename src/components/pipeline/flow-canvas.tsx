@@ -289,14 +289,14 @@ export function FlowCanvas({
   };
 
   const subsystemChipColor: Record<Subsystem, string> = {
-    telephony: "text-[#818cf8]",
-    desktop:   "text-[#38bdf8]",
-    bridge:    "text-[#22d3ee]",
-    jev:       "text-[#c084fc]",
-    core:      "text-success-green",
-    storage:   "text-[#a5b4fc]",
-    tts:       "text-coral-pulse",
-    worker:    "text-[#fbbf24]",
+    telephony: "text-electric-sky",
+    desktop: "text-info-blue",
+    bridge: "text-mist",
+    jev: "text-coral-pulse",
+    core: "text-success-green",
+    storage: "text-ash",
+    tts: "text-coral-pulse",
+    worker: "text-electric-sky",
   };
 
   return (
@@ -345,7 +345,7 @@ export function FlowCanvas({
           </marker>
 
           <marker
-            id="arrow-purple"
+            id="arrow-info"
             viewBox="0 0 10 10"
             refX="6"
             refY="5"
@@ -353,11 +353,11 @@ export function FlowCanvas({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#c084fc" />
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--color-info-blue)" />
           </marker>
 
           <marker
-            id="arrow-cyan"
+            id="arrow-sky"
             viewBox="0 0 10 10"
             refX="6"
             refY="5"
@@ -365,7 +365,7 @@ export function FlowCanvas({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8" />
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--color-electric-sky)" />
           </marker>
 
           <marker
@@ -390,18 +390,6 @@ export function FlowCanvas({
             orient="auto-start-reverse"
           >
             <path d="M 0 1 L 8 5 L 0 9 z" fill="#ff6363" />
-          </marker>
-
-          <marker
-            id="arrow-blue"
-            viewBox="0 0 10 10"
-            refX="6"
-            refY="5"
-            markerWidth="6"
-            markerHeight="6"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#60a5fa" />
           </marker>
         </defs>
 
@@ -472,17 +460,17 @@ export function FlowCanvas({
             let markerEnd = "url(#arrow-solid)";
 
             if (edge.type === "speculative") {
-              strokeColor = "#c084fc";
+              strokeColor = "var(--color-info-blue)";
               strokeDasharray = "5 3";
-              markerEnd = "url(#arrow-purple)";
+              markerEnd = "url(#arrow-info)";
             } else if (edge.type === "barge") {
               strokeColor = "#ff6363";
               strokeDasharray = "4 4";
               markerEnd = "url(#arrow-red)";
             } else if (edge.type === "async") {
-              strokeColor = "#38bdf8";
+              strokeColor = "var(--color-electric-sky)";
               strokeDasharray = "6 3";
-              markerEnd = "url(#arrow-cyan)";
+              markerEnd = "url(#arrow-sky)";
             }
 
             if (isTraceActive) {

@@ -13,9 +13,9 @@ const buttonVariants = cva(
         primary:
           "bg-mist px-3 py-2 text-iron shadow-[rgba(0,0,0,0.03)_0px_7px_3px_0px,rgba(0,0,0,0.25)_0px_4px_4px_0px] hover:bg-pure-white",
         secondary:
-          "border border-[#363739] bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
+          "border border-border-edge bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
         outline:
-          "border border-[#363739] bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
+          "border border-border-edge bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
         ghost: "bg-transparent px-3 py-2 text-ash hover:text-pure-white",
         destructive:
           "bg-ember-hush px-3 py-2 text-coral-pulse hover:bg-ember-hush/80",
@@ -38,7 +38,7 @@ const buttonVariants = cva(
       variant: "primary",
       size: "default",
     },
-  }
+  },
 );
 
 function Button({

@@ -8,7 +8,7 @@ export function PublicPipelinePage() {
   return (
     <div className="w-full bg-void-black font-sans text-ash">
       <section className="border-b border-border-edge bg-ink">
-        <div className="mx-auto max-w-[1240px] px-6 py-10 md:py-16">
+        <div className="mx-auto max-w-[1240px] px-6 pb-10 pt-28 md:pb-16 md:pt-36">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
               <div className="mb-2 flex items-center gap-2">
@@ -23,9 +23,10 @@ export function PublicPipelinePage() {
                 System Pipeline &amp; Architecture
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
-                The complete end-to-end architecture: Vox Desktop client, bidirectional
-                Twilio media streams, streaming STT, sub-100ms TypeSafe Jev System One
-                arbitration, Vox Core agent runtime, and durable background workers.
+                The complete end-to-end architecture: Vox Desktop client,
+                bidirectional Twilio media streams, streaming STT, sub-100ms
+                TypeSafe Jev System One arbitration, Vox Core agent runtime, and
+                durable background workers.
               </p>
             </div>
 
@@ -74,22 +75,30 @@ export function PublicPipelinePage() {
               Desktop &amp; Ingress Channels
             </h3>
             <p className="mb-4 text-xs text-ash">
-              Native cross-platform desktop application and low-jitter PSTN telephony streams.
+              Native cross-platform desktop application and low-jitter PSTN
+              telephony streams.
             </p>
             <div className="space-y-2.5 text-xs text-ash">
               <p>
                 <strong className="text-pure-white">
                   Vox Desktop (Tauri v2):
                 </strong>{" "}
-                CPAL native microphone capture, 20ms audio frame chunking, and deep-linked PKCE OAuth via vox://auth/callback.
+                CPAL native microphone capture, 20ms audio frame chunking, and
+                deep-linked PKCE OAuth via vox://auth/callback.
               </p>
               <p>
-                <strong className="text-pure-white">Twilio Media Streams:</strong>{" "}
-                8000Hz G.711 μ-law bidirectional WebSocket streaming with cryptographic HMAC signature verification.
+                <strong className="text-pure-white">
+                  Twilio Media Streams:
+                </strong>{" "}
+                8000Hz G.711 μ-law bidirectional WebSocket streaming with
+                cryptographic HMAC signature verification.
               </p>
               <p>
-                <strong className="text-pure-white">Streaming STT &amp; Biometrics:</strong>{" "}
-                AssemblyAI / Deepgram streaming STT with WeSpeaker ResNet-34 neural voiceprint extraction.
+                <strong className="text-pure-white">
+                  Streaming STT &amp; Biometrics:
+                </strong>{" "}
+                AssemblyAI / Deepgram streaming STT with WeSpeaker ResNet-34
+                neural voiceprint extraction.
               </p>
             </div>
           </div>
@@ -99,22 +108,29 @@ export function PublicPipelinePage() {
               Jev System One Intelligence
             </h3>
             <p className="mb-4 text-xs text-ash">
-              Fast, structured multi-primitive decisions that replace fragile generative LLM prompts.
+              Fast, structured multi-primitive decisions that replace fragile
+              generative LLM prompts.
             </p>
             <div className="space-y-2.5 text-xs text-ash">
               <p>
                 <strong className="text-pure-white">
                   Dynamic Turn Settling:
                 </strong>{" "}
-                Noul question measures thought completeness. Complete clauses settle in 160ms instead of waiting for long silence timers.
+                Noul question measures thought completeness. Complete clauses
+                settle in 160ms instead of waiting for long silence timers.
               </p>
               <p>
                 <strong className="text-pure-white">Smart Barge-In:</strong>{" "}
-                Distinguishes passive listener backchannels (<em>&ldquo;uh-huh&rdquo;</em>, <em>&ldquo;yeah&rdquo;</em>) from authentic interruptions.
+                Distinguishes passive listener backchannels (
+                <em>&ldquo;uh-huh&rdquo;</em>, <em>&ldquo;yeah&rdquo;</em>) from
+                authentic interruptions.
               </p>
               <p>
-                <strong className="text-pure-white">Prewarmed Filler Engine:</strong>{" "}
-                Streams pre-synthesized RAM audio in &lt;1ms if database tools take &gt;400ms.
+                <strong className="text-pure-white">
+                  Prewarmed Filler Engine:
+                </strong>{" "}
+                Streams pre-synthesized RAM audio in &lt;1ms if database tools
+                take &gt;400ms.
               </p>
             </div>
           </div>
@@ -124,26 +140,26 @@ export function PublicPipelinePage() {
               Vox Core Engine &amp; Workers
             </h3>
             <p className="mb-4 text-xs text-ash">
-              Dual-process architecture: authenticated API token streaming and durable asynchronous workers.
+              Dual-process architecture: authenticated API token streaming and
+              durable asynchronous workers.
             </p>
             <div className="space-y-2.5 text-xs text-ash">
               <p>
-                <strong className="text-pure-white">
-                  vox-core-api:
-                </strong>{" "}
-                Handles Bridge host assertions, session states, context assembly, and Rig SSE token streaming.
+                <strong className="text-pure-white">vox-core-api:</strong>{" "}
+                Handles Bridge host assertions, session states, context
+                assembly, and Rig SSE token streaming.
               </p>
               <p>
-                <strong className="text-pure-white">
-                  vox-core-worker:
-                </strong>{" "}
-                Leases durable jobs from PostgreSQL via row-level locks on a 30s interval to advance schedules and execute actions.
+                <strong className="text-pure-white">vox-core-worker:</strong>{" "}
+                Leases durable jobs from PostgreSQL via row-level locks on a 30s
+                interval to advance schedules and execute actions.
               </p>
               <p>
                 <strong className="text-pure-white">
                   Minimal Redis Cache:
                 </strong>{" "}
-                100ms strict caller resolution deadline backed by durable PostgreSQL persistence and AOF logs.
+                100ms strict caller resolution deadline backed by durable
+                PostgreSQL persistence and AOF logs.
               </p>
             </div>
           </div>

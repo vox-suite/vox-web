@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, Card, Field, Notice, Row, Select, Stack, Text } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Notice,
+  Row,
+  Select,
+  Stack,
+  Text,
+} from "@/components/ui";
 import type {
   ExtensionCapability,
   ExtensionEffect,
@@ -73,10 +83,14 @@ export function ExtensionsManager() {
   const [externalKey, setExternalKey] = useState("weather-mcp-service");
   const [displayName, setDisplayName] = useState("Weather Updates MCP");
   const [protocol, setProtocol] = useState<ExtensionProtocol>("mcp");
-  const [endpointUrl, setEndpointUrl] = useState("https://mcp.weather.example.com/sse");
+  const [endpointUrl, setEndpointUrl] = useState(
+    "https://mcp.weather.example.com/sse",
+  );
   const [operatorId, setOperatorId] = useState("weather-inc");
   const [operatorName, setOperatorName] = useState("Weather Analytics Inc.");
-  const [supportEmail, setSupportEmail] = useState("support@weather.example.com");
+  const [supportEmail, setSupportEmail] = useState(
+    "support@weather.example.com",
+  );
   const [termsUrl, setTermsUrl] = useState("https://weather.example.com/terms");
   const [capabilities, setCapabilities] = useState<ExtensionCapability[]>([
     {
@@ -98,7 +112,9 @@ export function ExtensionsManager() {
       const data = await res.json();
       setExtensions(data.extensions || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load extensions");
+      setError(
+        err instanceof Error ? err.message : "Failed to load extensions",
+      );
     } finally {
       setLoading(false);
     }
@@ -150,11 +166,15 @@ export function ExtensionsManager() {
         throw new Error(data.error || "Extension installation failed");
       }
 
-      setActionSuccess(`Extension "${displayName}" registered successfully (default-denied, no authority granted).`);
+      setActionSuccess(
+        `Extension "${displayName}" registered successfully (default-denied, no authority granted).`,
+      );
       setShowInstallForm(false);
       await loadExtensions();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to install extension");
+      setError(
+        err instanceof Error ? err.message : "Failed to install extension",
+      );
     }
   }
 
@@ -162,19 +182,28 @@ export function ExtensionsManager() {
     try {
       setError(null);
       setActionSuccess(null);
-      const res = await fetch(`/api/account/extensions/${encodeURIComponent(id)}/enable`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !currentEnabled }),
-      });
+      const res = await fetch(
+        `/api/account/extensions/${encodeURIComponent(id)}/enable`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: !currentEnabled }),
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to update enablement");
       }
-      setActionSuccess(`Operator enablement ${!currentEnabled ? "enabled" : "disabled"}.`);
+      setActionSuccess(
+        `Operator enablement ${!currentEnabled ? "enabled" : "disabled"}.`,
+      );
       await loadExtensions();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to toggle operator enablement");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to toggle operator enablement",
+      );
     }
   }
 
@@ -182,16 +211,21 @@ export function ExtensionsManager() {
     try {
       setError(null);
       setActionSuccess(null);
-      const res = await fetch(`/api/account/extensions/${encodeURIComponent(id)}/renew-consent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ version: currentVersion }),
-      });
+      const res = await fetch(
+        `/api/account/extensions/${encodeURIComponent(id)}/renew-consent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ version: currentVersion }),
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to renew consent");
       }
-      setActionSuccess("Consent renewed successfully. Suspended capabilities unpaused.");
+      setActionSuccess(
+        "Consent renewed successfully. Suspended capabilities unpaused.",
+      );
       await loadExtensions();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to renew consent");
@@ -205,23 +239,33 @@ export function ExtensionsManager() {
       // Simulate an update with expanded data recipients
       const expandedCaps = (ext.capabilities || []).map((c) => ({
         ...c,
-        data_recipients: [...(c.data_recipients || []), "ThirdPartyAuditor.example.com"],
+        data_recipients: [
+          ...(c.data_recipients || []),
+          "ThirdPartyAuditor.example.com",
+        ],
       }));
-      const res = await fetch(`/api/account/extensions/${encodeURIComponent(ext.id)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          capabilities: expandedCaps,
-        }),
-      });
+      const res = await fetch(
+        `/api/account/extensions/${encodeURIComponent(ext.id)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            capabilities: expandedCaps,
+          }),
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Update simulation failed");
       }
-      setActionSuccess("Extension manifest updated with expanded data recipients. Renewed consent is now REQUIRED.");
+      setActionSuccess(
+        "Extension manifest updated with expanded data recipients. Renewed consent is now REQUIRED.",
+      );
       await loadExtensions();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update extension");
+      setError(
+        err instanceof Error ? err.message : "Failed to update extension",
+      );
     }
   }
 
@@ -229,9 +273,12 @@ export function ExtensionsManager() {
     try {
       setError(null);
       setActionSuccess(null);
-      const res = await fetch(`/api/account/extensions/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/account/extensions/${encodeURIComponent(id)}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to remove extension");
@@ -239,7 +286,9 @@ export function ExtensionsManager() {
       setActionSuccess("Extension removed from active state.");
       await loadExtensions();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove extension");
+      setError(
+        err instanceof Error ? err.message : "Failed to remove extension",
+      );
     }
   }
 
@@ -252,22 +301,31 @@ export function ExtensionsManager() {
       >
         <Stack gap="normal">
           {/* Default-Deny & Remote-Only Notice */}
-          <div className="p-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm text-neutral-300">
-            <p className="font-semibold text-neutral-100 mb-1">
+          <div className="p-3 bg-obsidian border border-border-edge rounded-lg text-sm text-mist">
+            <p className="font-semibold text-pure-white mb-1">
               Zero-Authority Remote Lifecycle Guarantees:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-400">
+            <ul className="list-disc pl-5 space-y-1 text-xs text-ash">
               <li>
-                <strong>Remote-Only Execution:</strong> Untrusted code is never uploaded or executed inside Core. Extensions only communicate via declared HTTPS/SSE remote endpoints.
+                <strong>Remote-Only Execution:</strong> Untrusted code is never
+                uploaded or executed inside Core. Extensions only communicate
+                via declared HTTPS/SSE remote endpoints.
               </li>
               <li>
-                <strong>Default-Deny Authority:</strong> Installation grants <strong>zero</strong> connection, context, capability, or action authority automatically.
+                <strong>Default-Deny Authority:</strong> Installation grants{" "}
+                <strong>zero</strong> connection, context, capability, or action
+                authority automatically.
               </li>
               <li>
-                <strong>Consequential Fail-Closed:</strong> Consequential actions remain blocked until the extension passes conformance verification <em>and</em> operator enablement is toggled on.
+                <strong>Consequential Fail-Closed:</strong> Consequential
+                actions remain blocked until the extension passes conformance
+                verification <em>and</em> operator enablement is toggled on.
               </li>
               <li>
-                <strong>Renewed Consent Requirement:</strong> Any material change (operator transfer or expanded data recipients) immediately suspends affected actions until you explicitly review and renew consent.
+                <strong>Renewed Consent Requirement:</strong> Any material
+                change (operator transfer or expanded data recipients)
+                immediately suspends affected actions until you explicitly
+                review and renew consent.
               </li>
             </ul>
           </div>
@@ -286,15 +344,21 @@ export function ExtensionsManager() {
 
           {/* Action Row */}
           <Row spread>
-            <span className="text-sm font-medium text-neutral-200">
+            <span className="text-sm font-medium text-mist">
               Installed Remote Extensions ({extensions.length})
             </span>
             <Button
               variant={showInstallForm ? "secondary" : "primary"}
               onClick={() => setShowInstallForm(!showInstallForm)}
-              aria-label={showInstallForm ? "Close installation form" : "Install new remote extension"}
+              aria-label={
+                showInstallForm
+                  ? "Close installation form"
+                  : "Install new remote extension"
+              }
             >
-              {showInstallForm ? "Cancel Installation" : "+ Register Remote Extension"}
+              {showInstallForm
+                ? "Cancel Installation"
+                : "+ Register Remote Extension"}
             </Button>
           </Row>
 
@@ -302,20 +366,20 @@ export function ExtensionsManager() {
           {showInstallForm && (
             <form
               onSubmit={handleInstall}
-              className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg space-y-4"
+              className="p-4 bg-ink border border-border-edge rounded-lg space-y-4"
               aria-label="Register remote extension form"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-neutral-100">
+                <h3 className="text-sm font-semibold text-pure-white">
                   Register Remote Extension
                 </h3>
                 <div className="flex gap-2">
-                  <span className="text-xs text-neutral-400 self-center">Presets:</span>
+                  <span className="text-xs text-ash self-center">Presets:</span>
                   {SAMPLE_PRESETS.map((p, idx) => (
                     <button
                       key={p.external_key}
                       type="button"
-                      className="text-xs px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded"
+                      className="text-xs px-2 py-1 bg-graphite hover:bg-slate text-mist rounded"
                       onClick={() => applyPreset(idx)}
                     >
                       {p.name.split(" ")[0]}
@@ -343,9 +407,13 @@ export function ExtensionsManager() {
                   id="ext-proto"
                   label="Protocol Adapter"
                   value={protocol}
-                  onChange={(e) => setProtocol(e.target.value as ExtensionProtocol)}
+                  onChange={(e) =>
+                    setProtocol(e.target.value as ExtensionProtocol)
+                  }
                 >
-                  <option value="mcp">Model Context Protocol (MCP / SSE)</option>
+                  <option value="mcp">
+                    Model Context Protocol (MCP / SSE)
+                  </option>
                   <option value="direct">Direct HTTP / REST Service</option>
                 </Select>
                 <Field
@@ -385,17 +453,27 @@ export function ExtensionsManager() {
                 />
               </div>
 
-              <div className="p-3 bg-neutral-900 border border-neutral-800 rounded text-xs text-neutral-400">
+              <div className="p-3 bg-obsidian border border-border-edge rounded text-xs text-ash">
                 <strong>Declared Capabilities:</strong>{" "}
-                {capabilities.map((c) => `${c.display_name} (${c.effect}${c.consequential ? ", consequential" : ""})`).join("; ")}
+                {capabilities
+                  .map(
+                    (c) =>
+                      `${c.display_name} (${c.effect}${c.consequential ? ", consequential" : ""})`,
+                  )
+                  .join("; ")}
               </div>
 
-              <div className="p-2 bg-neutral-900 text-xs text-amber-300 rounded border border-amber-900/50">
-                ⚠️ Installation only saves metadata and endpoint contracts. It does NOT authorize any account tokens, context, or capabilities.
+              <div className="p-2 bg-ember-hush text-xs text-coral-pulse rounded border border-coral-pulse/30">
+                ⚠️ Installation only saves metadata and endpoint contracts. It
+                does NOT authorize any account tokens, context, or capabilities.
               </div>
 
               <Row>
-                <Button type="submit" variant="primary" aria-label="Confirm extension registration">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  aria-label="Confirm extension registration"
+                >
                   Register Extension
                 </Button>
                 <Button
@@ -413,33 +491,36 @@ export function ExtensionsManager() {
           {loading && <Text muted>Loading extension registry...</Text>}
 
           {!loading && extensions.length === 0 && (
-            <div className="p-6 text-center border border-dashed border-neutral-800 rounded-lg text-neutral-400 text-sm">
-              No remote extensions installed yet. Use the button above to register a remote MCP or Direct service.
+            <div className="p-6 text-center border border-dashed border-border-edge rounded-lg text-ash text-sm">
+              No remote extensions installed yet. Use the button above to
+              register a remote MCP or Direct service.
             </div>
           )}
 
           {!loading &&
             extensions.map((ext) => {
-              const isConsentRequired = ext.consent_status === "consent_required";
+              const isConsentRequired =
+                ext.consent_status === "consent_required";
               const isQuarantined = ext.lifecycle_state === "quarantined";
               const isRemoved = ext.lifecycle_state === "removed";
               const isConformant = ext.conformance_status === "passed";
-              const isReadyForConsequential = isConformant && ext.operator_enabled && !isConsentRequired;
+              const isReadyForConsequential =
+                isConformant && ext.operator_enabled && !isConsentRequired;
 
               return (
                 <div
                   key={ext.id}
-                  className="p-4 bg-neutral-900 border border-neutral-800 rounded-lg space-y-4"
+                  className="p-4 bg-obsidian border border-border-edge rounded-lg space-y-4"
                   data-testid={`extension-card-${ext.external_key}`}
                 >
                   {/* Header & Badges */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-neutral-800 pb-3">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-edge pb-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-neutral-100 text-base">
+                        <h3 className="font-semibold text-pure-white text-base">
                           {ext.display_name}
                         </h3>
-                        <span className="text-xs text-neutral-400 font-mono">
+                        <span className="text-xs text-ash font-mono">
                           ({ext.external_key})
                         </span>
                         <Badge tone="neutral">
@@ -447,7 +528,7 @@ export function ExtensionsManager() {
                         </Badge>
                         <Badge tone="neutral">v{ext.current_version}</Badge>
                       </div>
-                      <p className="text-xs text-neutral-400 mt-1 font-mono break-all">
+                      <p className="text-xs text-ash mt-1 font-mono break-all">
                         Endpoint: {ext.endpoint_url}
                       </p>
                     </div>
@@ -458,17 +539,28 @@ export function ExtensionsManager() {
                           ext.lifecycle_state === "active"
                             ? "positive"
                             : isQuarantined
-                            ? "warning"
-                            : "neutral"
+                              ? "warning"
+                              : "neutral"
                         }
                       >
                         State: {ext.lifecycle_state.toUpperCase()}
                       </Badge>
-                      <Badge tone={isConformant ? "positive" : ext.conformance_status === "failed" ? "warning" : "neutral"}>
+                      <Badge
+                        tone={
+                          isConformant
+                            ? "positive"
+                            : ext.conformance_status === "failed"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
                         Conformance: {ext.conformance_status}
                       </Badge>
-                      <Badge tone={ext.operator_enabled ? "positive" : "neutral"}>
-                        Operator: {ext.operator_enabled ? "Enabled" : "Disabled"}
+                      <Badge
+                        tone={ext.operator_enabled ? "positive" : "neutral"}
+                      >
+                        Operator:{" "}
+                        {ext.operator_enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
                   </div>
@@ -476,21 +568,29 @@ export function ExtensionsManager() {
                   {/* Renewed Consent Banner */}
                   {isConsentRequired && (
                     <div
-                      className="p-3 bg-red-950/60 border border-red-800 rounded-lg text-sm text-red-200 space-y-2"
+                      className="p-3 bg-ember-hush/60 border border-coral-pulse/40 rounded-lg text-sm text-mist space-y-2"
                       role="alert"
                       aria-live="assertive"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-red-400">⚠️ Renewed Consent Required</span>
+                        <span className="font-bold text-coral-pulse">
+                          ⚠️ Renewed Consent Required
+                        </span>
                         <Badge tone="warning">Action Suspended</Badge>
                       </div>
-                      <p className="text-xs text-red-300">
-                        A material change occurred in version {ext.current_version} (operator transfer or newly declared third-party data recipients). Consequential actions and executions are suspended until you explicitly review and grant consent.
+                      <p className="text-xs text-mist">
+                        A material change occurred in version{" "}
+                        {ext.current_version} (operator transfer or newly
+                        declared third-party data recipients). Consequential
+                        actions and executions are suspended until you
+                        explicitly review and grant consent.
                       </p>
                       <Button
-                        variant="primary"
-                        className="text-xs bg-red-600 hover:bg-red-500 text-white"
-                        onClick={() => handleRenewConsent(ext.id, ext.current_version)}
+                        variant="danger"
+                        className="text-xs"
+                        onClick={() =>
+                          handleRenewConsent(ext.id, ext.current_version)
+                        }
                         aria-label={`Renew consent for ${ext.display_name} version ${ext.current_version}`}
                       >
                         Review & Renew Consent (v{ext.current_version})
@@ -499,17 +599,24 @@ export function ExtensionsManager() {
                   )}
 
                   {/* Operator & Governance Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs bg-neutral-950 p-3 rounded border border-neutral-800/80">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs bg-ink p-3 rounded border border-border-edge/80">
                     <div>
-                      <span className="text-neutral-400">Operator Legal Entity:</span>{" "}
-                      <span className="text-neutral-200 font-medium">{ext.operator.operator_name}</span>{" "}
-                      <span className="text-neutral-400 font-mono">({ext.operator.operator_id})</span>
+                      <span className="text-ash">Operator Legal Entity:</span>{" "}
+                      <span className="text-mist font-medium">
+                        {ext.operator.operator_name}
+                      </span>{" "}
+                      <span className="text-ash font-mono">
+                        ({ext.operator.operator_id})
+                      </span>
                     </div>
                     <div>
-                      <span className="text-neutral-400">Support Contact:</span>{" "}
-                      <span className="text-neutral-200">
+                      <span className="text-ash">Support Contact:</span>{" "}
+                      <span className="text-mist">
                         {ext.operator.support_email ? (
-                          <a href={`mailto:${ext.operator.support_email}`} className="underline text-blue-400">
+                          <a
+                            href={`mailto:${ext.operator.support_email}`}
+                            className="underline text-mist hover:text-pure-white"
+                          >
                             {ext.operator.support_email}
                           </a>
                         ) : (
@@ -519,12 +626,12 @@ export function ExtensionsManager() {
                     </div>
                     {ext.operator.terms_url && (
                       <div className="col-span-full">
-                        <span className="text-neutral-400">Terms of Service:</span>{" "}
+                        <span className="text-ash">Terms of Service:</span>{" "}
                         <a
                           href={ext.operator.terms_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="underline text-blue-400"
+                          className="underline text-mist hover:text-pure-white"
                         >
                           {ext.operator.terms_url}
                         </a>
@@ -534,31 +641,50 @@ export function ExtensionsManager() {
 
                   {/* Declared Capabilities & Consequential Fail-Closed Inspection */}
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                    <h4 className="text-xs font-semibold text-mist uppercase tracking-wider">
                       Declared Capabilities & Consequential Gates
                     </h4>
-                    {(!ext.capabilities || ext.capabilities.length === 0) ? (
-                      <p className="text-xs text-neutral-400 italic">No capabilities declared.</p>
+                    {!ext.capabilities || ext.capabilities.length === 0 ? (
+                      <p className="text-xs text-ash italic">
+                        No capabilities declared.
+                      </p>
                     ) : (
                       <div className="space-y-2">
                         {ext.capabilities.map((cap) => {
-                          const isConsequential = cap.consequential || cap.effect === "write" || cap.effect === "mixed";
+                          const isConsequential =
+                            cap.consequential ||
+                            cap.effect === "write" ||
+                            cap.effect === "mixed";
                           return (
                             <div
                               key={cap.external_key}
-                              className="p-2.5 bg-neutral-950 border border-neutral-800/70 rounded text-xs space-y-1.5"
+                              className="p-2.5 bg-ink border border-border-edge/70 rounded text-xs space-y-1.5"
                             >
                               <div className="flex items-center justify-between flex-wrap gap-1">
-                                <span className="font-medium text-neutral-200">
+                                <span className="font-medium text-mist">
                                   {cap.display_name}{" "}
-                                  <code className="text-neutral-400">({cap.external_key})</code>
+                                  <code className="text-ash">
+                                    ({cap.external_key})
+                                  </code>
                                 </span>
                                 <div className="flex gap-1.5 items-center">
-                                  <Badge tone={cap.effect === "read" ? "neutral" : "warning"}>
+                                  <Badge
+                                    tone={
+                                      cap.effect === "read"
+                                        ? "neutral"
+                                        : "warning"
+                                    }
+                                  >
                                     Effect: {cap.effect}
                                   </Badge>
                                   {isConsequential && (
-                                    <Badge tone={isReadyForConsequential ? "positive" : "warning"}>
+                                    <Badge
+                                      tone={
+                                        isReadyForConsequential
+                                          ? "positive"
+                                          : "warning"
+                                      }
+                                    >
                                       {isReadyForConsequential
                                         ? "Consequential Action Ready"
                                         : "Consequential: Fails Closed"}
@@ -567,23 +693,33 @@ export function ExtensionsManager() {
                                 </div>
                               </div>
 
-                              <div className="text-neutral-400 flex flex-wrap gap-4 pt-1">
+                              <div className="text-ash flex flex-wrap gap-4 pt-1">
                                 <div>
                                   <strong>Data Recipients:</strong>{" "}
-                                  {cap.data_recipients && cap.data_recipients.length > 0
+                                  {cap.data_recipients &&
+                                  cap.data_recipients.length > 0
                                     ? cap.data_recipients.join(", ")
                                     : "None (local processing)"}
                                 </div>
-                                {cap.access_needs && cap.access_needs.length > 0 && (
-                                  <div>
-                                    <strong>Access Needs:</strong> {cap.access_needs.join(", ")}
-                                  </div>
-                                )}
+                                {cap.access_needs &&
+                                  cap.access_needs.length > 0 && (
+                                    <div>
+                                      <strong>Access Needs:</strong>{" "}
+                                      {cap.access_needs.join(", ")}
+                                    </div>
+                                  )}
                               </div>
 
                               {isConsequential && !isReadyForConsequential && (
-                                <p className="text-amber-400/90 text-xs italic">
-                                  ⚠️ Consequential execution blocked: Requires passed conformance (current: {ext.conformance_status}) and operator enablement (current: {ext.operator_enabled ? "enabled" : "disabled"}).
+                                <p className="text-coral-pulse/90 text-xs italic">
+                                  ⚠️ Consequential execution blocked: Requires
+                                  passed conformance (current:{" "}
+                                  {ext.conformance_status}) and operator
+                                  enablement (current:{" "}
+                                  {ext.operator_enabled
+                                    ? "enabled"
+                                    : "disabled"}
+                                  ).
                                 </p>
                               )}
                             </div>
@@ -595,20 +731,26 @@ export function ExtensionsManager() {
 
                   {/* Actions & Lifecycle Controls */}
                   {!isRemoved && (
-                    <div className="flex items-center justify-between pt-2 border-t border-neutral-800 flex-wrap gap-2">
+                    <div className="flex items-center justify-between pt-2 border-t border-border-edge flex-wrap gap-2">
                       <div className="flex items-center gap-2">
                         <Button
-                          variant={ext.operator_enabled ? "secondary" : "primary"}
+                          variant={
+                            ext.operator_enabled ? "secondary" : "primary"
+                          }
                           className="text-xs"
-                          onClick={() => handleToggleEnable(ext.id, ext.operator_enabled)}
+                          onClick={() =>
+                            handleToggleEnable(ext.id, ext.operator_enabled)
+                          }
                           aria-label={`${ext.operator_enabled ? "Disable" : "Enable"} operator for ${ext.display_name}`}
                         >
-                          {ext.operator_enabled ? "Disable Operator" : "Enable Operator"}
+                          {ext.operator_enabled
+                            ? "Disable Operator"
+                            : "Enable Operator"}
                         </Button>
 
                         <Button
                           variant="ghost"
-                          className="text-xs text-neutral-300 hover:text-white"
+                          className="text-xs text-mist hover:text-white"
                           onClick={() => handleSimulateMaterialUpdate(ext)}
                           aria-label={`Simulate material update on ${ext.display_name}`}
                         >
@@ -628,8 +770,9 @@ export function ExtensionsManager() {
                   )}
 
                   {isRemoved && (
-                    <div className="p-2 bg-neutral-950 text-neutral-400 text-xs italic rounded">
-                      This extension was removed and preserved for historical audit evidence.
+                    <div className="p-2 bg-ink text-ash text-xs italic rounded">
+                      This extension was removed and preserved for historical
+                      audit evidence.
                     </div>
                   )}
                 </div>

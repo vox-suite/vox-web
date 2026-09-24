@@ -59,14 +59,14 @@ export function InspectorDrawer({
     .filter((item) => Boolean(item.node));
 
   const subsystemColorMap: Record<Subsystem, string> = {
-    telephony: "bg-obsidian border-border-edge text-[#818cf8]",
-    desktop:   "bg-obsidian border-border-edge text-[#38bdf8]",
-    bridge:    "bg-obsidian border-border-edge text-[#22d3ee]",
-    jev:       "bg-obsidian border-border-edge text-[#c084fc]",
-    core:      "bg-obsidian border-border-edge text-success-green",
-    storage:   "bg-obsidian border-border-edge text-[#a5b4fc]",
-    tts:       "bg-obsidian border-border-edge text-coral-pulse",
-    worker:    "bg-obsidian border-border-edge text-[#fbbf24]",
+    telephony: "bg-obsidian border-border-edge text-electric-sky",
+    desktop: "bg-obsidian border-border-edge text-info-blue",
+    bridge: "bg-obsidian border-border-edge text-mist",
+    jev: "bg-obsidian border-border-edge text-coral-pulse",
+    core: "bg-obsidian border-border-edge text-success-green",
+    storage: "bg-obsidian border-border-edge text-ash",
+    tts: "bg-obsidian border-border-edge text-coral-pulse",
+    worker: "bg-obsidian border-border-edge text-electric-sky",
   };
 
   return (
@@ -76,14 +76,13 @@ export function InspectorDrawer({
           <div className="flex items-center gap-2">
             <span
               className={`text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 border rounded-[4px] ${
-                subsystemColorMap[node.subsystem] || "bg-obsidian border-border-edge text-ash"
+                subsystemColorMap[node.subsystem] ||
+                "bg-obsidian border-border-edge text-ash"
               }`}
             >
               {node.subsystem}
             </span>
-            <span className="font-mono text-xs text-ash">
-              {node.protocol}
-            </span>
+            <span className="font-mono text-xs text-ash">{node.protocol}</span>
           </div>
           <h2 className="font-sans text-xl font-semibold tracking-tight text-pure-white">
             {node.title}
@@ -177,12 +176,12 @@ export function InspectorDrawer({
           </pre>
         </section>
 
-        <section className="bg-[#1b120c] border border-[#4a2608] rounded-[8px] p-3.5">
-          <h3 className="text-xs font-bold text-[#fbbf24] flex items-center gap-1.5 mb-1.5 font-mono">
+        <section className="bg-ember-hush border border-coral-pulse/30 rounded-[8px] p-3.5">
+          <h3 className="text-xs font-bold text-coral-pulse flex items-center gap-1.5 mb-1.5 font-mono">
             <ShieldAlert size={14} />
             FAILURE &amp; FALLBACK STRATEGY
           </h3>
-          <p className="text-xs text-[#fde68a] leading-relaxed">
+          <p className="text-xs text-mist leading-relaxed">
             {node.details.fallbackStrategy}
           </p>
         </section>

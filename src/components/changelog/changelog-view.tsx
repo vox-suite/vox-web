@@ -10,15 +10,16 @@ export function ChangelogView() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-12 md:px-8">
+    <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-28 md:px-8 md:pt-36">
       <header className="mb-16 max-w-3xl space-y-6">
         <Badge tone="accent">Platform Evolution & Changelog</Badge>
         <h1 className="text-heading-lg font-normal tracking-[0.22px] text-pure-white">
           Every milestone, measured.
         </h1>
         <p className="text-body-lg text-ash">
-          Follow the engineering progress of Vox from zero-latency voice telephony and edge
-          signal processing to autonomous multi-agent cognition and biometric security.
+          Follow the engineering progress of Vox from zero-latency voice
+          telephony and edge signal processing to autonomous multi-agent
+          cognition and biometric security.
         </p>
 
         <div
@@ -37,7 +38,9 @@ export function ChangelogView() {
               key={label}
               className="rounded-2xl border border-border-edge bg-ink p-4 shadow-subtle-3"
             >
-              <div className="font-mono text-sm font-medium text-mist">{val}</div>
+              <div className="font-mono text-sm font-medium text-mist">
+                {val}
+              </div>
               <div className="mt-1 text-xs text-smoke">{label}</div>
             </div>
           ))}
@@ -65,13 +68,17 @@ export function ChangelogView() {
               <div className="mb-6 grid gap-4 md:grid-cols-[140px_1fr] md:items-start">
                 <div className="relative space-y-1 border-l border-border-edge pl-4 font-mono text-xs">
                   <div className="text-mist">{item.formattedDate}</div>
-                  <div className="changelog-relative-time text-smoke">{item.version}</div>
+                  <div className="changelog-relative-time text-smoke">
+                    {item.version}
+                  </div>
                   <span
                     className="absolute -left-1 top-1 size-2 rounded-full bg-coral-pulse"
                     aria-hidden="true"
                   />
                 </div>
-                <h2 className="text-heading-sm font-normal text-pure-white">{item.title}</h2>
+                <h2 className="text-heading-sm font-normal text-pure-white">
+                  {item.title}
+                </h2>
               </div>
 
               <div className="space-y-6">
@@ -85,8 +92,10 @@ export function ChangelogView() {
                     <ul className="space-y-2">
                       {section.items.map((feat, fIdx) => (
                         <li key={fIdx} className="text-sm text-ash">
-                          <strong className="font-medium text-mist">{feat.title}</strong> —{" "}
-                          {feat.description}
+                          <strong className="font-medium text-mist">
+                            {feat.title}
+                          </strong>{" "}
+                          — {feat.description}
                         </li>
                       ))}
                     </ul>
@@ -96,10 +105,16 @@ export function ChangelogView() {
                 {item.highlight ? (
                   <div className="rounded-md border border-border-edge bg-obsidian px-4 py-4">
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-mist">
-                      <Sparkles size={14} className="text-coral-pulse" aria-hidden="true" />
+                      <Sparkles
+                        size={14}
+                        className="text-coral-pulse"
+                        aria-hidden="true"
+                      />
                       {item.highlight.title}
                     </span>
-                    <p className="mt-2 text-sm text-ash">{item.highlight.description}</p>
+                    <p className="mt-2 text-sm text-ash">
+                      {item.highlight.description}
+                    </p>
                   </div>
                 ) : null}
               </div>

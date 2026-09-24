@@ -4,7 +4,7 @@ import { Brand, LinkButton } from "@/components/ui";
 export function SiteHeader() {
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-5 md:px-6">
-      <div className="pointer-events-auto flex w-full max-w-[920px] items-center gap-3 rounded-lg border border-[#363739] bg-[rgba(7,8,10,0.72)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-[48px] md:gap-6 md:px-4">
+      <div className="pointer-events-auto flex w-full max-w-[920px] items-center gap-3 rounded-lg border border-border-edge bg-[rgba(7,8,10,0.72)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-[48px] md:gap-6 md:px-4">
         <Brand animated size={20} />
         <nav
           className="hidden flex-1 items-center justify-center gap-5 text-[13px] font-medium lg:flex"
@@ -61,7 +61,7 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-[#363739] bg-void-black">
+    <footer className="relative overflow-hidden border-t border-border-edge bg-void-black">
       <div className="mx-auto grid max-w-[1200px] gap-12 px-6 py-20 md:grid-cols-[minmax(0,1fr)_auto] md:px-8">
         <div className="max-w-sm space-y-4">
           <Brand animated={false} size={28} />
@@ -74,22 +74,40 @@ export function SiteFooter() {
             <small className="mb-1 font-mono text-[10px] uppercase tracking-[0.08em] text-smoke">
               Discover
             </small>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/#follow-through">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/#follow-through"
+            >
               How it works
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/#capabilities">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/#capabilities"
+            >
               Capabilities
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/pipeline">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/pipeline"
+            >
               Pipeline Architecture
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/#principles">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/#principles"
+            >
               Our principles
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/changelog">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/changelog"
+            >
               Changelog
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/request-access">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/request-access"
+            >
               Request access
             </Link>
           </div>
@@ -97,7 +115,10 @@ export function SiteFooter() {
             <small className="mb-1 font-mono text-[10px] uppercase tracking-[0.08em] text-smoke">
               Vox
             </small>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/privacy">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/privacy"
+            >
               Privacy
             </Link>
             <Link
@@ -120,14 +141,17 @@ export function SiteFooter() {
             >
               Administration
             </Link>
-            <Link className="text-sm text-ash hover:text-pure-white" href="/#main">
+            <Link
+              className="text-sm text-ash hover:text-pure-white"
+              href="/#main"
+            >
               Back to top
             </Link>
           </div>
         </div>
       </div>
       <div
-        className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-[#363739] px-6 py-4 font-mono text-xs text-ash"
+        className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-border-edge px-6 py-4 font-mono text-xs text-ash"
         aria-label="Build and runtime specifications"
       >
         <span>v1.104.21</span>
@@ -144,8 +168,10 @@ export function SiteFooter() {
         </span>
         <span>curl -fsSL https://voxagent.in/install.sh</span>
       </div>
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-[#363739] px-6 py-6 text-sm text-ash md:px-8">
-        <span>&copy; {new Date().getFullYear()} Vox Inc. All rights reserved.</span>
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-border-edge px-6 py-6 text-sm text-ash md:px-8">
+        <span>
+          &copy; {new Date().getFullYear()} Vox Inc. All rights reserved.
+        </span>
         <span>Less screen time. More human.</span>
       </div>
     </footer>
