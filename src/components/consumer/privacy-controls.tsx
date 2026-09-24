@@ -247,15 +247,19 @@ export function PrivacyControls() {
           </div>
 
           {error && (
-            <Notice title="Notice" tone="error">
-              {error}
-            </Notice>
+            <div role="alert" aria-live="assertive">
+              <Notice title="Notice" tone="error">
+                {error}
+              </Notice>
+            </div>
           )}
 
           {success && (
-            <Notice title="Success" tone="success">
-              {success}
-            </Notice>
+            <div role="status" aria-live="polite">
+              <Notice title="Success" tone="success">
+                {success}
+              </Notice>
+            </div>
           )}
 
           {/* TAB 1: SAVED PREFERENCES */}
@@ -371,18 +375,28 @@ export function PrivacyControls() {
                   {preferences.map((pref) => (
                     <div
                       key={pref.id}
+                      role="region"
+                      aria-labelledby={`pref-key-${pref.preference_key}`}
                       className="p-3 border border-neutral-800 bg-neutral-950 rounded flex justify-between items-center text-xs"
                       data-testid={`pref-${pref.preference_key}`}
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <strong className="text-neutral-100">{pref.preference_key}</strong>
+                          <strong
+                            id={`pref-key-${pref.preference_key}`}
+                            className="text-neutral-100"
+                          >
+                            {pref.preference_key}
+                          </strong>
                           <Badge tone={pref.is_sensitive ? "warning" : "neutral"}>
                             {pref.category.toUpperCase()}
                           </Badge>
                           {pref.is_sensitive && (
-                            <span className="text-[10px] text-amber-400 font-mono">
-                              [SENSITIVE - CONFIRMED]
+                            <span
+                              className="text-[10px] text-amber-400 font-mono"
+                              aria-label="Sensitive personal preference requiring explicit confirmation"
+                            >
+                              🔒 [SENSITIVE - CONFIRMED]
                             </span>
                           )}
                         </div>
@@ -399,6 +413,7 @@ export function PrivacyControls() {
                       <Button
                         variant="danger"
                         className="text-xs py-1 px-2"
+                        aria-label={`Delete preference: ${pref.preference_key}`}
                         onClick={() => handleDeletePreference(pref.preference_key)}
                       >
                         Delete
@@ -490,7 +505,11 @@ export function PrivacyControls() {
               </div>
 
               {deletionResult && (
-                <div className="p-3 bg-neutral-900 border border-neutral-800 rounded text-xs space-y-2">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="p-3 bg-neutral-900 border border-neutral-800 rounded text-xs space-y-2"
+                >
                   <div className="font-semibold text-neutral-200">
                     Deletion Summary:
                   </div>
@@ -559,7 +578,11 @@ export function PrivacyControls() {
                 </Button>
 
                 {exportResult && (
-                  <div className="p-3 bg-neutral-950 border border-neutral-800 rounded space-y-1">
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="p-3 bg-neutral-950 border border-neutral-800 rounded space-y-1"
+                  >
                     <div className="font-semibold text-emerald-400">
                       Export Ready: {exportResult.export_id}
                     </div>

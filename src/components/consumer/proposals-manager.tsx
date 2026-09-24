@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Badge, Button, Card, Notice, Row, Stack, Text } from "@/components/ui";
 import type { ActionProposal, MaterialProposalDetails } from "@/lib/consumer-auth/core-host-client";
+import {
+  formatAuthoritativeCurrency,
+  formatAuthoritativeDateTime,
+  getAccessibleStatusIndicator,
+} from "@/lib/global-formatting";
 
 export function ProposalsManager({
   initialProposals = [],
@@ -87,8 +92,16 @@ export function ProposalsManager({
             <strong>Exact-Match Binding:</strong> Approvals require an exact, byte-for-byte match with the proposal hash stored in Core. If details, pricing, recipients, or timing change, existing proposals are immediately invalidated and require a new decision.
           </div>
 
-          {actionError && <Notice title="Decision Error" tone="error">{actionError}</Notice>}
-          {actionSuccess && <Notice title="Decision Recorded" tone="success">{actionSuccess}</Notice>}
+          {actionError && (
+            <div role="alert" aria-live="assertive">
+              <Notice title="Decision Error" tone="error">{actionError}</Notice>
+            </div>
+          )}
+          {actionSuccess && (
+            <div role="status" aria-live="polite">
+              <Notice title="Decision Recorded" tone="success">{actionSuccess}</Notice>
+            </div>
+          )}
 
           {proposals.length === 0 && (
             <Text muted>No pending action proposals requiring your decision.</Text>
@@ -102,10 +115,21 @@ export function ProposalsManager({
               const approved = proposal.state === "approved";
               const isPending = !expired && !superseded && !approved;
 
+              const statusKey = expired
+                ? "expired"
+                : superseded
+                ? "superseded"
+                : approved
+                ? "approved"
+                : "pending";
+              const statusIndicator = getAccessibleStatusIndicator(statusKey);
+
               return (
                 <div
                   key={proposal.id}
-                  className="p-5 border border-neutral-800 bg-neutral-950 rounded-lg space-y-4"
+                  role="region"
+                  aria-labelledby={`proposal-title-${proposal.id}`}
+                  className="p-5 border border-neutral-800 bg-neutral-950 rounded-lg space-y-4 focus-within:ring-1 focus-within:ring-neutral-700"
                   data-testid={`proposal-${proposal.id}`}
                 >
                   <Row spread>
@@ -113,15 +137,22 @@ export function ProposalsManager({
                       <span className="text-xs uppercase tracking-wide text-neutral-400 font-mono">
                         {proposal.capability_external_key}
                       </span>
-                      <h4 className="text-base font-semibold text-neutral-100">
+                      <h4
+                        id={`proposal-title-${proposal.id}`}
+                        className="text-base font-semibold text-neutral-100"
+                      >
                         {details.title || "Action Proposal"}
                       </h4>
                     </div>
                     <div className="flex items-center gap-2">
-                      {expired && <Badge tone="warning">EXPIRED</Badge>}
-                      {superseded && <Badge tone="warning">SUPERSEDED</Badge>}
-                      {approved && <Badge tone="positive">APPROVED</Badge>}
-                      {isPending && <Badge tone="accent">AWAITING DECISION</Badge>}
+                      <Badge
+                        tone={statusIndicator.badgeTone}
+                        aria-label={statusIndicator.ariaLabel}
+                        className="flex items-center gap-1.5"
+                      >
+                        <span aria-hidden="true">{statusIndicator.symbol}</span>
+                        <span>{statusIndicator.text}</span>
+                      </Badge>
                     </div>
                   </Row>
 
@@ -165,26 +196,57 @@ export function ProposalsManager({
                         <strong className="text-neutral-200">{details.time}</strong>
                       </div>
                     )}
-                    {details.price !== undefined && (
-                      <div>
-                        <span className="text-neutral-500">Exact Price:</span>{" "}
-                        <strong className="text-neutral-100 font-mono text-sm">
-                          {details.currency || "USD"} {Number(details.price).toFixed(2)}
-                        </strong>
-                      </div>
-                    )}
-                    {details.fees !== undefined && (
-                      <div>
-                        <span className="text-neutral-500">Mandatory Fees / Taxes:</span>{" "}
-                        <strong className="text-neutral-300 font-mono">
-                          {details.currency || "USD"} {Number(details.fees).toFixed(2)}
-                        </strong>
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-neutral-500">Expires At:</span>{" "}
-                      <span className="text-neutral-400 font-mono">{new Date(proposal.expires_at).toLocaleString()}</span>
-                    </div>
+                    {details.price !== undefined && (() => {
+                      const authCurr = formatAuthoritativeCurrency(
+                        details.price,
+                        details.currency || "USD"
+                      );
+                      return (
+                        <div>
+                          <span className="text-neutral-500">Exact Price:</span>{" "}
+                          <strong
+                            className="text-neutral-100 font-mono text-sm"
+                            aria-label={authCurr.ariaLabel}
+                          >
+                            {authCurr.formattedAmount}
+                          </strong>
+                          <span className="text-[10px] text-neutral-500 block">
+                            (authoritative provider quote · no currency conversion)
+                          </span>
+                        </div>
+                      );
+                    })()}
+                    {details.fees !== undefined && (() => {
+                      const authFees = formatAuthoritativeCurrency(
+                        details.fees,
+                        details.currency || "USD"
+                      );
+                      return (
+                        <div>
+                          <span className="text-neutral-500">Mandatory Fees / Taxes:</span>{" "}
+                          <strong
+                            className="text-neutral-300 font-mono"
+                            aria-label={authFees.ariaLabel}
+                          >
+                            {authFees.formattedAmount}
+                          </strong>
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const authDate = formatAuthoritativeDateTime(proposal.expires_at, "UTC");
+                      return (
+                        <div>
+                          <span className="text-neutral-500">Expires At:</span>{" "}
+                          <span
+                            className="text-neutral-400 font-mono"
+                            aria-label={authDate.ariaLabel}
+                          >
+                            {authDate.formattedDateTime} ({authDate.authoritativeTimezone})
+                          </span>
+                        </div>
+                      );
+                    })()}
                     {details.data_recipients && details.data_recipients.length > 0 && (
                       <div className="md:col-span-2">
                         <span className="text-neutral-500">Data Recipients:</span>{" "}
@@ -208,29 +270,49 @@ export function ProposalsManager({
                         Grouped Actions Breakdown ({details.grouped_actions.length} individual items)
                       </span>
                       <div className="space-y-2">
-                        {details.grouped_actions.map((act) => (
-                          <div
-                            key={act.action_id}
-                            className="p-3 bg-neutral-900/70 border border-neutral-800 rounded flex items-center justify-between text-xs"
-                          >
-                            <div className="space-y-0.5">
-                              <div className="font-medium text-neutral-200">{act.description}</div>
-                              <div className="text-neutral-500">
-                                Provider: {act.provider || "N/A"} · ID: {act.action_id}
+                        {details.grouped_actions.map((act) => {
+                          const actIndicator = getAccessibleStatusIndicator(
+                            act.outcome || "pending"
+                          );
+                          const actCurr =
+                            act.price !== undefined
+                              ? formatAuthoritativeCurrency(
+                                  act.price,
+                                  details.currency || "USD"
+                                )
+                              : null;
+                          return (
+                            <div
+                              key={act.action_id}
+                              className="p-3 bg-neutral-900/70 border border-neutral-800 rounded flex items-center justify-between text-xs"
+                            >
+                              <div className="space-y-0.5">
+                                <div className="font-medium text-neutral-200">{act.description}</div>
+                                <div className="text-neutral-500">
+                                  Provider: {act.provider || "N/A"} · ID: {act.action_id}
+                                </div>
+                              </div>
+                              <div className="text-right flex items-center gap-3">
+                                {actCurr && (
+                                  <div
+                                    className="font-mono text-neutral-100 font-medium"
+                                    aria-label={actCurr.ariaLabel}
+                                  >
+                                    {actCurr.formattedAmount}
+                                  </div>
+                                )}
+                                <Badge
+                                  tone={actIndicator.badgeTone}
+                                  aria-label={actIndicator.ariaLabel}
+                                  className="flex items-center gap-1"
+                                >
+                                  <span aria-hidden="true">{actIndicator.symbol}</span>
+                                  <span>{actIndicator.text}</span>
+                                </Badge>
                               </div>
                             </div>
-                            <div className="text-right">
-                              {act.price !== undefined && (
-                                <div className="font-mono text-neutral-100 font-medium">
-                                  {details.currency || "USD"} {Number(act.price).toFixed(2)}
-                                </div>
-                              )}
-                              <Badge tone={act.outcome === "succeeded" ? "positive" : "neutral"}>
-                                {act.outcome || "PENDING"}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -239,6 +321,7 @@ export function ProposalsManager({
                   <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-900">
                     <Button
                       variant="ghost"
+                      aria-label={`Reject action proposal: ${details.title || proposal.id}`}
                       disabled={submittingId === proposal.id || !isPending}
                       onClick={() => handleReject(proposal.id)}
                     >
@@ -246,6 +329,7 @@ export function ProposalsManager({
                     </Button>
                     <Button
                       variant="primary"
+                      aria-label={`Approve exact action proposal: ${details.title || proposal.id}`}
                       disabled={submittingId === proposal.id || !isPending}
                       onClick={() => handleApprove(proposal)}
                     >

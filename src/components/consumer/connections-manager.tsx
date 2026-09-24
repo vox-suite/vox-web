@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge, Button, Card, Notice, Stack, Text, Row } from "@/components/ui";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
+import { getAccessibleStatusIndicator } from "@/lib/global-formatting";
 
 type DisconnectDisclosure = {
   connectionId: string;
@@ -67,10 +68,18 @@ export function ConnectionsManager() {
           </div>
 
           {loading && <Text muted>Loading connections...</Text>}
-          {error && <Notice title="Error" tone="error">{error}</Notice>}
+          {error && (
+            <div role="alert" aria-live="assertive">
+              <Notice title="Error" tone="error">{error}</Notice>
+            </div>
+          )}
 
           {disclosure && (
-            <div className="p-3 bg-amber-950 border border-amber-800 rounded-lg text-sm text-amber-200" role="alert">
+            <div
+              className="p-3 bg-amber-950 border border-amber-800 rounded-lg text-sm text-amber-200"
+              role="alert"
+              aria-live="polite"
+            >
               <strong>Disconnect Notice:</strong> {disclosure.message}
             </div>
           )}
@@ -83,20 +92,34 @@ export function ConnectionsManager() {
             {connections.map((conn) => {
               const isPlatformHeld = conn.credential_custody === "platform_held";
               const isAuthorized = conn.authorization_state === "authorized";
+              const statusIndicator = getAccessibleStatusIndicator(
+                isAuthorized ? "confirmed" : conn.authorization_state
+              );
+
               return (
                 <div
                   key={conn.id}
+                  role="region"
+                  aria-labelledby={`connection-title-${conn.id}`}
                   className="p-4 border border-neutral-800 bg-neutral-950 rounded-lg space-y-3"
                   data-testid={`connection-${conn.id}`}
                 >
                   <Row spread>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <strong className="text-base text-neutral-100">
+                        <strong
+                          id={`connection-title-${conn.id}`}
+                          className="text-base text-neutral-100"
+                        >
                           {conn.integration_external_key.toUpperCase()}
                         </strong>
-                        <Badge tone={isAuthorized ? "positive" : "warning"}>
-                          {conn.authorization_state.toUpperCase()}
+                        <Badge
+                          tone={statusIndicator.badgeTone}
+                          aria-label={statusIndicator.ariaLabel}
+                          className="flex items-center gap-1.5"
+                        >
+                          <span aria-hidden="true">{statusIndicator.symbol}</span>
+                          <span>{statusIndicator.text}</span>
                         </Badge>
                       </div>
                       <p className="ui-text text-sm" data-muted="true">
@@ -107,6 +130,7 @@ export function ConnectionsManager() {
                     {isAuthorized && (
                       <Button
                         variant="danger"
+                        aria-label={`Disconnect ${conn.integration_external_key.toUpperCase()} integration`}
                         disabled={disconnectingId === conn.id}
                         onClick={() => handleDisconnect(conn.id)}
                       >
@@ -149,6 +173,7 @@ export function ConnectionsManager() {
                   <p className="ui-text text-xs" data-muted="true">Custody: {provider.custody}</p>
                   <Button
                     variant="primary"
+                    aria-label={`Connect ${provider.name}`}
                     className="w-full text-xs"
                     onClick={async () => {
                       try {
