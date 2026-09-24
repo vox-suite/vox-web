@@ -18,6 +18,10 @@ import type {
   ReminderDelivery,
   ReminderScheduleKind,
 } from "@/lib/consumer-auth/core-host-client";
+import {
+  formatAuthoritativeDateTime,
+  getAccessibleStatusIndicator,
+} from "@/lib/global-formatting";
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -408,15 +412,19 @@ export function RemindersManager() {
           </form>
 
           {error && (
-            <Notice title="Notice" tone="error">
-              {error}
-            </Notice>
+            <div role="alert" aria-live="assertive">
+              <Notice title="Notice" tone="error">
+                {error}
+              </Notice>
+            </div>
           )}
 
           {success && (
-            <Notice title="Success" tone="success">
-              {success}
-            </Notice>
+            <div role="status" aria-live="polite">
+              <Notice title="Success" tone="success">
+                {success}
+              </Notice>
+            </div>
           )}
 
           {/* Reminders List & Truthful Delivery Status */}
@@ -448,34 +456,43 @@ export function RemindersManager() {
                 const isFailed = reminder.status === "failed";
                 const isUnknown = reminder.status === "unknown";
 
+                const statusKey = missed
+                  ? "missed"
+                  : isDelivered
+                  ? "delivered_to_channel"
+                  : isFailed
+                  ? "failed"
+                  : isUnknown
+                  ? "unknown"
+                  : reminder.status;
+                const statusIndicator = getAccessibleStatusIndicator(statusKey);
+
                 return (
                   <div
                     key={reminder.id}
+                    role="region"
+                    aria-labelledby={`reminder-title-${reminder.id}`}
                     className="p-4 border border-neutral-800 bg-neutral-950 rounded-lg space-y-3"
                     data-testid={`reminder-${reminder.id}`}
                   >
                     <Row spread>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-neutral-100">
+                          <h4
+                            id={`reminder-title-${reminder.id}`}
+                            className="font-semibold text-neutral-100"
+                          >
                             {reminder.title}
                           </h4>
-                          {/* TRUTHFUL STATUS BADGES (PRD FR-REM-005, FR-REM-006, FR-REM-008) */}
-                          {missed ? (
-                            <Badge tone="warning">MISSED (SURFACED)</Badge>
-                          ) : isDelivered ? (
-                            <Badge tone="positive">
-                              DELIVERED TO CHANNEL (NOT CONFIRMED SEEN)
-                            </Badge>
-                          ) : isFailed ? (
-                            <Badge tone="warning">FAILED</Badge>
-                          ) : isUnknown ? (
-                            <Badge tone="warning">DELIVERY UNKNOWN</Badge>
-                          ) : (
-                            <Badge tone="accent">
-                              {reminder.status.toUpperCase()}
-                            </Badge>
-                          )}
+                          {/* TRUTHFUL STATUS BADGES (PRD FR-REM-005, FR-REM-006, FR-REM-008, WCAG 2.2 AA non-color reliance) */}
+                          <Badge
+                            tone={statusIndicator.badgeTone}
+                            aria-label={statusIndicator.ariaLabel}
+                            className="flex items-center gap-1.5"
+                          >
+                            <span aria-hidden="true">{statusIndicator.symbol}</span>
+                            <span>{statusIndicator.text}</span>
+                          </Badge>
                         </div>
                         <p className="text-sm text-neutral-300 mt-1">
                           {reminder.message}
@@ -487,6 +504,7 @@ export function RemindersManager() {
                           <Button
                             variant="danger"
                             className="text-xs py-1 px-2"
+                            aria-label={`Cancel reminder: ${reminder.title}`}
                             onClick={() => handleCancel(reminder.id)}
                           >
                             Cancel
@@ -495,6 +513,8 @@ export function RemindersManager() {
                         <Button
                           variant="secondary"
                           className="text-xs py-1 px-2"
+                          aria-expanded={expandedReminderId === reminder.id}
+                          aria-label={`${expandedReminderId === reminder.id ? "Hide receipts" : "Show delivery history"} for ${reminder.title}`}
                           onClick={() => toggleDeliveries(reminder.id)}
                         >
                           {expandedReminderId === reminder.id
@@ -512,10 +532,16 @@ export function RemindersManager() {
                         </div>
                         <p>
                           This reminder was scheduled for{" "}
-                          <strong>
-                            {reminder.next_run_at || reminder.run_at} (
-                            {reminder.timezone})
-                          </strong>
+                          {(() => {
+                            const target = reminder.next_run_at || reminder.run_at;
+                            if (!target) return <strong>(unspecified time)</strong>;
+                            const dt = formatAuthoritativeDateTime(target, reminder.timezone);
+                            return (
+                              <strong aria-label={dt.ariaLabel}>
+                                {dt.formattedDateTime} ({dt.authoritativeTimezone})
+                              </strong>
+                            );
+                          })()}
                           , but the delivery window elapsed during system or provider unavailability. Per Vox policy, missed reminders are surfaced for human review rather than silently delivered late.
                         </p>
                         <Row>
@@ -620,15 +646,19 @@ export function RemindersManager() {
                                   )}
                                 </div>
                                 <div className="text-right">
-                                  <Badge
-                                    tone={
-                                      deliv.status === "delivered_to_channel"
-                                        ? "positive"
-                                        : "warning"
-                                    }
-                                  >
-                                    {deliv.status.replace(/_/g, " ").toUpperCase()}
-                                  </Badge>
+                                  {(() => {
+                                    const delivInd = getAccessibleStatusIndicator(deliv.status);
+                                    return (
+                                      <Badge
+                                        tone={delivInd.badgeTone}
+                                        aria-label={delivInd.ariaLabel}
+                                        className="flex items-center gap-1"
+                                      >
+                                        <span aria-hidden="true">{delivInd.symbol}</span>
+                                        <span>{delivInd.text}</span>
+                                      </Badge>
+                                    );
+                                  })()}
                                   {deliv.provider_receipt_id && (
                                     <div className="text-neutral-500 font-mono text-[10px] mt-1">
                                       Receipt: {deliv.provider_receipt_id}

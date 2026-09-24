@@ -35,10 +35,11 @@ function Badge({
 }: React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & {
     asChild?: boolean;
-    tone?: "neutral" | "positive" | "accent" | "warning";
+    tone?: "neutral" | "positive" | "accent" | "warning" | "error" | "destructive";
   }) {
   const Comp = asChild ? Slot.Root : "span";
-  const resolved = tone ?? variant;
+  const toneMapped = tone === "error" ? "destructive" : tone;
+  const resolved = toneMapped ?? variant;
 
   return (
     <Comp

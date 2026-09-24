@@ -20,6 +20,12 @@ import type {
   MultiServiceJourneyItem,
   UberTrip,
 } from "@/lib/consumer-auth/core-host-client";
+import {
+  formatAuthoritativeCurrency,
+  formatAuthoritativeDateTime,
+  formatAuthoritativeDistance,
+  getAccessibleStatusIndicator,
+} from "@/lib/global-formatting";
 
 type JourneyTab = "read" | "write" | "handoffs" | "composite";
 
@@ -324,8 +330,16 @@ export function UnifiedJourneys({
           <Badge tone="accent">Platform V1 Contract</Badge>
         </Row>
 
-        {error && <Notice title="Journey Notice" tone="error">{error}</Notice>}
-        {success && <Notice title="Authoritative State Updated" tone="success">{success}</Notice>}
+        {error && (
+          <div role="alert" aria-live="assertive">
+            <Notice title="Journey Notice" tone="error">{error}</Notice>
+          </div>
+        )}
+        {success && (
+          <div role="status" aria-live="polite">
+            <Notice title="Authoritative State Updated" tone="success">{success}</Notice>
+          </div>
+        )}
 
         <Field
           id="journey-conn-id"
@@ -349,62 +363,95 @@ export function UnifiedJourneys({
                 </Notice>
 
                 <div className="space-y-4">
-                  {compositeItems.map((item, idx) => (
-                    <Card key={idx} tone="contrast">
-                      <Stack gap="small">
-                        <Row spread>
-                          <Row>
-                            <strong>{item.service}</strong>
-                            <Badge tone={item.status === "confirmed" ? "positive" : "warning"}>
-                              {item.status.toUpperCase()}
-                            </Badge>
-                            <Badge tone="neutral">
-                              {item.service_type === "consequential_write"
-                                ? "L3 Consequential Write"
-                                : item.service_type === "connected_read"
-                                ? "L2 Connected Read"
-                                : "L0 Labelled Handoff"}
-                            </Badge>
-                          </Row>
-                          {item.completed ? (
-                            <Badge tone="positive">Completed</Badge>
-                          ) : (
-                            <Badge tone="warning">Pending External / Handoff</Badge>
-                          )}
-                        </Row>
-
-                        <Text>{item.summary}</Text>
-
-                        <Row spread>
-                          <Row>
-                            <Text small muted>
-                              Provider: <strong>{item.provider.toUpperCase()}</strong>
-                            </Text>
-                            {item.authoritative_reference && (
-                              <Text small muted>
-                                Reference: <strong>{item.authoritative_reference}</strong>
-                              </Text>
+                  {compositeItems.map((item, idx) => {
+                    const statusIndicator = getAccessibleStatusIndicator(item.status);
+                    return (
+                      <div
+                        key={idx}
+                        role="region"
+                        aria-labelledby={`composite-item-${idx}`}
+                        className="p-4 border border-neutral-800 bg-neutral-950 rounded-lg space-y-3"
+                      >
+                        <Stack gap="small">
+                          <Row spread>
+                            <Row>
+                              <strong
+                                id={`composite-item-${idx}`}
+                                className="text-sm text-neutral-100"
+                              >
+                                {item.service}
+                              </strong>
+                              <Badge
+                                tone={statusIndicator.badgeTone}
+                                aria-label={statusIndicator.ariaLabel}
+                                className="flex items-center gap-1.5"
+                              >
+                                <span aria-hidden="true">{statusIndicator.symbol}</span>
+                                <span>{statusIndicator.text}</span>
+                              </Badge>
+                              <Badge tone="neutral">
+                                {item.service_type === "consequential_write"
+                                  ? "L3 Consequential Write"
+                                  : item.service_type === "connected_read"
+                                  ? "L2 Connected Read"
+                                  : "L0 Labelled Handoff"}
+                              </Badge>
+                            </Row>
+                            {item.completed ? (
+                              <Badge
+                                tone="positive"
+                                aria-label="Completion status: Completed"
+                                className="flex items-center gap-1"
+                              >
+                                <span aria-hidden="true">✓</span>
+                                <span>Completed</span>
+                              </Badge>
+                            ) : (
+                              <Badge
+                                tone="warning"
+                                aria-label="Completion status: Pending external handoff"
+                                className="flex items-center gap-1"
+                              >
+                                <span aria-hidden="true">⏳</span>
+                                <span>Pending External / Handoff</span>
+                              </Badge>
                             )}
-                            <Text small muted>
-                              Payment: <strong>{item.payment_status?.toUpperCase()}</strong>
-                            </Text>
                           </Row>
 
-                          {item.handoff_url && (
-                            <a
-                              href={item.handoff_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ui-button"
-                              data-variant="secondary"
-                            >
-                              Continue in {item.provider === "uber" ? "Uber" : "Zomato"} ↗
-                            </a>
-                          )}
-                        </Row>
-                      </Stack>
-                    </Card>
-                  ))}
+                          <Text>{item.summary}</Text>
+
+                          <Row spread>
+                            <Row>
+                              <Text small muted>
+                                Provider: <strong>{item.provider.toUpperCase()}</strong>
+                              </Text>
+                              {item.authoritative_reference && (
+                                <Text small muted>
+                                  Reference: <strong>{item.authoritative_reference}</strong>
+                                </Text>
+                              )}
+                              <Text small muted>
+                                Payment: <strong>{item.payment_status?.toUpperCase()}</strong>
+                              </Text>
+                            </Row>
+
+                            {item.handoff_url && (
+                              <a
+                                href={item.handoff_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Continue journey in ${item.provider === "uber" ? "Uber" : "Zomato"}`}
+                                className="ui-button"
+                                data-variant="secondary"
+                              >
+                                Continue in {item.provider === "uber" ? "Uber" : "Zomato"} ↗
+                              </a>
+                            )}
+                          </Row>
+                        </Stack>
+                      </div>
+                    );
+                  })}
                 </div>
               </Stack>
             </Card>
@@ -421,7 +468,11 @@ export function UnifiedJourneys({
             >
               <Stack gap="normal">
                 <Row spread>
-                  <Button onClick={handleFetchTrips} disabled={loading}>
+                  <Button
+                    onClick={handleFetchTrips}
+                    disabled={loading}
+                    aria-label="Retrieve trip history with context minimization"
+                  >
                     {loading ? "Reading Authoritative Trips..." : "Retrieve Trip History (L2)"}
                   </Button>
                   {readMetadata && (
@@ -438,22 +489,47 @@ export function UnifiedJourneys({
 
                 {trips.length > 0 ? (
                   <div className="space-y-2">
-                    {trips.map((trip) => (
-                      <Card key={trip.trip_id} tone="contrast">
-                        <Row spread>
+                    {trips.map((trip) => {
+                      const authDist = formatAuthoritativeDistance(trip.distance_miles, "mi");
+                      const authDate = formatAuthoritativeDateTime(trip.request_time, "UTC");
+                      const statusIndicator = getAccessibleStatusIndicator(trip.status);
+                      return (
+                        <div
+                          key={trip.trip_id}
+                          role="region"
+                          aria-labelledby={`trip-${trip.trip_id}`}
+                          className="p-3 border border-neutral-800 bg-neutral-950 rounded-lg flex justify-between items-center"
+                        >
                           <Stack gap="small">
-                            <strong>Trip #{trip.trip_id}</strong>
+                            <strong id={`trip-${trip.trip_id}`} className="text-sm text-neutral-100">
+                              Trip #{trip.trip_id}
+                            </strong>
                             <Text small muted>
-                              Date: {new Date(trip.request_time).toLocaleDateString()} · City: {trip.start_city || "Minimised"}
+                              <span aria-label={authDate.ariaLabel}>
+                                Date: {authDate.formattedDateTime} ({authDate.authoritativeTimezone})
+                              </span>{" "}
+                              · City: {trip.start_city || "Minimised"}
                             </Text>
                           </Stack>
                           <Row>
-                            <Badge tone="neutral">{trip.distance_miles} miles</Badge>
-                            <Badge tone="positive">{trip.status.toUpperCase()}</Badge>
+                            <Badge
+                              tone="neutral"
+                              aria-label={authDist.ariaLabel}
+                            >
+                              {authDist.authoritativeValue}
+                            </Badge>
+                            <Badge
+                              tone={statusIndicator.badgeTone}
+                              aria-label={statusIndicator.ariaLabel}
+                              className="flex items-center gap-1"
+                            >
+                              <span aria-hidden="true">{statusIndicator.symbol}</span>
+                              <span>{statusIndicator.text}</span>
+                            </Badge>
                           </Row>
-                        </Row>
-                      </Card>
-                    ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <Text muted>Click &quot;Retrieve Trip History&quot; to inspect authoritative read data.</Text>
@@ -487,25 +563,41 @@ export function UnifiedJourneys({
                 {properties.length > 0 && !booking && (
                   <div className="space-y-4">
                     <h3>Available Verified Properties</h3>
-                    {properties.map((prop) => (
-                      <Card key={prop.property_id} tone="contrast">
-                        <Row spread>
-                          <Stack gap="small">
-                            <strong>{prop.name}</strong>
-                            <Text small muted>{prop.location} · {prop.star_rating} Stars</Text>
-                            <Text small>
-                              Rate: <strong>${(prop.price_amount_minor / 100).toFixed(2)} {prop.currency}</strong>
-                            </Text>
-                          </Stack>
-                          <Button
-                            variant="secondary"
-                            onClick={() => handleAuthorizePayment(prop)}
-                          >
-                            Authorize Booking Proposal
-                          </Button>
-                        </Row>
-                      </Card>
-                    ))}
+                    {properties.map((prop) => {
+                      const authCurr = formatAuthoritativeCurrency(
+                        prop.price_amount_minor,
+                        prop.currency,
+                        true
+                      );
+                      return (
+                        <div
+                          key={prop.property_id}
+                          role="region"
+                          aria-labelledby={`prop-${prop.property_id}`}
+                          className="p-4 border border-neutral-800 bg-neutral-950 rounded-lg"
+                        >
+                          <Row spread>
+                            <Stack gap="small">
+                              <strong id={`prop-${prop.property_id}`} className="text-sm text-neutral-100">
+                                {prop.name}
+                              </strong>
+                              <Text small muted>{prop.location} · {prop.star_rating} Stars</Text>
+                              <Text small>
+                                Rate: <strong aria-label={authCurr.ariaLabel}>{authCurr.formattedAmount}</strong>{" "}
+                                <span className="text-[10px] text-neutral-500">(authoritative provider quote)</span>
+                              </Text>
+                            </Stack>
+                            <Button
+                              variant="secondary"
+                              aria-label={`Authorize booking proposal for ${prop.name}`}
+                              onClick={() => handleAuthorizePayment(prop)}
+                            >
+                              Authorize Booking Proposal
+                            </Button>
+                          </Row>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -519,12 +611,30 @@ export function UnifiedJourneys({
                       <Row spread>
                         <Stack gap="small">
                           <strong>{selectedProperty.name}</strong>
-                          <Text small>Amount: ${(selectedProperty.price_amount_minor / 100).toFixed(2)} {selectedProperty.currency}</Text>
+                          {(() => {
+                            const authHold = formatAuthoritativeCurrency(
+                              selectedProperty.price_amount_minor,
+                              selectedProperty.currency,
+                              true
+                            );
+                            return (
+                              <Text small>
+                                Amount: <strong aria-label={authHold.ariaLabel}>{authHold.formattedAmount}</strong>
+                              </Text>
+                            );
+                          })()}
                           <Text small muted>Policy: Full refund if cancelled 48h prior to check-in.</Text>
                         </Stack>
-                        <Badge tone="accent">Payment Held in Escrow</Badge>
+                        <Badge tone="accent" className="flex items-center gap-1">
+                          <span aria-hidden="true">🔒</span>
+                          <span>Payment Held in Escrow</span>
+                        </Badge>
                       </Row>
-                      <Button onClick={handleConfirmBooking} disabled={loading}>
+                      <Button
+                        onClick={handleConfirmBooking}
+                        disabled={loading}
+                        aria-label={`Confirm consequential booking for ${selectedProperty.name}`}
+                      >
                         {loading ? "Submitting to Expedia..." : "Confirm Consequential Booking (L3)"}
                       </Button>
                     </Stack>
@@ -539,30 +649,63 @@ export function UnifiedJourneys({
                         <Stack gap="small">
                           <Row>
                             <strong>Expedia Confirmation: {booking.expedia_booking_ref}</strong>
-                            <Badge tone={booking.status === "confirmed" ? "positive" : "warning"}>
-                              {booking.status.toUpperCase()}
-                            </Badge>
+                            {(() => {
+                              const ind = getAccessibleStatusIndicator(booking.status);
+                              return (
+                                <Badge
+                                  tone={ind.badgeTone}
+                                  aria-label={ind.ariaLabel}
+                                  className="flex items-center gap-1"
+                                >
+                                  <span aria-hidden="true">{ind.symbol}</span>
+                                  <span>{ind.text}</span>
+                                </Badge>
+                              );
+                            })()}
                           </Row>
                           <Text small muted>
                             Dates: {booking.check_in} to {booking.check_out}
                           </Text>
-                          <Text small muted>
-                            Settled Total: ${(booking.total_amount_minor / 100).toFixed(2)} {booking.currency}
-                          </Text>
+                          {(() => {
+                            const authTotal = formatAuthoritativeCurrency(
+                              booking.total_amount_minor,
+                              booking.currency,
+                              true
+                            );
+                            return (
+                              <Text small muted>
+                                Settled Total: <strong aria-label={authTotal.ariaLabel}>{authTotal.formattedAmount}</strong>
+                              </Text>
+                            );
+                          })()}
                         </Stack>
                         {booking.status === "confirmed" && (
-                          <Button variant="danger" onClick={handleCancelBooking} disabled={loading}>
+                          <Button
+                            variant="danger"
+                            onClick={handleCancelBooking}
+                            disabled={loading}
+                            aria-label={`Cancel Expedia booking: ${booking.expedia_booking_ref}`}
+                          >
                             {loading ? "Processing Cancellation..." : "Cancel Booking & Refund"}
                           </Button>
                         )}
                       </Row>
 
-                      {cancellation && (
-                        <Notice title="Cancellation Verified" tone="success">
-                          Booking {cancellation.expedia_booking_ref} cancelled by Expedia.
-                          Refund of ${(cancellation.refund_amount_minor / 100).toFixed(2)} {cancellation.currency} confirmed.
-                        </Notice>
-                      )}
+                      {cancellation && (() => {
+                        const authRefund = formatAuthoritativeCurrency(
+                          cancellation.refund_amount_minor,
+                          cancellation.currency,
+                          true
+                        );
+                        return (
+                          <div role="status" aria-live="polite">
+                            <Notice title="Cancellation Verified" tone="success">
+                              Booking {cancellation.expedia_booking_ref} cancelled by Expedia.
+                              Refund of {authRefund.formattedAmount} confirmed.
+                            </Notice>
+                          </div>
+                        );
+                      })()}
                     </Stack>
                   </Card>
                 )}
@@ -592,7 +735,11 @@ export function UnifiedJourneys({
                         <strong>Apple MacBook Air M3 (16GB, 512GB)</strong>
                         <Text small muted>ASIN: B08N5WRWNW · Locale: US</Text>
                       </div>
-                      <Button onClick={() => handleGenerateHandoff("amazon")} disabled={loading}>
+                      <Button
+                        onClick={() => handleGenerateHandoff("amazon")}
+                        disabled={loading}
+                        aria-label="Generate Amazon handoff link"
+                      >
                         Generate Amazon Handoff
                       </Button>
                     </Row>
@@ -600,13 +747,33 @@ export function UnifiedJourneys({
                       <Stack gap="small">
                         <Row spread>
                           <Row>
-                            <Badge tone="warning">Status: {amazonHandoff.status}</Badge>
-                            <Badge tone="neutral">Completed: {String(amazonHandoff.completed)}</Badge>
+                            {(() => {
+                              const ind = getAccessibleStatusIndicator(amazonHandoff.status);
+                              return (
+                                <Badge
+                                  tone={ind.badgeTone}
+                                  aria-label={ind.ariaLabel}
+                                  className="flex items-center gap-1"
+                                >
+                                  <span aria-hidden="true">{ind.symbol}</span>
+                                  <span>{ind.text}</span>
+                                </Badge>
+                              );
+                            })()}
+                            <Badge
+                              tone={amazonHandoff.completed ? "positive" : "neutral"}
+                              aria-label={`Completed state: ${amazonHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
+                              className="flex items-center gap-1"
+                            >
+                              <span aria-hidden="true">{amazonHandoff.completed ? "✓" : "⊘"}</span>
+                              <span>Completed: {String(amazonHandoff.completed)}</span>
+                            </Badge>
                           </Row>
                           <a
                             href={amazonHandoff.handoff_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            aria-label="Continue to external Amazon application"
                             className="ui-button"
                             data-variant="secondary"
                           >
@@ -627,7 +794,11 @@ export function UnifiedJourneys({
                         <strong>The Bombay Canteen (Lower Parel, Mumbai)</strong>
                         <Text small muted>Restaurant ID: 18204 · Region: IN</Text>
                       </div>
-                      <Button onClick={() => handleGenerateHandoff("zomato")} disabled={loading}>
+                      <Button
+                        onClick={() => handleGenerateHandoff("zomato")}
+                        disabled={loading}
+                        aria-label="Generate Zomato handoff link"
+                      >
                         Generate Zomato Handoff
                       </Button>
                     </Row>
@@ -635,13 +806,33 @@ export function UnifiedJourneys({
                       <Stack gap="small">
                         <Row spread>
                           <Row>
-                            <Badge tone="warning">Status: {zomatoHandoff.status}</Badge>
-                            <Badge tone="neutral">Completed: {String(zomatoHandoff.completed)}</Badge>
+                            {(() => {
+                              const ind = getAccessibleStatusIndicator(zomatoHandoff.status);
+                              return (
+                                <Badge
+                                  tone={ind.badgeTone}
+                                  aria-label={ind.ariaLabel}
+                                  className="flex items-center gap-1"
+                                >
+                                  <span aria-hidden="true">{ind.symbol}</span>
+                                  <span>{ind.text}</span>
+                                </Badge>
+                              );
+                            })()}
+                            <Badge
+                              tone={zomatoHandoff.completed ? "positive" : "neutral"}
+                              aria-label={`Completed state: ${zomatoHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
+                              className="flex items-center gap-1"
+                            >
+                              <span aria-hidden="true">{zomatoHandoff.completed ? "✓" : "⊘"}</span>
+                              <span>Completed: {String(zomatoHandoff.completed)}</span>
+                            </Badge>
                           </Row>
                           <a
                             href={zomatoHandoff.handoff_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            aria-label="Continue to external Zomato application"
                             className="ui-button"
                             data-variant="secondary"
                           >
@@ -662,7 +853,11 @@ export function UnifiedJourneys({
                         <strong>Market St to Mission St (San Francisco)</strong>
                         <Text small muted>UberX · Fare Quote: $18.50 USD (Expiring in 5m)</Text>
                       </div>
-                      <Button onClick={() => handleGenerateHandoff("uber")} disabled={loading}>
+                      <Button
+                        onClick={() => handleGenerateHandoff("uber")}
+                        disabled={loading}
+                        aria-label="Generate Uber ride request handoff link"
+                      >
                         Generate Uber Ride Handoff
                       </Button>
                     </Row>
@@ -670,13 +865,33 @@ export function UnifiedJourneys({
                       <Stack gap="small">
                         <Row spread>
                           <Row>
-                            <Badge tone="warning">Status: {uberHandoff.status}</Badge>
-                            <Badge tone="neutral">Completed: {String(uberHandoff.completed)}</Badge>
+                            {(() => {
+                              const ind = getAccessibleStatusIndicator(uberHandoff.status);
+                              return (
+                                <Badge
+                                  tone={ind.badgeTone}
+                                  aria-label={ind.ariaLabel}
+                                  className="flex items-center gap-1"
+                                >
+                                  <span aria-hidden="true">{ind.symbol}</span>
+                                  <span>{ind.text}</span>
+                                </Badge>
+                              );
+                            })()}
+                            <Badge
+                              tone={uberHandoff.completed ? "positive" : "neutral"}
+                              aria-label={`Completed state: ${uberHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
+                              className="flex items-center gap-1"
+                            >
+                              <span aria-hidden="true">{uberHandoff.completed ? "✓" : "⊘"}</span>
+                              <span>Completed: {String(uberHandoff.completed)}</span>
+                            </Badge>
                           </Row>
                           <a
                             href={uberHandoff.handoff_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            aria-label="Continue to external Uber application"
                             className="ui-button"
                             data-variant="secondary"
                           >
