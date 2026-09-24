@@ -6,7 +6,9 @@ import {
 import { ConnectionsManager } from "@/components/consumer/connections-manager";
 import { ExtensionsManager } from "@/components/consumer/extensions-manager";
 import { GrantsManager } from "@/components/consumer/grants-manager";
+import { PrivacyControls } from "@/components/consumer/privacy-controls";
 import { ProposalsManager } from "@/components/consumer/proposals-manager";
+import { RemindersManager } from "@/components/consumer/reminders-manager";
 import { TasksView } from "@/components/consumer/tasks-view";
 import { UnifiedJourneys } from "@/components/consumer/unified-journeys";
 import { AuthFrame, Badge, Card, Stack, Text } from "@/components/ui";
@@ -38,6 +40,8 @@ export default async function ConsumerHomePage() {
         </Stack>
         <UnifiedJourneys />
         <TasksView />
+        <RemindersManager />
+        <PrivacyControls />
         <ProposalsManager />
         <ConnectionsManager />
         <GrantsManager />

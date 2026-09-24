@@ -188,6 +188,7 @@ export function AdminShell({
                 aria-hidden="true"
               >
                 {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- external OAuth avatar, no remote pattern configured for next/image
                   <img
                     src={avatarUrl}
                     alt={firstName}

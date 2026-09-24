@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Card, Notice, Stack, Text, Row } from "@/components/ui";
 import type {
   CapabilityGrant,
@@ -14,7 +14,7 @@ export function GrantsManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -33,11 +33,13 @@ export function GrantsManager() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [agentKey]);
 
   useEffect(() => {
-    loadData();
-  }, [agentKey]);
+    (async () => {
+      await loadData();
+    })();
+  }, [loadData]);
 
   async function handleGrant(connectionId: string, capability: string) {
     try {

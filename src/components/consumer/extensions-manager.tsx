@@ -121,7 +121,9 @@ export function ExtensionsManager() {
   }
 
   useEffect(() => {
-    loadExtensions();
+    (async () => {
+      await loadExtensions();
+    })();
   }, []);
 
   function applyPreset(presetIndex: number) {

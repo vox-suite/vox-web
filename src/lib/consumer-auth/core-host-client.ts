@@ -345,6 +345,113 @@ export type MultiServiceJourney = {
   created_at: string;
 };
 
+export type ReminderScheduleKind = "one_time" | "interval" | "recurring";
+
+export type ReminderDeliveryStatus =
+  | "scheduled"
+  | "delivered_to_channel"
+  | "failed"
+  | "unknown";
+
+export type Reminder = {
+  id: string;
+  user_context_id: string;
+  title: string;
+  message: string;
+  channel: string;
+  destination: string;
+  timezone: string;
+  schedule_kind: ReminderScheduleKind;
+  run_at: string | null;
+  interval_seconds: number | null;
+  recurrence_expression: string | null;
+  status: ReminderDeliveryStatus;
+  max_retries: number;
+  retry_count: number;
+  last_attempt_at: string | null;
+  next_run_at: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReminderDelivery = {
+  id: string;
+  reminder_id: string;
+  status: ReminderDeliveryStatus;
+  channel: string;
+  destination: string;
+  provider_receipt_id: string | null;
+  failure_reason: string | null;
+  attempted_at: string;
+};
+
+export type CreateReminderInput = {
+  title: string;
+  message: string;
+  channel: string;
+  destination: string;
+  timezone: string;
+  schedule_kind: ReminderScheduleKind;
+  run_at?: string | null;
+  interval_seconds?: number | null;
+  recurrence_expression?: string | null;
+  max_retries?: number | null;
+  metadata?: Record<string, unknown> | null;
+};
+
+export type UserPreference = {
+  id: string;
+  user_context_id: string;
+  category: string;
+  preference_key: string;
+  value: unknown;
+  is_sensitive: boolean;
+  confirmed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  authority_disclaimer: string;
+};
+
+export type SetPreferenceInput = {
+  category: string;
+  preference_key: string;
+  value: unknown;
+  is_sensitive?: boolean | null;
+  confirmed?: boolean | null;
+};
+
+export type DeleteHistoryResponse = {
+  deleted_tasks_count: number;
+  deleted_conversations_count: number;
+  disclosure: string;
+};
+
+export type PortableExportResponse = {
+  export_id: string;
+  download_url: string;
+  categories: string[];
+  generated_at: string;
+  disclosure: string;
+};
+
+export const SENSITIVE_PREFERENCE_KEYS: readonly string[] = [
+  "home_address",
+  "work_address",
+  "allergies",
+  "dietary_medical",
+  "passport_number",
+  "identity_document",
+  "payment_method_preference",
+];
+
+export const DELETION_DISCLOSURE =
+  "Platform task entries and conversation turns are removed from active databases. " +
+  "External service records (e.g. Amazon, Expedia, Uber, Twilio carrier receipts), " +
+  "remote operator system logs, mandatory audit hold retention, and cold backups " +
+  "(retained for 30 days before rolling expiration) cannot be retroactively destroyed. " +
+  "Deleting task history DOES NOT undo, cancel, or refund completed external transactions.";
+
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
@@ -977,5 +1084,153 @@ export class VoxCoreHostClient {
       },
     );
   }
+
+  async listReminders(accountId: string): Promise<Reminder[]> {
+    return this.signedPost<Reminder[]>("/v1/reminders/list", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
+  async createReminder(
+    accountId: string,
+    input: CreateReminderInput,
+  ): Promise<Reminder> {
+    return this.signedPost<Reminder>("/v1/reminders", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      title: input.title,
+      message: input.message,
+      channel: input.channel,
+      destination: input.destination,
+      timezone: input.timezone,
+      schedule_kind: input.schedule_kind,
+      run_at: input.run_at ?? null,
+      interval_seconds: input.interval_seconds ?? null,
+      recurrence_expression: input.recurrence_expression ?? null,
+      max_retries: input.max_retries ?? 3,
+      metadata: input.metadata ?? null,
+    });
+  }
+
+  async getReminder(accountId: string, reminderId: string): Promise<Reminder> {
+    return this.signedPost<Reminder>(
+      `/v1/reminders/${encodeURIComponent(reminderId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async cancelReminder(
+    accountId: string,
+    reminderId: string,
+  ): Promise<Reminder> {
+    return this.signedPost<Reminder>(
+      `/v1/reminders/${encodeURIComponent(reminderId)}/cancel`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async getReminderDeliveries(
+    accountId: string,
+    reminderId: string,
+  ): Promise<ReminderDelivery[]> {
+    return this.signedPost<ReminderDelivery[]>(
+      `/v1/reminders/${encodeURIComponent(reminderId)}/deliveries`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async listPreferences(accountId: string): Promise<UserPreference[]> {
+    return this.signedPost<UserPreference[]>("/v1/preferences/list", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
+  async setPreference(
+    accountId: string,
+    preference: SetPreferenceInput,
+  ): Promise<UserPreference> {
+    return this.signedPost<UserPreference>("/v1/preferences", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      preference,
+    });
+  }
+
+  async deletePreference(accountId: string, key: string): Promise<void> {
+    return this.signedPost<void>(
+      `/v1/preferences/${encodeURIComponent(key)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+      "DELETE",
+    );
+  }
+
+  async deleteTaskHistory(
+    accountId: string,
+    deleteConversations = true,
+  ): Promise<DeleteHistoryResponse> {
+    return this.signedPost<DeleteHistoryResponse>(
+      "/v1/privacy/delete-history",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        delete_conversations: deleteConversations,
+      },
+    );
+  }
+
+  async requestPortableExport(
+    accountId: string,
+    categories: ("preferences" | "config" | "tasks")[],
+  ): Promise<PortableExportResponse> {
+    return this.signedPost<PortableExportResponse>(
+      "/v1/privacy/portable-export",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        categories,
+      },
+    );
+  }
 }
+
 

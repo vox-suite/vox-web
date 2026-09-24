@@ -1,17 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Badge,
-  Button,
-  Card,
-  Field,
-  Notice,
-  Stack,
-  Text,
-  Row,
-} from "@/components/ui";
+import { Badge, Button, Card, Field, Notice, Stack, Text, Row } from "@/components/ui";
 import type { DurableTask } from "@/lib/consumer-auth/core-host-client";
+import { getAccessibleStatusIndicator } from "@/lib/global-formatting";
 
 export function TasksView() {
   const [tasks, setTasks] = useState<DurableTask[]>([]);
@@ -20,7 +12,6 @@ export function TasksView() {
   const [loading, setLoading] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
   async function handleStartTask(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +32,6 @@ export function TasksView() {
       if (!res.ok) throw new Error("Failed to submit task");
       const data = await res.json();
       setTasks((prev) => [data.task, ...prev]);
-      setActiveTaskId(data.task.id);
       setTitle("");
       setInstruction("");
     } catch (err) {
@@ -54,12 +44,12 @@ export function TasksView() {
   async function handleReconnect(taskId: string) {
     try {
       setReconnecting(true);
-      const res = await fetch(
-        `/api/account/tasks?taskId=${encodeURIComponent(taskId)}`,
-      );
+      const res = await fetch(`/api/account/tasks?taskId=${encodeURIComponent(taskId)}`);
       if (!res.ok) throw new Error("Failed to fetch authoritative task state");
       const data = await res.json();
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? data.task : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? data.task : t)),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Reconnect failed");
     } finally {
@@ -69,23 +59,20 @@ export function TasksView() {
 
   async function handleCancel(taskId: string) {
     try {
-      const res = await fetch(
-        `/api/account/tasks/${encodeURIComponent(taskId)}/cancel`,
-        {
-          method: "POST",
-        },
-      );
+      const res = await fetch(`/api/account/tasks/${encodeURIComponent(taskId)}/cancel`, {
+        method: "POST",
+      });
       if (!res.ok) throw new Error("Failed to cancel task");
       const data = await res.json();
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? data.task : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? data.task : t)),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cancel failed");
     }
   }
 
-  function toneForState(
-    state: DurableTask["state"],
-  ): "neutral" | "positive" | "accent" | "warning" {
+  function toneForState(state: DurableTask["state"]): "neutral" | "positive" | "accent" | "warning" {
     switch (state) {
       case "completed":
         return "positive";
@@ -136,75 +123,83 @@ export function TasksView() {
           </form>
 
           {error && (
-            <Notice title="Error" tone="error">
-              {error}
-            </Notice>
+            <div role="alert" aria-live="assertive">
+              <Notice title="Error" tone="error">{error}</Notice>
+            </div>
           )}
 
           {tasks.length === 0 && (
-            <Text muted>
-              No active tasks. Submit an instruction above to begin a durable
-              execution.
-            </Text>
+            <Text muted>No active tasks. Submit an instruction above to begin a durable execution.</Text>
           )}
 
           <div className="space-y-4 pt-2">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="p-4 border border-border-edge bg-ink rounded-lg space-y-2"
-                data-testid={`task-${task.id}`}
-              >
-                <Row spread>
-                  <div>
-                    <h4 className="font-semibold text-pure-white">
-                      {task.title}
-                    </h4>
-                    <p className="ui-text text-sm" data-muted="true">
-                      {task.instruction}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge tone={toneForState(task.state)}>
-                      {task.state.replace(/_/g, " ").toUpperCase()}
-                    </Badge>
-                  </div>
-                </Row>
-
-                {task.wait_reason && (
-                  <div className="p-2 bg-ember-hush/60 border border-coral-pulse/30 rounded text-xs text-mist">
-                    <strong>Wait Reason:</strong> {task.wait_reason}
-                  </div>
-                )}
-
-                <div className="border-t border-slate pt-2 text-xs text-smoke">
+            {tasks.map((task) => {
+              const statusIndicator = getAccessibleStatusIndicator(task.state);
+              return (
+                <div
+                  key={task.id}
+                  role="region"
+                  aria-labelledby={`task-title-${task.id}`}
+                  className="p-4 border border-border-edge bg-ink rounded-lg space-y-2"
+                  data-testid={`task-${task.id}`}
+                >
                   <Row spread>
-                    <span>Agent: {task.agent_external_key || "None"}</span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="secondary"
-                        className="text-xs py-1 px-2"
-                        disabled={reconnecting}
-                        onClick={() => handleReconnect(task.id)}
+                    <div>
+                      <h4
+                        id={`task-title-${task.id}`}
+                        className="font-semibold text-pure-white"
                       >
-                        {reconnecting ? "Checking..." : "Reconnect / Status"}
-                      </Button>
-                      {task.state !== "completed" &&
-                        task.state !== "cancelled" &&
-                        task.state !== "failed" && (
+                        {task.title}
+                      </h4>
+                      <p className="ui-text text-sm" data-muted="true">{task.instruction}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        tone={statusIndicator.badgeTone}
+                        aria-label={statusIndicator.ariaLabel}
+                        className="flex items-center gap-1.5"
+                      >
+                        <span aria-hidden="true">{statusIndicator.symbol}</span>
+                        <span>{statusIndicator.text}</span>
+                      </Badge>
+                    </div>
+                  </Row>
+
+                  {task.wait_reason && (
+                    <div className="p-2 bg-ember-hush/60 border border-coral-pulse/30 rounded text-xs text-mist">
+                      <strong>Wait Reason:</strong> {task.wait_reason}
+                    </div>
+                  )}
+
+                  <div className="border-t border-slate pt-2 text-xs text-smoke">
+                    <Row spread>
+                      <span>Agent: {task.agent_external_key || "None"}</span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          className="text-xs py-1 px-2"
+                          aria-label={`Check authoritative status for task: ${task.title}`}
+                          disabled={reconnecting}
+                          onClick={() => handleReconnect(task.id)}
+                        >
+                          {reconnecting ? "Checking..." : "Reconnect / Status"}
+                        </Button>
+                        {task.state !== "completed" && task.state !== "cancelled" && task.state !== "failed" && (
                           <Button
                             variant="danger"
                             className="text-xs py-1 px-2"
+                            aria-label={`Cancel task: ${task.title}`}
                             onClick={() => handleCancel(task.id)}
                           >
                             Cancel
                           </Button>
                         )}
-                    </div>
-                  </Row>
+                      </div>
+                    </Row>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Stack>
       </Card>

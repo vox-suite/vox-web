@@ -2,6 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { VoxCoreHostClient } from "../src/lib/consumer-auth/core-host-client";
 
+function get(obj: unknown, path: string): unknown {
+  return path
+    .split(".")
+    .reduce<unknown>(
+      (o, k) => (o as Record<string, unknown> | undefined)?.[k],
+      obj,
+    );
+}
+
 const privateKey =
   "MC4CAQAwBQYDK2VwBCIEIBERERERERERERERERERERERERERERERERERERERERER";
 
@@ -22,8 +31,8 @@ const testConfig = {
 
 test("listConnections posts signed host context and parses connection list", async () => {
   let capturedUrl = "";
-  let capturedBody: any = null;
-  let capturedHeaders: any = null;
+  let capturedBody: unknown = null;
+  let capturedHeaders: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -52,8 +61,8 @@ test("listConnections posts signed host context and parses connection list", asy
 
   const connections = await client.listConnections("user-1");
   assert.equal(capturedUrl, "https://core.vox.test/v1/connections/list");
-  assert.equal(capturedBody.host_context.host_user_id, "vox-account:user-1");
-  assert.equal(capturedHeaders["X-Vox-Host-Credential"], "11111111-2222-4333-8444-555555555555");
+  assert.equal(get(capturedBody, "host_context.host_user_id"), "vox-account:user-1");
+  assert.equal(get(capturedHeaders, "X-Vox-Host-Credential"), "11111111-2222-4333-8444-555555555555");
   assert.equal(connections.length, 1);
   assert.equal(connections[0].account_display_id, "alex@example.test");
   assert.equal(connections[0].credential_custody, "external_operator");
@@ -61,7 +70,7 @@ test("listConnections posts signed host context and parses connection list", asy
 
 test("initiateConnection returns authorization challenge and url", async () => {
   let capturedUrl = "";
-  let capturedBody: any = null;
+  let capturedBody: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -87,7 +96,7 @@ test("initiateConnection returns authorization challenge and url", async () => {
   });
 
   assert.equal(capturedUrl, "https://core.vox.test/v1/connections/initiate");
-  assert.equal(capturedBody.initiation.integration_external_key, "google-calendar");
+  assert.equal(get(capturedBody, "initiation.integration_external_key"), "google-calendar");
   assert.equal(res.session_id, "sess-abc");
   assert.equal(res.state_token, "state-token-xyz");
 });
@@ -256,7 +265,7 @@ test("durable task start, get, and cancel call Core endpoints", async () => {
 test("action proposal creation and exact-match approval call Core endpoints", async () => {
   let capturedProposalUrl = "";
   let capturedApproveUrl = "";
-  let capturedApproveBody: any = null;
+  let capturedApproveBody: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -315,5 +324,5 @@ test("action proposal creation and exact-match approval call Core endpoints", as
   assert.equal(capturedApproveUrl, "https://core.vox.test/v1/action-proposals/prop-123/approve");
   assert.equal(approved.state, "approved");
   assert.equal(approved.approval_id, "appr-456");
-  assert.deepEqual(capturedApproveBody?.details, proposal.details);
+  assert.deepEqual(get(capturedApproveBody, "details"), proposal.details);
 });

@@ -53,6 +53,7 @@ export function WorkspaceWelcome({
       </div>
       {avatarUrl ? (
         <div className="size-20 shrink-0 overflow-hidden rounded-2xl border border-border-edge bg-obsidian shadow-subtle-3 md:size-24">
+          {/* eslint-disable-next-line @next/next/no-img-element -- external OAuth avatar, no remote pattern configured for next/image */}
           <img
             src={avatarUrl}
             alt={firstName}

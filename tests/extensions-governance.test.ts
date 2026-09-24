@@ -3,9 +3,17 @@ import test from "node:test";
 import { VoxCoreHostClient } from "../src/lib/consumer-auth/core-host-client";
 import type {
   InstallExtensionRequest,
-  RemoteExtension,
   UpdateExtensionRequest,
 } from "../src/lib/consumer-auth/core-host-client";
+
+function get(obj: unknown, path: string): unknown {
+  return path
+    .split(".")
+    .reduce<unknown>(
+      (o, k) => (o as Record<string, unknown> | undefined)?.[k],
+      obj,
+    );
+}
 
 const privateKey =
   "MC4CAQAwBQYDK2VwBCIEIBERERERERERERERERERERERERERERERERERERERERER";
@@ -27,8 +35,8 @@ const testConfig = {
 
 test("installExtension posts signed host context and manifest to /v1/remote-extensions", async () => {
   let capturedUrl = "";
-  let capturedBody: any = null;
-  let capturedHeaders: any = null;
+  let capturedBody: unknown = null;
+  let capturedHeaders: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -96,10 +104,10 @@ test("installExtension posts signed host context and manifest to /v1/remote-exte
   const ext = await client.installExtension("user-42", request);
 
   assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions");
-  assert.equal(capturedBody.host_context.host_user_id, "vox-account:user-42");
-  assert.equal(capturedBody.extension.external_key, "weather-service");
-  assert.equal(capturedBody.extension.protocol, "mcp");
-  assert.equal(capturedHeaders["X-Vox-Host-Credential"], "11111111-2222-4333-8444-555555555555");
+  assert.equal(get(capturedBody, "host_context.host_user_id"), "vox-account:user-42");
+  assert.equal(get(capturedBody, "extension.external_key"), "weather-service");
+  assert.equal(get(capturedBody, "extension.protocol"), "mcp");
+  assert.equal(get(capturedHeaders, "X-Vox-Host-Credential"), "11111111-2222-4333-8444-555555555555");
 
   // Acceptance Criterion 1: Installation clearly states that no access is granted automatically
   assert.equal(ext.lifecycle_state, "installed");
@@ -174,7 +182,7 @@ test("listExtensions and getExtension fetch registered extensions and capabiliti
 
 test("setExtensionEnabled toggles operator enablement", async () => {
   let capturedUrl = "";
-  let capturedBody: any = null;
+  let capturedBody: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -193,14 +201,14 @@ test("setExtensionEnabled toggles operator enablement", async () => {
 
   const updated = await client.setExtensionEnabled("user-42", "ext-uuid-1", true);
   assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1/enable");
-  assert.equal(capturedBody.enabled, true);
+  assert.equal(get(capturedBody, "enabled"), true);
   assert.equal(updated.operator_enabled, true);
 });
 
 test("updateExtension triggers consent_required on expanded data recipients or operator transfer", async () => {
   let capturedUrl = "";
   let capturedMethod = "";
-  let capturedBody: any = null;
+  let capturedBody: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -234,7 +242,7 @@ test("updateExtension triggers consent_required on expanded data recipients or o
   const result = await client.updateExtension("user-42", "ext-uuid-1", update);
   assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1");
   assert.equal(capturedMethod, "PUT");
-  assert.equal(capturedBody.extension.capabilities[0].data_recipients.length, 2);
+  assert.equal(get(capturedBody, "extension.capabilities.0.data_recipients.length"), 2);
 
   // Acceptance Criterion 2: Material integration changes pause affected use until renewed consent
   assert.equal(result.consent_status, "consent_required");
@@ -244,7 +252,7 @@ test("updateExtension triggers consent_required on expanded data recipients or o
 
 test("renewExtensionConsent restores consented state for specific version", async () => {
   let capturedUrl = "";
-  let capturedBody: any = null;
+  let capturedBody: unknown = null;
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -263,7 +271,7 @@ test("renewExtensionConsent restores consented state for specific version", asyn
 
   const renewed = await client.renewExtensionConsent("user-42", "ext-uuid-1", 2);
   assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1/renew-consent");
-  assert.equal(capturedBody.version, 2);
+  assert.equal(get(capturedBody, "version"), 2);
   assert.equal(renewed.consent_status, "consented");
 });
 

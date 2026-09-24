@@ -13,6 +13,7 @@ export type ConsumerSession = {
 };
 
 export async function currentConsumer(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reserved for future host/tenant-aware lookups; Supabase reads the session from cookies today
   _requestHeaders?: Headers | globalThis.Headers,
 ): Promise<ConsumerSession | null> {
   try {
