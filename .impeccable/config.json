@@ -4,24 +4,10 @@
     "ignoreFiles": [],
     "ignoreValues": [
       {
-        "rule": "gradient-text",
-        "value": "*",
-        "files": ["src/app/globals.css"],
-        "createdAt": "2026-09-21T17:30:37.363Z",
-        "reason": "DESIGN.md: spectral gradient on hero h1 span is the documented brand signal"
-      },
-      {
         "rule": "design-system-font",
         "value": "sfmono-regular",
         "createdAt": "2026-09-21T17:30:37.386Z",
-        "reason": "Standard monospace fallback stack for code blocks, badges, and changelog dates — not a display font"
-      },
-      {
-        "rule": "side-tab",
-        "value": "*",
-        "files": ["src/app/globals.css"],
-        "createdAt": "2026-09-21T17:32:22.458Z",
-        "reason": "DESIGN.md: left-accent 3px border is the notice component's documented signature — editorial annotation pattern, not a card tab"
+        "reason": "Standard monospace fallback stack for code blocks, badges, and changelog dates \u2014 not a display font"
       }
     ]
   }

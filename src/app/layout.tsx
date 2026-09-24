@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Funnel_Display, Geist_Mono, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -9,6 +9,13 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
   weight: ["400", "500", "600"],
+});
+
+const funnel = Funnel_Display({
+  subsets: ["latin"],
+  variable: "--font-funnel",
+  display: "swap",
+  weight: ["500", "600"],
 });
 
 const geistMono = Geist_Mono({
@@ -111,7 +118,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("dark", inter.variable, geistMono.variable)}>
+    <html lang="en" className={cn("dark", inter.variable, funnel.variable, geistMono.variable)}>
       <head>
         <script
           type="application/ld+json"

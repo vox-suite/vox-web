@@ -1,438 +1,456 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-21T00:00:00.000Z",
+  "generatedAt": "2026-09-24T14:58:13Z",
   "title": "Design System: Vox",
   "extensions": {
     "colorMeta": {
-      "paper": {
+      "void-black": {
         "role": "neutral",
-        "displayName": "Paper White",
+        "displayName": "Void Black",
+        "canonical": "#040506",
+        "tonalRamp": [
+          "#101418",
+          "#1f262e",
+          "#33404c",
+          "#4b5e71",
+          "#667f99",
+          "#8ea1b4",
+          "#bcc7d2",
+          "#eaedf1"
+        ]
+      },
+      "plate": {
+        "role": "neutral",
+        "displayName": "Plate Graphite",
+        "canonical": "#0d0d10",
+        "tonalRamp": [
+          "#121217",
+          "#22222a",
+          "#393946",
+          "#555568",
+          "#72728d",
+          "#9797aa",
+          "#c1c1cd",
+          "#ebebef"
+        ]
+      },
+      "plate-raised": {
+        "role": "neutral",
+        "displayName": "Raised Graphite",
+        "canonical": "#141417",
+        "tonalRamp": [
+          "#131316",
+          "#242429",
+          "#3b3b44",
+          "#585865",
+          "#777788",
+          "#9a9aa7",
+          "#c3c3cb",
+          "#ececee"
+        ]
+      },
+      "bubble-you": {
+        "role": "neutral",
+        "displayName": "Caller Transcript Graphite",
+        "canonical": "#1f1f23",
+        "tonalRamp": [
+          "#131316",
+          "#242429",
+          "#3c3c44",
+          "#595964",
+          "#787887",
+          "#9b9ba6",
+          "#c4c4ca",
+          "#ececee"
+        ]
+      },
+      "bubble-vox": {
+        "role": "neutral",
+        "displayName": "Vox Transcript Graphite",
+        "canonical": "#16161a",
+        "tonalRamp": [
+          "#131316",
+          "#232329",
+          "#3a3a45",
+          "#565666",
+          "#75758a",
+          "#9999a9",
+          "#c2c2cc",
+          "#ececef"
+        ]
+      },
+      "crimson": {
+        "role": "primary",
+        "displayName": "Anodised Crimson",
+        "canonical": "#d7373f",
+        "tonalRamp": [
+          "#220708",
+          "#400d0f",
+          "#6a1519",
+          "#9d1f26",
+          "#d42a33",
+          "#e06268",
+          "#eca2a5",
+          "#f9e1e2"
+        ]
+      },
+      "crimson-hi": {
+        "role": "primary",
+        "displayName": "Crimson Highlight",
+        "canonical": "#e5484d",
+        "tonalRamp": [
+          "#240506",
+          "#430a0b",
+          "#701013",
+          "#a5171c",
+          "#df2026",
+          "#e85a5e",
+          "#f19d9f",
+          "#fbe0e1"
+        ]
+      },
+      "crimson-mid": {
+        "role": "primary",
+        "displayName": "Crimson Mid-stop",
+        "canonical": "#c52f37",
+        "tonalRamp": [
+          "#210809",
+          "#3e0f11",
+          "#67191d",
+          "#98242b",
+          "#ce3139",
+          "#db676d",
+          "#e9a4a8",
+          "#f8e2e3"
+        ]
+      },
+      "crimson-lo": {
+        "role": "primary",
+        "displayName": "Crimson Shadow",
+        "canonical": "#8e1c22",
+        "tonalRamp": [
+          "#220708",
+          "#400d0f",
+          "#6a1519",
+          "#9e1f26",
+          "#d52a33",
+          "#e06168",
+          "#eda1a5",
+          "#f9e1e2"
+        ]
+      },
+      "pure-white": {
+        "role": "neutral",
+        "displayName": "Pure White",
         "canonical": "#ffffff",
         "tonalRamp": [
-          "#e5e5e5",
-          "#d4d4d4",
-          "#a3a3a3",
-          "#737373",
-          "#525252",
-          "#404040",
+          "#141414",
           "#262626",
-          "#111111"
-        ]
-      },
-      "ink": {
-        "role": "primary",
-        "displayName": "Near-Black Ink",
-        "canonical": "#111111",
-        "tonalRamp": [
-          "#111111",
-          "#27272a",
-          "#3f3f46",
-          "#52525b",
-          "#71717a",
-          "#a1a1aa",
-          "#d4d4d8",
-          "#f4f4f5"
-        ]
-      },
-      "muted": {
-        "role": "neutral",
-        "displayName": "Editorial Muted",
-        "canonical": "#656565",
-        "tonalRamp": [
-          "#1a1a1a",
-          "#2e2e2e",
           "#404040",
-          "#525252",
-          "#656565",
-          "#888888",
-          "#b0b0b0",
-          "#d8d8d8"
+          "#5e5e5e",
+          "#808080",
+          "#a1a1a1",
+          "#c7c7c7",
+          "#ededed"
         ]
       },
-      "line": {
+      "mist": {
         "role": "neutral",
-        "displayName": "Rule Line",
-        "canonical": "#d8d8d8",
+        "displayName": "Mist",
+        "canonical": "#e6e6e6",
         "tonalRamp": [
+          "#141414",
+          "#262626",
           "#404040",
-          "#525252",
-          "#737373",
-          "#a3a3a3",
-          "#d4d4d4",
-          "#e5e5e5",
-          "#f0f0f0",
-          "#fafafa"
+          "#5e5e5e",
+          "#808080",
+          "#a1a1a1",
+          "#c7c7c7",
+          "#ededed"
         ]
       },
-      "soft": {
+      "ash": {
         "role": "neutral",
-        "displayName": "Soft Ground",
-        "canonical": "#f7f7f7",
+        "displayName": "Ash",
+        "canonical": "#9c9c9d",
         "tonalRamp": [
-          "#d4d4d4",
-          "#e0e0e0",
-          "#e8e8e8",
-          "#eeeeee",
-          "#f2f2f2",
-          "#f5f5f5",
-          "#f7f7f7",
-          "#ffffff"
+          "#141415",
+          "#262626",
+          "#3f3f40",
+          "#5e5e5f",
+          "#7f7f80",
+          "#a0a0a1",
+          "#c7c7c7",
+          "#ededed"
         ]
       },
-      "subtle": {
+      "smoke": {
         "role": "neutral",
-        "displayName": "Subtle Surface",
-        "canonical": "#eeeeee",
+        "displayName": "Smoke",
+        "canonical": "#8b8c8d",
         "tonalRamp": [
-          "#c0c0c0",
-          "#cccccc",
-          "#d8d8d8",
-          "#e0e0e0",
-          "#e8e8e8",
-          "#eeeeee",
-          "#f5f5f5",
-          "#fafafa"
+          "#141415",
+          "#262627",
+          "#3f4040",
+          "#5e5e5f",
+          "#7e8081",
+          "#a0a1a1",
+          "#c6c7c7",
+          "#ededed"
         ]
       },
-      "indigo": {
-        "role": "primary",
-        "displayName": "Indigo Signal",
-        "canonical": "#4f46e5",
-        "tonalRamp": [
-          "#1e1b4b",
-          "#312e81",
-          "#3730a3",
-          "#4338ca",
-          "#4f46e5",
-          "#6366f1",
-          "#818cf8",
-          "#e0e7ff"
-        ]
-      },
-      "indigo-deep": {
-        "role": "primary",
-        "displayName": "Indigo Deep",
-        "canonical": "#4338ca",
-        "tonalRamp": [
-          "#1e1b4b",
-          "#2d2a8a",
-          "#3730a3",
-          "#3f3abf",
-          "#4338ca",
-          "#5a55d8",
-          "#7c79ea",
-          "#c7c5f8"
-        ]
-      },
-      "indigo-light": {
-        "role": "secondary",
-        "displayName": "Indigo Light",
-        "canonical": "#6366f1",
-        "tonalRamp": [
-          "#312e81",
-          "#3730a3",
-          "#4f46e5",
-          "#6366f1",
-          "#818cf8",
-          "#a5b4fc",
-          "#c7d2fe",
-          "#e0e7ff"
-        ]
-      },
-      "violet": {
-        "role": "secondary",
-        "displayName": "Violet Gradient",
-        "canonical": "#7c3aed",
-        "tonalRamp": [
-          "#2e1065",
-          "#4c1d95",
-          "#5b21b6",
-          "#6d28d9",
-          "#7c3aed",
-          "#8b5cf6",
-          "#a78bfa",
-          "#ede9fe"
-        ]
-      },
-      "cyan": {
-        "role": "tertiary",
-        "displayName": "Cyan Terminus",
-        "canonical": "#06b6d4",
-        "tonalRamp": [
-          "#083344",
-          "#164e63",
-          "#155e75",
-          "#0e7490",
-          "#0891b2",
-          "#06b6d4",
-          "#22d3ee",
-          "#cffafe"
-        ]
-      },
-      "emerald": {
-        "role": "tertiary",
-        "displayName": "Confirmation Green",
-        "canonical": "#10b981",
-        "tonalRamp": [
-          "#064e3b",
-          "#065f46",
-          "#047857",
-          "#059669",
-          "#10b981",
-          "#34d399",
-          "#6ee7b7",
-          "#d1fae5"
-        ]
-      },
-      "danger": {
-        "role": "tertiary",
-        "displayName": "Danger Rose",
-        "canonical": "#9f1239",
-        "tonalRamp": [
-          "#4c0519",
-          "#881337",
-          "#9f1239",
-          "#be123c",
-          "#e11d48",
-          "#fb7185",
-          "#fda4af",
-          "#ffe4e6"
-        ]
-      },
-      "danger-surface": {
-        "role": "tertiary",
-        "displayName": "Danger Surface",
-        "canonical": "#fff1f2",
-        "tonalRamp": [
-          "#fda4af",
-          "#fecdd3",
-          "#fed7d7",
-          "#fee2e2",
-          "#fff1f2",
-          "#fff5f5",
-          "#fff8f8",
-          "#ffffff"
-        ]
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(255, 255, 255, 0.06)"
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Hero headline only. Carries spectral gradient on <span>."
+        "purpose": "Hero headline only; closing headline uses the clamp(2.25rem, 5.5vw, 4rem) sibling step."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "Section titles on marketing and changelog pages."
+        "purpose": "Every section heading, balanced wrap, max 34rem."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Card headings, admin sub-headings, component titles."
+        "purpose": "Group headings, phone caller name, 'Vox is calling' (20-24px)."
+      },
+      "subtitle": {
+        "displayName": "Subtitle",
+        "purpose": "List and step titles (17-19px Inter 500)."
+      },
+      "body-lg": {
+        "displayName": "Body Large",
+        "purpose": "Section descriptions and hero subhead (17-18px)."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "All running prose. Max 65–72ch in reading contexts."
+        "purpose": "All descriptive copy, 30-36rem measure."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Button text, form labels, numeric stat values, changelog dates. Space Grotesk only."
+        "purpose": "Captions, illustrative disclosures, transcript meta, footer titles."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Call timers, release versions and dates only."
       }
     },
+    "gradients": [
+      {
+        "name": "anodised-crimson",
+        "value": "linear-gradient(160deg, #e5484d 0%, #c52f37 46%, #8e1c22 100%)",
+        "purpose": "Brand mark, primary key, round call keys, final step marker."
+      },
+      {
+        "name": "graphite-key",
+        "value": "linear-gradient(180deg, #1d1d21 0%, #141417 100%)",
+        "purpose": "Secondary keys, selected tabs, step markers, menu toggle."
+      },
+      {
+        "name": "machined-frame",
+        "value": "linear-gradient(145deg, #5a5a62 0%, #26262b 22%, #111114 48%, #2e2e34 74%, #0b0b0d 100%)",
+        "purpose": "Phone bezel only."
+      },
+      {
+        "name": "section-glow",
+        "value": "radial-gradient(closest-side, rgba(215,55,63,0.14), transparent)",
+        "purpose": "One per section, behind a crimson object; 0.14-0.18 alpha."
+      }
+    ],
     "shadows": [
       {
-        "name": "button-rest",
-        "value": "0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
-        "purpose": "Primary and secondary button at rest. Hairline structural definition."
+        "name": "plate",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.045), 0 1px 2px rgba(0,0,0,0.4)",
+        "purpose": "Demo and story plates, mobile menu."
       },
       {
-        "name": "button-hover",
-        "value": "0 6px 20px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
-        "purpose": "Primary button hover — the spectral lift glow."
+        "name": "graphite-key",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.5)",
+        "purpose": "Secondary keys and step markers."
       },
       {
-        "name": "card-hover",
-        "value": "0 8px 30px rgba(99, 102, 241, 0.12)",
-        "purpose": "Module card and changelog card hover. Diffuse indigo ambient."
+        "name": "crimson-key",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.3), 0 10px 24px -10px rgba(142,28,34,0.75), 0 1px 2px rgba(0,0,0,0.5)",
+        "purpose": "Primary key at rest."
       },
       {
-        "name": "featured-card",
-        "value": "0 18px 55px rgba(79, 70, 229, 0.12)",
-        "purpose": "Permanently elevated feature card (follow-up card). Use sparingly."
+        "name": "crimson-key-pressed",
+        "value": "inset 0 1px 2px rgba(0,0,0,0.35), 0 4px 10px -6px rgba(142,28,34,0.7)",
+        "purpose": "Primary key on press."
+      },
+      {
+        "name": "floating-nav",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 32px -16px rgba(0,0,0,0.8)",
+        "purpose": "Floating header bar, with 24px backdrop blur."
+      },
+      {
+        "name": "machined-frame",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.35), inset 1px 0 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.7), 0 40px 80px -30px rgba(0,0,0,0.9), 0 12px 24px -12px rgba(0,0,0,0.7)",
+        "purpose": "Phone frame only."
+      },
+      {
+        "name": "inner-card",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.05), 0 24px 48px -24px rgba(0,0,0,0.9)",
+        "purpose": "Recessed card inside a plate (story call card)."
       }
     ],
     "motion": [
       {
-        "name": "spring",
+        "name": "ease-machined",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Button hover lift, feature card transforms. Snappy with a natural settle."
+        "purpose": "Keys, rise entrance, ring-out pulse."
       },
       {
-        "name": "standard",
-        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
-        "purpose": "Default easing for color and border transitions."
+        "name": "key-press",
+        "value": "160ms",
+        "purpose": "Key hover and press transitions."
       },
       {
-        "name": "fast",
-        "value": "0.2s",
-        "purpose": "Text color hover, border color changes."
+        "name": "rise",
+        "value": "700ms; from opacity 0, translateY(8px), blur(4px)",
+        "purpose": "Staggered entrance for transcript lines and the queued-actions tray."
       },
       {
-        "name": "normal",
-        "value": "0.25s",
-        "purpose": "Card and icon transitions."
+        "name": "ring-out",
+        "value": "2.4s infinite; scale 1 to 1.9, opacity 0.55 to 0",
+        "purpose": "Live-call pulse around the round crimson call key."
       },
       {
-        "name": "slow",
-        "value": "0.35s",
-        "purpose": "Art sections, radial glow opacity."
+        "name": "reduced-motion",
+        "value": "all animation and transition durations collapse to 0.01ms",
+        "purpose": "prefers-reduced-motion: reduce."
       }
     ],
     "breakpoints": [
       {
-        "name": "tablet",
-        "value": "1000px",
-        "purpose": "Grid columns collapse; demo context hides; 4-col → 2-col; admin sidebar narrows to 195px."
+        "name": "sm",
+        "value": "640px"
       },
       {
-        "name": "mobile",
-        "value": "720px",
-        "purpose": "Site nav hides; hero reduces padding; multi-column grids stack; card padding 1.25rem."
+        "name": "md",
+        "value": "768px"
       },
       {
-        "name": "changelog",
-        "value": "900px",
-        "purpose": "Changelog timeline collapses date column into inline flow."
+        "name": "lg",
+        "value": "1024px"
       }
     ]
   },
   "components": [
     {
-      "name": "Primary Button",
+      "name": "Crimson Key",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The primary call-to-action. Near-black at rest; transforms to indigo on hover.",
-      "html": "<button class=\"ds-btn-primary\">Get Started</button>",
-      "css": ".ds-btn-primary { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.65rem 1.45rem; border: 1px solid #18181b; border-radius: 6px; background: linear-gradient(180deg, #27272a 0%, #18181b 100%); color: white; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15); cursor: pointer; } .ds-btn-primary:hover { background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%); border-color: #6366f1; box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.25); transform: translateY(-1px); } .ds-btn-primary:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25); } .ds-btn-primary:focus-visible { outline: 3px solid #6366f1; outline-offset: 4px; }"
+      "description": "Primary action (Request access). One per viewport region.",
+      "html": "<a class=\"ds-key-crimson\" href=\"#\">Request access</a>",
+      "css": ".ds-key-crimson{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:12px;font:500 15px/1 Inter,ui-sans-serif,system-ui,sans-serif;color:#fff;text-decoration:none;background:linear-gradient(160deg, #e5484d 0%, #c52f37 46%, #8e1c22 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.3),0 10px 24px -10px rgba(142,28,34,0.75),0 1px 2px rgba(0,0,0,0.5);transition:filter 160ms cubic-bezier(0.16,1,0.3,1),transform 160ms cubic-bezier(0.16,1,0.3,1),box-shadow 160ms cubic-bezier(0.16,1,0.3,1)}.ds-key-crimson:hover{filter:brightness(1.08)}.ds-key-crimson:active{transform:translateY(1px);box-shadow:inset 0 1px 2px rgba(0,0,0,0.35),0 4px 10px -6px rgba(142,28,34,0.7)}.ds-key-crimson:focus-visible{outline:2px solid #9c9c9d;outline-offset:2px}"
     },
     {
-      "name": "Secondary Button",
+      "name": "Graphite Key",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Supporting action. White at rest; pale violet surface on hover.",
-      "html": "<button class=\"ds-btn-secondary\">Learn More</button>",
-      "css": ".ds-btn-secondary { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.65rem 1.45rem; border: 1px solid #d1d5db; border-radius: 6px; background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%); color: #18181b; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.05), inset 0 1px 0 #ffffff; cursor: pointer; } .ds-btn-secondary:hover { background: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 100%); color: #4f46e5; border-color: #c4b5fd; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.14), inset 0 1px 0 #ffffff; transform: translateY(-1px); } .ds-btn-secondary:focus-visible { outline: 3px solid #6366f1; outline-offset: 4px; }"
+      "description": "Secondary action and selected tab state.",
+      "html": "<a class=\"ds-key-graphite\" href=\"#\">Read the latest releases</a>",
+      "css": ".ds-key-graphite{display:inline-flex;align-items:center;height:44px;padding:0 20px;border-radius:12px;font:400 15px/1 Inter,ui-sans-serif,system-ui,sans-serif;color:#e6e6e6;text-decoration:none;background:linear-gradient(180deg,#1d1d21 0%,#141417 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),0 1px 2px rgba(0,0,0,0.5);transition:background 160ms ease-out,color 160ms ease-out}.ds-key-graphite:hover{color:#fff;background:linear-gradient(180deg,#232328 0%,#18181b 100%)}.ds-key-graphite:focus-visible{outline:2px solid #9c9c9d;outline-offset:2px}"
     },
     {
-      "name": "Ghost Button",
+      "name": "Text Link",
       "kind": "button",
-      "refersTo": "button-ghost",
-      "description": "Tertiary action. Invisible at rest; pale violet on hover.",
-      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
-      "css": ".ds-btn-ghost { font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.65rem 1.45rem; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #656565; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; } .ds-btn-ghost:hover { background: #f5f3ff; color: #4f46e5; } .ds-btn-ghost:focus-visible { outline: 3px solid #6366f1; outline-offset: 4px; }"
+      "refersTo": "link",
+      "description": "Tertiary action with a nudging arrow.",
+      "html": "<a class=\"ds-link\" href=\"#\">See how it works <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></a>",
+      "css": ".ds-link{display:inline-flex;align-items:center;gap:8px;height:48px;font:400 15px Inter,ui-sans-serif,system-ui,sans-serif;color:#e6e6e6;text-decoration:none;transition:color 150ms}.ds-link svg{transition:transform 200ms}.ds-link:hover{color:#fff}.ds-link:hover svg{transform:translateX(2px)}.ds-link:focus-visible{outline:2px solid #9c9c9d;outline-offset:2px}"
     },
     {
-      "name": "Badge — Neutral",
-      "kind": "chip",
-      "refersTo": "badge-neutral",
-      "description": "Default metadata chip. Monospace, uppercase, square-cornered.",
-      "html": "<span class=\"ds-badge\">Feature</span>",
-      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.28rem 0.65rem; border-radius: 0; background: #f1f1f1; color: #595959; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.65rem; letter-spacing: 0.045em; border: 1px solid #d8d8d8; text-transform: uppercase; line-height: 1.4; font-weight: 600; white-space: nowrap; }"
-    },
-    {
-      "name": "Badge — Accent",
-      "kind": "chip",
-      "refersTo": "badge-accent",
-      "description": "Indigo tonal badge for product labels, 'new' indicators, active tags.",
-      "html": "<span class=\"ds-badge-accent\">New</span>",
-      "css": ".ds-badge-accent { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.28rem 0.65rem; border-radius: 0; background: #ede9fe; color: #6d28d9; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.65rem; letter-spacing: 0.045em; border: 1px solid #ddd6fe; text-transform: uppercase; line-height: 1.4; font-weight: 600; white-space: nowrap; }"
-    },
-    {
-      "name": "Badge — Positive",
-      "kind": "chip",
-      "refersTo": "badge-positive",
-      "description": "Emerald badge for 'live', 'completed', and confirmation states.",
-      "html": "<span class=\"ds-badge-positive\">Live</span>",
-      "css": ".ds-badge-positive { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.28rem 0.65rem; border-radius: 0; background: #ecfdf5; color: #047857; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.65rem; letter-spacing: 0.045em; border: 1px solid #a7f3d0; text-transform: uppercase; line-height: 1.4; font-weight: 600; white-space: nowrap; }"
-    },
-    {
-      "name": "Card",
-      "kind": "card",
-      "refersTo": "card",
-      "description": "Base information container. Flat at rest; square corners; 1px rule border.",
-      "html": "<div class=\"ds-card\"><div class=\"ds-card-heading\"><h2>Card Title</h2><p>Supporting description text.</p></div><p>Card body content goes here.</p></div>",
-      "css": ".ds-card { padding: 1.75rem; border: 1px solid #d8d8d8; border-radius: 0; background: white; min-width: 0; font-family: 'Manrope', sans-serif; } .ds-card-heading { margin-bottom: 1.5rem; } .ds-card-heading h2 { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.025em; color: #111111; margin: 0; } .ds-card-heading p { margin-top: 0.45rem; font-size: 0.85rem; color: #656565; margin-bottom: 0; }"
-    },
-    {
-      "name": "Input / Field",
-      "kind": "input",
-      "refersTo": null,
-      "description": "Form input with label. Square-cornered; darker border than neutral line for contrast.",
-      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-input-1\">Email address</label><input class=\"ds-input\" id=\"ds-input-1\" type=\"email\" placeholder=\"you@example.com\" /></div>",
-      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; } .ds-label { font-family: 'Manrope', sans-serif; font-size: 0.84rem; font-weight: 600; color: #111111; } .ds-input { width: 100%; min-height: 2.75rem; border: 1px solid #a8a8a8; border-radius: 0; background: white; color: #111111; padding: 0.65rem 0.85rem; font-size: 1rem; font-family: 'Manrope', sans-serif; transition: border-color 0.2s ease, outline 0.1s ease; box-sizing: border-box; } .ds-input:focus-visible { outline: 3px solid #6366f1; outline-offset: 4px; border-color: #6366f1; }"
-    },
-    {
-      "name": "Admin Nav Link",
+      "name": "Floating Nav",
       "kind": "nav",
-      "refersTo": null,
-      "description": "Sidebar navigation link. Neutral at rest; inverted black/white when active.",
-      "html": "<nav class=\"ds-admin-nav\"><a class=\"ds-admin-nav-link\" href=\"#\">Dashboard</a><a class=\"ds-admin-nav-link\" href=\"#\" aria-current=\"page\">Redis</a><a class=\"ds-admin-nav-link\" href=\"#\">Health</a></nav>",
-      "css": ".ds-admin-nav { display: flex; flex-direction: column; gap: 0.35rem; } .ds-admin-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0; font-family: 'Manrope', sans-serif; font-size: 0.82rem; color: #656565; text-decoration: none; transition: background 0.15s ease, color 0.15s ease; } .ds-admin-nav-link[aria-current=\"page\"] { background: #111111; color: white; font-weight: 600; } .ds-admin-nav-link:hover:not([aria-current=\"page\"]) { background: #f7f7f7; color: #111111; }"
+      "refersTo": "nav-bar",
+      "description": "Fixed header bar; plate at 72% with blur, no outline.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><span class=\"ds-nav-mark\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\"><path d=\"M2 2.5 6 9.5 10 2.5\" stroke=\"white\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>Vox</a><span class=\"ds-nav-links\"><a href=\"#\">How it works</a><a href=\"#\">Capabilities</a><a href=\"#\">Changelog</a></span><a class=\"ds-nav-cta\" href=\"#\">Request access</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:16px;max-width:1040px;padding:8px 8px 8px 16px;border-radius:16px;background:rgba(13,13,16,0.72);backdrop-filter:blur(24px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.06),0 12px 32px -16px rgba(0,0,0,0.8);font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ds-nav-brand{display:inline-flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:600 17px 'Funnel Display',Inter,sans-serif;letter-spacing:-0.02em}.ds-nav-mark{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;background:linear-gradient(160deg, #e5484d 0%, #c52f37 46%, #8e1c22 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.3)}.ds-nav-links{display:flex;flex:1;justify-content:center;gap:28px}.ds-nav-links a{font-size:14px;color:#9c9c9d;text-decoration:none;transition:color 150ms}.ds-nav-links a:hover{color:#fff}.ds-nav-cta{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:500;color:#fff;text-decoration:none;background:linear-gradient(160deg, #e5484d 0%, #c52f37 46%, #8e1c22 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.3),0 10px 24px -10px rgba(142,28,34,0.75)}.ds-nav-cta:hover{filter:brightness(1.08)}"
+    },
+    {
+      "name": "Plate",
+      "kind": "card",
+      "refersTo": "plate",
+      "description": "Primary raised surface; fill and top highlight, never an outline.",
+      "html": "<div class=\"ds-plate\"><h3>The work continues after you hang up.</h3><p>Vox keeps commitments durable and brings the next important update back to you.</p></div>",
+      "css": ".ds-plate{padding:56px;border-radius:28px;background:#0d0d10;box-shadow:inset 0 1px 0 rgba(255,255,255,0.045),0 1px 2px rgba(0,0,0,0.4)}.ds-plate h3{margin:0;font:600 32px/1.05 'Funnel Display',Inter,sans-serif;letter-spacing:-0.03em;color:#fff}.ds-plate p{margin:20px 0 0;font:400 17px/1.625 Inter,sans-serif;color:#9c9c9d}"
+    },
+    {
+      "name": "Transcript",
+      "kind": "custom",
+      "refersTo": "bubble-you",
+      "description": "Two-step graphite speech bubbles with a cut tail corner.",
+      "html": "<div class=\"ds-transcript\"><p class=\"ds-bubble ds-you\">Tomorrow is packed. Protect two hours for the proposal.</p><p class=\"ds-bubble ds-vox\">The client review is fixed. I'll move the internal sync to Thursday and hold 9 to 11.</p></div>",
+      "css": ".ds-transcript{display:flex;flex-direction:column;gap:12px}.ds-bubble{margin:0;max-width:34rem;padding:12px 16px;border-radius:16px;font:400 15px/1.625 Inter,sans-serif}.ds-you{margin-left:auto;background:#1f1f23;color:#e6e6e6;border-bottom-right-radius:6px}.ds-vox{background:#16161a;color:#9c9c9d;border-bottom-left-radius:6px}"
+    },
+    {
+      "name": "Call Key",
+      "kind": "custom",
+      "refersTo": "call-key",
+      "description": "Round anodised call key with live ring-out pulse; the calling state.",
+      "html": "<span class=\"ds-call\"><span class=\"ds-call-ring\"></span><span class=\"ds-call-key\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"/></svg></span></span>",
+      "css": ".ds-call{position:relative;display:inline-block;width:64px;height:64px}.ds-call-ring{position:absolute;inset:0;border-radius:9999px;background:rgba(215,55,63,0.4);animation:ds-ring 2.4s cubic-bezier(0.16,1,0.3,1) infinite}.ds-call-key{position:relative;display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:9999px;background:linear-gradient(160deg, #e5484d 0%, #c52f37 46%, #8e1c22 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.3)}@keyframes ds-ring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.9);opacity:0}}@media (prefers-reduced-motion:reduce){.ds-call-ring{animation:none}}"
+    },
+    {
+      "name": "Release Row",
+      "kind": "custom",
+      "refersTo": "release-row",
+      "description": "List row separated by the white/6% hairline; mono for version and date only.",
+      "html": "<div class=\"ds-rows\"><article class=\"ds-row\"><div class=\"ds-row-meta\"><span>v2.4.0</span><time>Sep 20, 2026</time></div><h3>Faster call openings</h3></article><article class=\"ds-row\"><div class=\"ds-row-meta\"><span>v2.3.0</span><time>Sep 12, 2026</time></div><h3>Scheduled callbacks</h3></article></div>",
+      "css": ".ds-row{display:grid;grid-template-columns:160px 1fr;gap:40px;padding:32px 0}.ds-row+.ds-row{border-top:1px solid rgba(255,255,255,0.06)}.ds-row-meta{display:flex;flex-direction:column;gap:4px;font:400 13px 'Geist Mono',ui-monospace,monospace;color:#8b8c8d;font-variant-numeric:tabular-nums}.ds-row-meta span{color:#e6e6e6}.ds-row h3{margin:0;font:500 17px Inter,sans-serif;letter-spacing:-0.01em;color:#fff}"
     }
   ],
   "narrative": {
-    "northStar": "The Signal in the Noise",
-    "overview": "Vox is a quiet system that comes alive. At rest, every surface is white or a step in a tightly controlled neutral scale — paper, soft, subtle, contrast, line. There is no ambient color, no decorative warmth, no visual noise. The system's formality is mathematical: square corners everywhere, borders at exactly 1px, content held inside a vertical rail of border-inline rules that frame the page like an editorial column.\n\nThe signal appears only when the system is alive. The indigo-violet-cyan spectral gradient animates the hero headline, illuminates hover states, pulses behind active badges, and fills the closing section's dark void. It is a reward for attention, not wallpaper. This restraint is deliberate: professionals using Vox need to read fast. Color carries meaning here because it is used rarely.\n\nDensity is medium. The spacing scale runs generous but not lavish — 1.75rem card padding, clamp(4.5rem, 10vw, 8rem) between sections. Typography uses a single typeface family (Manrope Variable) for all text, reserving Space Grotesk for button labels and numeric displays.",
+    "northStar": "Machined",
+    "overview": "Vox is a precision instrument you keep in your pocket, and the marketing surface is built like one: near-black anodised graphite, fills machined to slightly different depths, and a single crimson anodised key that means \"press here\" or \"a call is live\". Nothing is outlined. Surfaces read as separate parts because they are milled from different stock (a fill step plus a one-pixel top highlight), the way a phone's frame and glass read as separate without a drawn line between them.\n\nDensity is low and deliberate. Sections breathe at 64 to 128px, headlines are tight and heavy in Funnel Display, and body copy sits in quiet ash Inter. Colour is almost entirely absent; crimson is the one voice, and its scarcity is what makes the call button and the calling state legible at a glance. The retired Raycast world (neon glow, bordered keycaps, coral/blue/green accents) is explicitly rejected on the marketing surface.",
     "keyCharacteristics": [
-      "White infrastructure; spectral energy is the signal, not the atmosphere",
-      "Square corners by default — only interactive controls (6px) and conversation bubbles (12px) earn curves",
-      "Single typeface (Manrope Variable), tightly tracked at −0.045em on headings",
-      "Dot-grid texture marks structural backdrops (hero, auth, admin welcome)",
-      "Vertical rail (border-inline) is the primary spatial organizing device",
-      "Hover is when the world turns on: every transition moves from neutral to spectral"
+      "Near-black ground with two graphite fill steps; depth by fill and inset highlight, never borders.",
+      "One anodised crimson gradient (160°) reserved for the mark, primary key, calling state, and at most one low glow per section.",
+      "Funnel Display 600 with negative tracking for headings; Inter for everything read; mono only for times and versions.",
+      "Hardware objects (the machined phone frame, round anodised call keys) carry the story instead of illustration or iconography grids."
     ],
     "rules": [
       {
-        "name": "The Signal Rule",
-        "body": "The spectral indigo-violet-cyan gradient is reserved for moments of activation: hero text span, interactive hover glows, the closing dark section. It does not appear as ambient decoration. Its rarity is its meaning.",
+        "name": "The One Voice Rule",
+        "body": "Crimson is the only hue on the marketing surface. No blue, no green, no coral. If a second colour seems necessary, use a graphite step or a white weight instead.",
         "section": "colors"
       },
       {
-        "name": "The Flat-at-Rest Rule",
-        "body": "Surfaces have no ambient elevation shadow. Shadows appear only as interaction feedback — hover, focus, or intentional visual lift of a featured element.",
-        "section": "elevation"
+        "name": "The One Glow Rule",
+        "body": "At most one crimson radial glow per section (0.14–0.18 alpha, falling to transparent by 70–75%). The glow sits behind the crimson object it belongs to, never as ambient decoration.",
+        "section": "colors"
       },
       {
-        "name": "The Square Frame Rule",
-        "body": "All containers and information elements use radius: 0. Only things a person presses (6px) or things a person said (12px) get curved corners. Rounding must be earned by function.",
-        "section": "shapes"
-      },
-      {
-        "name": "The Rail Rule",
-        "body": "Every page-level container carries border-inline: 1px solid var(--color-line). This vertical frame is the primary spatial organizing device. The empty gutter is the design.",
-        "section": "layout"
-      },
-      {
-        "name": "The Single-Family Rule",
-        "body": "All text is Manrope Variable. Space Grotesk appears only on button labels, numeric stat values, and changelog dates. Do not import additional typefaces.",
+        "name": "The Mono Is A Clock Rule",
+        "body": "Monospace means a time or a version number. It is never used for labels, headings, or decoration.",
         "section": "typography"
+      },
+      {
+        "name": "The No-Outline Rule",
+        "body": "Surfaces are separated by fill and the top-edge highlight, never by a border or 1px ring. The only lines are white/6% hairline dividers between rows of a list (principles, releases, and the footer's top edge).",
+        "section": "elevation"
       }
     ],
     "dos": [
-      "Do use the spectral gradient (indigo → violet → cyan) only for hero text highlights, interactive hover glows, and the closing dark section. One significant instance per view.",
-      "Do apply border-inline: 1px solid var(--color-line) to every page-level content container.",
-      "Do use radius: 0 for all containers, cards, badges, and information displays.",
-      "Do use Space Grotesk only on button labels, numeric stat values, and changelog dates.",
-      "Do mark structural backdrops with the radial-gradient dot-grid texture.",
-      "Do use the inverted black/white treatment for the active admin sidebar link.",
-      "Do keep badge text in monospace to maintain its metadata-versus-prose distinction."
+      "Do separate every surface by fill step plus a 1px top inset highlight (4.5–7% white).",
+      "Do reserve the anodised crimson gradient (160°, crimson-hi → crimson-lo) for the mark, the primary key, the calling state, and the closing step of a sequence.",
+      "Do keep crimson glows to one per section, behind a crimson object, at 0.14–0.18 alpha.",
+      "Do set headings in Funnel Display 600 with -0.02em to -0.04em tracking, tighter as size grows.",
+      "Do label every simulated call or conversation as illustrative in smoke 13px.",
+      "Do vary section padding between the 64/96px and 96/128px cadences."
     ],
     "donts": [
-      "Don't add ambient shadows to cards or containers at rest — shadows are hover and interaction feedback only.",
-      "Don't use the spectral gradient as a background pattern, texture, or repeated element.",
-      "Don't round cards, containers, badges, or admin panels.",
-      "Don't introduce a second display typeface.",
-      "Don't add color to resting states of cards or navigation links.",
-      "Don't apply the dot-grid texture behind interactive surfaces, dense text, or content cards.",
-      "Don't invent testimonials, customer logos, or metrics not present in the changelog record."
+      "Don't draw borders or 1px rings around cards, keys, or plates; the only lines are white/6% row dividers.",
+      "Don't use blue, green, or coral on the marketing surface, and don't use flat crimson as a fill.",
+      "Don't use monospace for anything other than times and version numbers.",
+      "Don't add neon or ambient glows that are not attached to a crimson object.",
+      "Don't reintroduce the retired Raycast keycap ring shadow (white/25% 1px ring) on marketing surfaces."
     ]
   }
 }
