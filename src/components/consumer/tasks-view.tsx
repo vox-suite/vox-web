@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, Button, Card, Field, Notice, Stack, Text, Row } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Notice,
+  Stack,
+  Text,
+  Row,
+} from "@/components/ui";
 import type { DurableTask } from "@/lib/consumer-auth/core-host-client";
 import { getAccessibleStatusIndicator } from "@/lib/global-formatting";
 
@@ -44,12 +53,12 @@ export function TasksView() {
   async function handleReconnect(taskId: string) {
     try {
       setReconnecting(true);
-      const res = await fetch(`/api/account/tasks?taskId=${encodeURIComponent(taskId)}`);
+      const res = await fetch(
+        `/api/account/tasks?taskId=${encodeURIComponent(taskId)}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch authoritative task state");
       const data = await res.json();
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? data.task : t)),
-      );
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? data.task : t)));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Reconnect failed");
     } finally {
@@ -59,34 +68,17 @@ export function TasksView() {
 
   async function handleCancel(taskId: string) {
     try {
-      const res = await fetch(`/api/account/tasks/${encodeURIComponent(taskId)}/cancel`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/account/tasks/${encodeURIComponent(taskId)}/cancel`,
+        {
+          method: "POST",
+        },
+      );
       if (!res.ok) throw new Error("Failed to cancel task");
       const data = await res.json();
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? data.task : t)),
-      );
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? data.task : t)));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cancel failed");
-    }
-  }
-
-  function toneForState(state: DurableTask["state"]): "neutral" | "positive" | "accent" | "warning" {
-    switch (state) {
-      case "completed":
-        return "positive";
-      case "running":
-        return "accent";
-      case "waiting_for_approval":
-      case "waiting_for_clarification":
-      case "waiting_for_connection":
-        return "warning";
-      case "cancelled":
-      case "failed":
-      case "queued":
-      default:
-        return "neutral";
     }
   }
 
@@ -124,12 +116,17 @@ export function TasksView() {
 
           {error && (
             <div role="alert" aria-live="assertive">
-              <Notice title="Error" tone="error">{error}</Notice>
+              <Notice title="Error" tone="error">
+                {error}
+              </Notice>
             </div>
           )}
 
           {tasks.length === 0 && (
-            <Text muted>No active tasks. Submit an instruction above to begin a durable execution.</Text>
+            <Text muted>
+              No active tasks. Submit an instruction above to begin a durable
+              execution.
+            </Text>
           )}
 
           <div className="space-y-4 pt-2">
@@ -151,7 +148,9 @@ export function TasksView() {
                       >
                         {task.title}
                       </h4>
-                      <p className="ui-text text-sm" data-muted="true">{task.instruction}</p>
+                      <p className="ui-text text-sm" data-muted="true">
+                        {task.instruction}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge
@@ -184,16 +183,18 @@ export function TasksView() {
                         >
                           {reconnecting ? "Checking..." : "Reconnect / Status"}
                         </Button>
-                        {task.state !== "completed" && task.state !== "cancelled" && task.state !== "failed" && (
-                          <Button
-                            variant="danger"
-                            className="text-xs py-1 px-2"
-                            aria-label={`Cancel task: ${task.title}`}
-                            onClick={() => handleCancel(task.id)}
-                          >
-                            Cancel
-                          </Button>
-                        )}
+                        {task.state !== "completed" &&
+                          task.state !== "cancelled" &&
+                          task.state !== "failed" && (
+                            <Button
+                              variant="danger"
+                              className="text-xs py-1 px-2"
+                              aria-label={`Cancel task: ${task.title}`}
+                              onClick={() => handleCancel(task.id)}
+                            >
+                              Cancel
+                            </Button>
+                          )}
                       </div>
                     </Row>
                   </div>

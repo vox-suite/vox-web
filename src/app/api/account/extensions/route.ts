@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ extensions });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to list extensions" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to list extensions",
+      },
       { status: 400 },
     );
   }
@@ -43,7 +46,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    if (!body.external_key || !body.display_name || !body.endpoint_url || !body.operator) {
+    if (
+      !body.external_key ||
+      !body.display_name ||
+      !body.endpoint_url ||
+      !body.operator
+    ) {
       return NextResponse.json(
         { error: "Missing required fields for extension installation" },
         { status: 400 },
@@ -61,7 +69,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ extension }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to install extension" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to install extension",
+      },
       { status: 400 },
     );
   }

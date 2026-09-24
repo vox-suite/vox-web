@@ -25,7 +25,9 @@ const PREFERENCE_CATEGORIES = [
 
 export function PrivacyControls() {
   const formId = useId();
-  const [activeTab, setActiveTab] = useState<"preferences" | "history" | "governance">("preferences");
+  const [activeTab, setActiveTab] = useState<
+    "preferences" | "history" | "governance"
+  >("preferences");
   const [preferences, setPreferences] = useState<UserPreference[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +37,22 @@ export function PrivacyControls() {
   const [category, setCategory] = useState("locale");
   const [prefKey, setPrefKey] = useState("display_currency");
   const [prefValue, setPrefValue] = useState("USD");
-  const [isSensitive, setIsSensitive] = useState(false);
+  const isSensitive =
+    category === "sensitive_personal" ||
+    SENSITIVE_PREFERENCE_KEYS.includes(prefKey);
+  const [prevIsSensitive, setPrevIsSensitive] = useState(isSensitive);
   const [confirmedSensitive, setConfirmedSensitive] = useState(false);
-  const [pendingConfirmationKey, setPendingConfirmationKey] = useState<string | null>(null);
+  const [pendingConfirmationKey, setPendingConfirmationKey] = useState<
+    string | null
+  >(null);
+
+  if (isSensitive !== prevIsSensitive) {
+    setPrevIsSensitive(isSensitive);
+    if (!isSensitive) {
+      setConfirmedSensitive(false);
+      setPendingConfirmationKey(null);
+    }
+  }
 
   // Deletion state
   const [deletingHistory, setDeletingHistory] = useState(false);
@@ -57,18 +72,10 @@ export function PrivacyControls() {
   } | null>(null);
 
   useEffect(() => {
-    loadPreferences();
+    (async () => {
+      await loadPreferences();
+    })();
   }, []);
-
-  useEffect(() => {
-    const sensitive =
-      category === "sensitive_personal" || SENSITIVE_PREFERENCE_KEYS.includes(prefKey);
-    setIsSensitive(sensitive);
-    if (!sensitive) {
-      setConfirmedSensitive(false);
-      setPendingConfirmationKey(null);
-    }
-  }, [category, prefKey]);
 
   async function loadPreferences() {
     try {
@@ -79,7 +86,9 @@ export function PrivacyControls() {
       const data = await res.json();
       setPreferences(data.preferences || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load preferences");
+      setError(
+        err instanceof Error ? err.message : "Failed to load preferences",
+      );
     } finally {
       setLoading(false);
     }
@@ -131,35 +140,48 @@ export function PrivacyControls() {
       }
 
       setPreferences((prev) => {
-        const filtered = prev.filter((p) => p.preference_key !== data.preference.preference_key);
+        const filtered = prev.filter(
+          (p) => p.preference_key !== data.preference.preference_key,
+        );
         return [data.preference, ...filtered];
       });
 
-      setSuccess(`Preference "${data.preference.preference_key}" saved successfully.`);
+      setSuccess(
+        `Preference "${data.preference.preference_key}" saved successfully.`,
+      );
       setPendingConfirmationKey(null);
       setConfirmedSensitive(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save preference");
+      setError(
+        err instanceof Error ? err.message : "Failed to save preference",
+      );
     }
   }
 
   async function handleDeletePreference(key: string) {
     try {
       setError(null);
-      const res = await fetch(`/api/account/preferences/${encodeURIComponent(key)}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/account/preferences/${encodeURIComponent(key)}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) throw new Error("Failed to delete preference");
       setPreferences((prev) => prev.filter((p) => p.preference_key !== key));
       setSuccess(`Preference "${key}" deleted.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete preference");
+      setError(
+        err instanceof Error ? err.message : "Failed to delete preference",
+      );
     }
   }
 
   async function handleDeleteTaskHistory() {
     if (!understandNoUndo) {
-      setError("Please confirm your acknowledgment that deleting history does not undo external transactions.");
+      setError(
+        "Please confirm your acknowledgment that deleting history does not undo external transactions.",
+      );
       return;
     }
 
@@ -168,18 +190,24 @@ export function PrivacyControls() {
       setError(null);
       setSuccess(null);
 
-      const res = await fetch("/api/account/privacy/history?delete_conversations=true", {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        "/api/account/privacy/history?delete_conversations=true",
+        {
+          method: "DELETE",
+        },
+      );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete task history");
+      if (!res.ok)
+        throw new Error(data.error || "Failed to delete task history");
 
       setDeletionResult({
         tasks: data.deleted_tasks_count,
         conversations: data.deleted_conversations_count,
         disclosure: data.disclosure,
       });
-      setSuccess("Task and conversation history removed from active platform database.");
+      setSuccess(
+        "Task and conversation history removed from active platform database.",
+      );
       setShowDeleteModal(false);
       setUnderstandNoUndo(false);
     } catch (err) {
@@ -196,7 +224,9 @@ export function PrivacyControls() {
       const res = await fetch("/api/account/privacy/export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ categories: ["preferences", "config", "tasks"] }),
+        body: JSON.stringify({
+          categories: ["preferences", "config", "tasks"],
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Export failed");
@@ -205,7 +235,9 @@ export function PrivacyControls() {
         export_id: data.export.export_id,
         disclosure: data.disclosure,
       });
-      setSuccess("Portable export generated. Excludes raw credentials and active authority.");
+      setSuccess(
+        "Portable export generated. Excludes raw credentials and active authority.",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Export failed");
     } finally {
@@ -270,9 +302,12 @@ export function PrivacyControls() {
                   Advisory Context Invariant (PRD FR-PRF-006 & FR-PRF-008):
                 </div>
                 <p>
-                  Saved preferences are user-managed and strictly separated from task history and agent code.
-                  Preferences provide advisory context only and grant NO capability, account, payment, or action authority.
-                  Authoritative provider facts (currency, inventory, booking deadlines, timezone) always supersede saved preferences.
+                  Saved preferences are user-managed and strictly separated from
+                  task history and agent code. Preferences provide advisory
+                  context only and grant NO capability, account, payment, or
+                  action authority. Authoritative provider facts (currency,
+                  inventory, booking deadlines, timezone) always supersede saved
+                  preferences.
                 </p>
               </div>
 
@@ -329,17 +364,24 @@ export function PrivacyControls() {
                       Sensitive Personal Preference Confirmation Required:
                     </div>
                     <p>
-                      Key <strong>{prefKey}</strong> contains sensitive personal data (e.g. address, medical/dietary, ID, or payment preference).
-                      Vox requires explicit confirmation before saving or replacing this context.
+                      Key <strong>{prefKey}</strong> contains sensitive personal
+                      data (e.g. address, medical/dietary, ID, or payment
+                      preference). Vox requires explicit confirmation before
+                      saving or replacing this context.
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer pt-1">
                       <input
                         type="checkbox"
                         checked={confirmedSensitive}
-                        onChange={(e) => setConfirmedSensitive(e.target.checked)}
+                        onChange={(e) =>
+                          setConfirmedSensitive(e.target.checked)
+                        }
                         className="rounded border-amber-700 bg-neutral-900"
                       />
-                      <span>I explicitly authorize Vox to save/replace this sensitive preference.</span>
+                      <span>
+                        I explicitly authorize Vox to save/replace this
+                        sensitive preference.
+                      </span>
                     </label>
                   </div>
                 )}
@@ -367,7 +409,8 @@ export function PrivacyControls() {
 
                 {preferences.length === 0 && !loading && (
                   <Text muted>
-                    No saved preferences found. Add advisory preferences using the form above.
+                    No saved preferences found. Add advisory preferences using
+                    the form above.
                   </Text>
                 )}
 
@@ -388,7 +431,9 @@ export function PrivacyControls() {
                           >
                             {pref.preference_key}
                           </strong>
-                          <Badge tone={pref.is_sensitive ? "warning" : "neutral"}>
+                          <Badge
+                            tone={pref.is_sensitive ? "warning" : "neutral"}
+                          >
                             {pref.category.toUpperCase()}
                           </Badge>
                           {pref.is_sensitive && (
@@ -414,7 +459,9 @@ export function PrivacyControls() {
                         variant="danger"
                         className="text-xs py-1 px-2"
                         aria-label={`Delete preference: ${pref.preference_key}`}
-                        onClick={() => handleDeletePreference(pref.preference_key)}
+                        onClick={() =>
+                          handleDeletePreference(pref.preference_key)
+                        }
                       >
                         Delete
                       </Button>
@@ -430,10 +477,12 @@ export function PrivacyControls() {
             <div className="space-y-4">
               <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-lg space-y-3 text-xs">
                 <div className="font-semibold text-neutral-100 text-sm">
-                  Platform Task History Deletion (PRD FR-DAT-005, FR-DAT-006, FR-DAT-007)
+                  Platform Task History Deletion (PRD FR-DAT-005, FR-DAT-006,
+                  FR-DAT-007)
                 </div>
                 <p className="text-neutral-300">
-                  Users can request deletion of platform-controlled conversation sessions and durable task executions.
+                  Users can request deletion of platform-controlled conversation
+                  sessions and durable task executions.
                 </p>
 
                 {/* MANDATORY DELETION DISCLOSURE COPY */}
@@ -443,18 +492,31 @@ export function PrivacyControls() {
                   </div>
                   <ul className="list-disc pl-4 space-y-1">
                     <li>
-                      <strong>No Transaction Undo:</strong> Deleting task history removes internal Vox logs. It{" "}
-                      <strong className="text-rose-200">DOES NOT undo, cancel, or refund completed external actions</strong>{" "}
-                      (e.g. hotel bookings, rides, food orders, or calendar events).
+                      <strong>No Transaction Undo:</strong> Deleting task
+                      history removes internal Vox logs. It{" "}
+                      <strong className="text-rose-200">
+                        DOES NOT undo, cancel, or refund completed external
+                        actions
+                      </strong>{" "}
+                      (e.g. hotel bookings, rides, food orders, or calendar
+                      events).
                     </li>
                     <li>
-                      <strong>External Records:</strong> Third-party services (Amazon, Expedia, Uber, Twilio carrier receipts) retain transaction logs under their own retention policies outside Vox control.
+                      <strong>External Records:</strong> Third-party services
+                      (Amazon, Expedia, Uber, Twilio carrier receipts) retain
+                      transaction logs under their own retention policies
+                      outside Vox control.
                     </li>
                     <li>
-                      <strong>Remote Operators & Audit Retention:</strong> Deployment operators may maintain mandatory legal audit logs and compliance records that are exempt from immediate user deletion.
+                      <strong>Remote Operators & Audit Retention:</strong>{" "}
+                      Deployment operators may maintain mandatory legal audit
+                      logs and compliance records that are exempt from immediate
+                      user deletion.
                     </li>
                     <li>
-                      <strong>Backup Timing:</strong> Database backup snapshots retain records for up to 30 days before natural rolling expiration.
+                      <strong>Backup Timing:</strong> Database backup snapshots
+                      retain records for up to 30 days before natural rolling
+                      expiration.
                     </li>
                   </ul>
                 </div>
@@ -479,7 +541,8 @@ export function PrivacyControls() {
                         className="rounded border-rose-700 bg-neutral-900"
                       />
                       <span>
-                        I understand that this deletes internal Vox task records and CANNOT undo or refund completed external actions.
+                        I understand that this deletes internal Vox task records
+                        and CANNOT undo or refund completed external actions.
                       </span>
                     </label>
                     <Row spread>
@@ -488,7 +551,9 @@ export function PrivacyControls() {
                         disabled={!understandNoUndo || deletingHistory}
                         onClick={handleDeleteTaskHistory}
                       >
-                        {deletingHistory ? "Purging Task Records..." : "Permanently Delete Task History"}
+                        {deletingHistory
+                          ? "Purging Task Records..."
+                          : "Permanently Delete Task History"}
                       </Button>
                       <Button
                         variant="secondary"
@@ -515,7 +580,8 @@ export function PrivacyControls() {
                   </div>
                   <p className="text-neutral-400">
                     Purged <strong>{deletionResult.tasks}</strong> tasks and{" "}
-                    <strong>{deletionResult.conversations}</strong> conversation turns from platform database.
+                    <strong>{deletionResult.conversations}</strong> conversation
+                    turns from platform database.
                   </p>
                   <p className="text-neutral-500 italic">
                     {deletionResult.disclosure}
@@ -533,16 +599,31 @@ export function PrivacyControls() {
                   Data Recipient Disclosures (PRD FR-DAT-006):
                 </div>
                 <p className="text-neutral-400">
-                  External services only receive data necessary to execute approved actions:
+                  External services only receive data necessary to execute
+                  approved actions:
                 </p>
                 <div className="space-y-1 text-neutral-300">
-                  <div>• <strong>Expedia:</strong> Receives travel dates, destination, guest count, and payment details strictly during approved booking.</div>
-                  <div>• <strong>Uber:</strong> Receives pickup/dropoff coordinates during ride request handoff.</div>
-                  <div>• <strong>Amazon:</strong> Receives ASIN item reference and quantity for cart continuation.</div>
-                  <div>• <strong>Twilio / WhatsApp:</strong> Receives destination phone number and notification text for dispatch.</div>
+                  <div>
+                    • <strong>Expedia:</strong> Receives travel dates,
+                    destination, guest count, and payment details strictly
+                    during approved booking.
+                  </div>
+                  <div>
+                    • <strong>Uber:</strong> Receives pickup/dropoff coordinates
+                    during ride request handoff.
+                  </div>
+                  <div>
+                    • <strong>Amazon:</strong> Receives ASIN item reference and
+                    quantity for cart continuation.
+                  </div>
+                  <div>
+                    • <strong>Twilio / WhatsApp:</strong> Receives destination
+                    phone number and notification text for dispatch.
+                  </div>
                 </div>
                 <div className="pt-2 text-neutral-400">
-                  To disconnect integrations or revoke agent capabilities, use the separate management panels below:
+                  To disconnect integrations or revoke agent capabilities, use
+                  the separate management panels below:
                 </div>
                 <Row>
                   <a
@@ -566,15 +647,23 @@ export function PrivacyControls() {
                   Portable Data Export (PRD FR-PRT-001 - FR-PRT-005)
                 </div>
                 <p className="text-neutral-400">
-                  Download a documented portable representation of your non-secret preferences, configuration, and task history.
-                  In accordance with platform safety guarantees, <strong>credentials, active approvals, and reusable authority are never exported</strong>.
+                  Download a documented portable representation of your
+                  non-secret preferences, configuration, and task history. In
+                  accordance with platform safety guarantees,{" "}
+                  <strong>
+                    credentials, active approvals, and reusable authority are
+                    never exported
+                  </strong>
+                  .
                 </p>
                 <Button
                   variant="secondary"
                   disabled={exporting}
                   onClick={handleExport}
                 >
-                  {exporting ? "Packaging Export..." : "Generate Portable Export"}
+                  {exporting
+                    ? "Packaging Export..."
+                    : "Generate Portable Export"}
                 </Button>
 
                 {exportResult && (
@@ -586,7 +675,9 @@ export function PrivacyControls() {
                     <div className="font-semibold text-emerald-400">
                       Export Ready: {exportResult.export_id}
                     </div>
-                    <p className="text-neutral-400">{exportResult.disclosure}</p>
+                    <p className="text-neutral-400">
+                      {exportResult.disclosure}
+                    </p>
                   </div>
                 )}
               </div>

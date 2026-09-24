@@ -36,7 +36,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(history);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to read connected trip history" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to read connected trip history",
+      },
       { status: 400 },
     );
   }

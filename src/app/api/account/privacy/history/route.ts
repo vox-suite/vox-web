@@ -19,9 +19,13 @@ export async function DELETE(request: NextRequest) {
 
   try {
     const url = new URL(request.url);
-    const deleteConversations = url.searchParams.get("delete_conversations") !== "false";
+    const deleteConversations =
+      url.searchParams.get("delete_conversations") !== "false";
 
-    const result = await core.deleteTaskHistory(account.accountId, deleteConversations);
+    const result = await core.deleteTaskHistory(
+      account.accountId,
+      deleteConversations,
+    );
 
     return NextResponse.json({
       deleted_tasks_count: result.deleted_tasks_count,

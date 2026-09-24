@@ -412,9 +412,7 @@ export function RedisExplorer() {
                               aria-haspopup="menu"
                               aria-expanded={isMenuOpen}
                               onClick={() => {
-                                setActiveMenuKey(
-                                  isMenuOpen ? null : entry.key,
-                                );
+                                setActiveMenuKey(isMenuOpen ? null : entry.key);
                               }}
                             >
                               <MoreVertical size={16} aria-hidden="true" />
@@ -629,10 +627,7 @@ export function RedisExplorer() {
                                         variant="danger"
                                         onClick={() => setConfirmDelete(true)}
                                       >
-                                        <Trash2
-                                          size={15}
-                                          aria-hidden="true"
-                                        />
+                                        <Trash2 size={15} aria-hidden="true" />
                                         Delete entry
                                       </Button>
                                     </Row>

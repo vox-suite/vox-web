@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(results);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to search lodging" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to search lodging",
+      },
       { status: 400 },
     );
   }
@@ -79,7 +82,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to book lodging" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to book lodging",
+      },
       { status: 400 },
     );
   }

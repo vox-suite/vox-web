@@ -262,7 +262,8 @@ export const PIPELINE_NODES: PipelineNode[] = [
       summary:
         "Native voice client built in Rust with Tauri v2 and Dioxus. Handles microphone capture via CPAL, buffers into 20ms chunks, manages deep-linked PKCE authentication via vox://auth/callback, and plays responses through native speakers.",
       latencyBudget: "Budget: 10ms. Observed: 3.5ms capture-to-socket latency.",
-      empiricalSla: "Seamless native desktop integration with zero port bindings.",
+      empiricalSla:
+        "Seamless native desktop integration with zero port bindings.",
       codeReference: "vox-desktop/src-tauri/src/audio.rs",
       sourceFile: "vox-desktop/src-tauri/src/audio.rs",
       codeSnippet: `pub fn start_audio_capture(
@@ -326,7 +327,8 @@ export const PIPELINE_NODES: PipelineNode[] = [
       summary:
         "Dedicated WebSocket endpoint on vox-bridge for desktop voice streaming. Validates single-use session tickets issued by /bridge/desktop/sessions, streaming audio directly to the acoustic pipeline.",
       latencyBudget: "Budget: 5ms. Observed: 1.4ms per frame.",
-      empiricalSla: "High-throughput binary streaming without transcoding overhead.",
+      empiricalSla:
+        "High-throughput binary streaming without transcoding overhead.",
       codeReference: "vox-bridge/src/channels/desktop/stream.rs",
       sourceFile: "src/channels/desktop/stream.rs",
       codeSnippet: `pub async fn desktop_stream_handler(
@@ -362,7 +364,12 @@ export const PIPELINE_NODES: PipelineNode[] = [
     width: 270,
     height: 170,
     inputs: [
-      { id: "in_raw", name: "μ-law / PCM Frames", type: "in", dataType: "Bytes" },
+      {
+        id: "in_raw",
+        name: "μ-law / PCM Frames",
+        type: "in",
+        dataType: "Bytes",
+      },
     ],
     outputs: [
       {
@@ -492,8 +499,10 @@ settle_at = None;`,
     details: {
       summary:
         "Stores minimal per-user records (vox:user:{id} with name + channels, plus vox:channel:{channel}:{external_id} indexes). Runs with AOF persistence. Strict 100ms deadline fails open on cache miss.",
-      latencyBudget: "Budget: 100ms. Observed: 2.1-4.5ms over local Redis network.",
-      empiricalSla: "P99 under 10ms; fails open immediately to anonymous greeting.",
+      latencyBudget:
+        "Budget: 100ms. Observed: 2.1-4.5ms over local Redis network.",
+      empiricalSla:
+        "P99 under 10ms; fails open immediately to anonymous greeting.",
       codeReference: "vox-core/src/cache/mod.rs",
       sourceFile: "vox-core/src/cache/mod.rs",
       codeSnippet: `let key = format!("vox:channel:{}:{}", channel, external_id);
@@ -600,7 +609,8 @@ let user_id = tokio::time::timeout(Duration::from_millis(100), redis.get(&key)).
       summary:
         "Validates Desktop client user tokens against Supabase JWT secret. Exchanges identity with Core /v1/auth/exchange and generates a single-use session ticket for the WebSocket channel.",
       latencyBudget: "Budget: 25ms. Observed: 8ms.",
-      empiricalSla: "Ensures no secrets or master credentials are distributed to clients.",
+      empiricalSla:
+        "Ensures no secrets or master credentials are distributed to clients.",
       codeReference: "vox-bridge/src/channels/desktop/session.rs",
       sourceFile: "src/channels/desktop/session.rs",
       codeSnippet: `pub async fn create_desktop_session(
@@ -1083,7 +1093,8 @@ if score >= 3.5 {
       summary:
         "PostgreSQL is authoritative across all services. Stores conversation history, agents, durable events, schedules, summaries, and pending job leases. All writes commit here before worker execution.",
       latencyBudget: "Budget: 15ms. Observed: 4-8ms query execution.",
-      empiricalSla: "Full ACID durability; row-level locking for multi-instance safety.",
+      empiricalSla:
+        "Full ACID durability; row-level locking for multi-instance safety.",
       codeReference: "vox-core/supabase_schema.sql",
       sourceFile: "vox-core/supabase_schema.sql",
       codeSnippet: `CREATE TABLE vox_jobs (
@@ -1342,7 +1353,8 @@ output.send(CallCommand::Mark(format!("response-{number}"))).await?;`,
       summary:
         "Streams uncompressed synthesized PCM audio directly over the desktop WebSocket. Bypasses telephony downsampling for pristine, studio-quality native speaker and headphone output.",
       latencyBudget: "Budget: 3ms. Observed: 0.8ms.",
-      empiricalSla: "Pristine audio fidelity without telephone codec artifacts.",
+      empiricalSla:
+        "Pristine audio fidelity without telephone codec artifacts.",
       codeReference: "vox-bridge/src/channels/desktop/stream.rs",
       sourceFile: "src/channels/desktop/stream.rs",
       codeSnippet: `let msg = DesktopOutboundText::AudioChunk { payload: base64_pcm };
@@ -1445,7 +1457,8 @@ tracing::info!(outcome = %disposition.outcome, satisfaction = disposition.satisf
       summary:
         "Dispatched asynchronously by vox-core-worker. Computes vector embeddings of call insights, saves durable memory notes to user profile in PostgreSQL, and delivers scheduled reminder notifications.",
       latencyBudget: "Budget: 2000ms. Background non-blocking execution.",
-      empiricalSla: "Guaranteed memory persistence for subsequent calls or desktop sessions.",
+      empiricalSla:
+        "Guaranteed memory persistence for subsequent calls or desktop sessions.",
       codeReference: "vox-core/src/workers/actions.rs",
       sourceFile: "vox-core/src/workers/actions.rs",
       codeSnippet: `pub async fn execute_action(action: &ActionJob, db: &PgPool) -> Result<()> {
@@ -2062,8 +2075,7 @@ export const TRACE_SCENARIOS: TraceScenario[] = [
         nodeId: "stt_stream",
         label: "Fast Partial Utterance",
         elapsedMs: 60,
-        description:
-          "AssemblyAI partial returns single short token: 'uh-huh'.",
+        description: "AssemblyAI partial returns single short token: 'uh-huh'.",
         dataPayload: `{"partial": "uh-huh"}`,
       },
       {

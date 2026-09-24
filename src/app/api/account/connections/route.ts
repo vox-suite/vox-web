@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ connections });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to list connections" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to list connections",
+      },
       { status: 500 },
     );
   }
@@ -52,7 +55,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to initiate connection" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to initiate connection",
+      },
       { status: 400 },
     );
   }

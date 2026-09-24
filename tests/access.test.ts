@@ -104,10 +104,7 @@ test("consumer routing isolates app.voxagent.in and keeps local /app paths", () 
     consumerDestination("app.voxagent.in", "/account"),
     "/app/account",
   );
-  assert.equal(
-    consumerDestination("app.voxagent.in", "/auth/callback"),
-    null,
-  );
+  assert.equal(consumerDestination("app.voxagent.in", "/auth/callback"), null);
   assert.equal(
     consumerDestination("app.voxagent.in", "/api/account/auth/session"),
     null,
@@ -139,7 +136,10 @@ test("admin e2e session encoding rejects tampering", async () => {
     await import("../src/lib/access");
   const secret = "test-secret";
   const token = encodeAdminE2ESession("admin@example.test", secret);
-  assert.equal(decodeAdminE2ESession(token, secret)?.email, "admin@example.test");
+  assert.equal(
+    decodeAdminE2ESession(token, secret)?.email,
+    "admin@example.test",
+  );
   assert.equal(decodeAdminE2ESession(token.slice(0, -1) + "x", secret), null);
   assert.equal(isSuperuser("admin@example.test", "admin@example.test"), true);
 });

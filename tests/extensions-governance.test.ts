@@ -104,10 +104,16 @@ test("installExtension posts signed host context and manifest to /v1/remote-exte
   const ext = await client.installExtension("user-42", request);
 
   assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions");
-  assert.equal(get(capturedBody, "host_context.host_user_id"), "vox-account:user-42");
+  assert.equal(
+    get(capturedBody, "host_context.host_user_id"),
+    "vox-account:user-42",
+  );
   assert.equal(get(capturedBody, "extension.external_key"), "weather-service");
   assert.equal(get(capturedBody, "extension.protocol"), "mcp");
-  assert.equal(get(capturedHeaders, "X-Vox-Host-Credential"), "11111111-2222-4333-8444-555555555555");
+  assert.equal(
+    get(capturedHeaders, "X-Vox-Host-Credential"),
+    "11111111-2222-4333-8444-555555555555",
+  );
 
   // Acceptance Criterion 1: Installation clearly states that no access is granted automatically
   assert.equal(ext.lifecycle_state, "installed");
@@ -171,12 +177,18 @@ test("listExtensions and getExtension fetch registered extensions and capabiliti
   });
 
   const list = await client.listExtensions("user-42");
-  assert.equal(capturedListUrl, "https://core.vox.test/v1/remote-extensions/list");
+  assert.equal(
+    capturedListUrl,
+    "https://core.vox.test/v1/remote-extensions/list",
+  );
   assert.equal(list.length, 1);
   assert.equal(list[0].external_key, "weather-service");
 
   const single = await client.getExtension("user-42", "ext-uuid-1");
-  assert.equal(capturedGetUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1");
+  assert.equal(
+    capturedGetUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1",
+  );
   assert.equal(single.id, "ext-uuid-1");
 });
 
@@ -199,8 +211,15 @@ test("setExtensionEnabled toggles operator enablement", async () => {
     nonce: () => "mock-nonce-ext-3",
   });
 
-  const updated = await client.setExtensionEnabled("user-42", "ext-uuid-1", true);
-  assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1/enable");
+  const updated = await client.setExtensionEnabled(
+    "user-42",
+    "ext-uuid-1",
+    true,
+  );
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/enable",
+  );
   assert.equal(get(capturedBody, "enabled"), true);
   assert.equal(updated.operator_enabled, true);
 });
@@ -234,15 +253,24 @@ test("updateExtension triggers consent_required on expanded data recipients or o
         external_key: "weather.get_forecast",
         display_name: "Get Weather Forecast",
         effect: "read",
-        data_recipients: ["Weather Analytics Cloud", "NewAdvertisingPartner.com"],
+        data_recipients: [
+          "Weather Analytics Cloud",
+          "NewAdvertisingPartner.com",
+        ],
       },
     ],
   };
 
   const result = await client.updateExtension("user-42", "ext-uuid-1", update);
-  assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1");
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1",
+  );
   assert.equal(capturedMethod, "PUT");
-  assert.equal(get(capturedBody, "extension.capabilities.0.data_recipients.length"), 2);
+  assert.equal(
+    get(capturedBody, "extension.capabilities.0.data_recipients.length"),
+    2,
+  );
 
   // Acceptance Criterion 2: Material integration changes pause affected use until renewed consent
   assert.equal(result.consent_status, "consent_required");
@@ -269,8 +297,15 @@ test("renewExtensionConsent restores consented state for specific version", asyn
     nonce: () => "mock-nonce-ext-5",
   });
 
-  const renewed = await client.renewExtensionConsent("user-42", "ext-uuid-1", 2);
-  assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1/renew-consent");
+  const renewed = await client.renewExtensionConsent(
+    "user-42",
+    "ext-uuid-1",
+    2,
+  );
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/renew-consent",
+  );
   assert.equal(get(capturedBody, "version"), 2);
   assert.equal(renewed.consent_status, "consented");
 });
@@ -293,7 +328,10 @@ test("removeExtension issues DELETE and marks lifecycle_state removed", async ()
   });
 
   const removed = await client.removeExtension("user-42", "ext-uuid-1");
-  assert.equal(capturedUrl, "https://core.vox.test/v1/remote-extensions/ext-uuid-1");
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1",
+  );
   assert.equal(capturedMethod, "DELETE");
   assert.equal(removed.lifecycle_state, "removed");
 });
@@ -393,7 +431,11 @@ test("malicious metadata and XSS payloads in extension fields are handled safely
   const isValidUrl = (url: string) => {
     try {
       const u = new URL(url);
-      return u.protocol === "https:" || (u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1"));
+      return (
+        u.protocol === "https:" ||
+        (u.protocol === "http:" &&
+          (u.hostname === "localhost" || u.hostname === "127.0.0.1"))
+      );
     } catch {
       return false;
     }

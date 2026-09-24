@@ -23,7 +23,7 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "neutral",
     },
-  }
+  },
 );
 
 function Badge({
@@ -35,7 +35,8 @@ function Badge({
 }: React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & {
     asChild?: boolean;
-    tone?: "neutral" | "positive" | "accent" | "warning" | "error" | "destructive";
+    tone?:
+      "neutral" | "positive" | "accent" | "warning" | "error" | "destructive";
   }) {
   const Comp = asChild ? Slot.Root : "span";
   const toneMapped = tone === "error" ? "destructive" : tone;

@@ -152,10 +152,7 @@ test("deleteTaskHistory posts to /v1/privacy/delete-history and verifies disclos
   });
 
   const result = await client.deleteTaskHistory("user-1", true);
-  assert.equal(
-    capturedUrl,
-    "https://core.vox.test/v1/privacy/delete-history",
-  );
+  assert.equal(capturedUrl, "https://core.vox.test/v1/privacy/delete-history");
   assert.equal(capturedBody?.delete_conversations, true);
   assert.equal(result.deleted_tasks_count, 5);
   assert.equal(result.deleted_conversations_count, 12);
@@ -164,7 +161,9 @@ test("deleteTaskHistory posts to /v1/privacy/delete-history and verifies disclos
 test("deletion disclosure invariant: explicitly identifies external records, backups, and no undo", () => {
   // PRD FR-DAT-006 & FR-DAT-007 verification
   assert.ok(
-    DELETION_DISCLOSURE.includes("DOES NOT undo, cancel, or refund completed external transactions"),
+    DELETION_DISCLOSURE.includes(
+      "DOES NOT undo, cancel, or refund completed external transactions",
+    ),
     "Must state that deleting history does not undo completed external transactions",
   );
   assert.ok(
@@ -198,7 +197,8 @@ test("portable export request excludes credentials and active authority", async 
         download_url: "https://core.vox.test/downloads/exp-999.json",
         categories: ["preferences", "config"],
         generated_at: "2026-09-24T08:00:00Z",
-        disclosure: "Non-secret export excluding credentials and active authority",
+        disclosure:
+          "Non-secret export excluding credentials and active authority",
       });
     },
     now: () => 1_795_622_400,
@@ -209,10 +209,7 @@ test("portable export request excludes credentials and active authority", async 
     "preferences",
     "config",
   ]);
-  assert.equal(
-    capturedUrl,
-    "https://core.vox.test/v1/privacy/portable-export",
-  );
+  assert.equal(capturedUrl, "https://core.vox.test/v1/privacy/portable-export");
   assert.deepEqual(capturedBody?.categories, ["preferences", "config"]);
   assert.equal(result.export_id, "exp-999");
 });

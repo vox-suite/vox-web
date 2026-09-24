@@ -25,7 +25,9 @@ export function ConnectionsManager() {
       const data = await res.json();
       setConnections(data.connections || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load connections");
+      setError(
+        err instanceof Error ? err.message : "Failed to load connections",
+      );
     } finally {
       setLoading(false);
     }
@@ -40,9 +42,12 @@ export function ConnectionsManager() {
   async function handleDisconnect(connectionId: string) {
     try {
       setDisconnectingId(connectionId);
-      const res = await fetch(`/api/account/connections/${encodeURIComponent(connectionId)}/disconnect`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/account/connections/${encodeURIComponent(connectionId)}/disconnect`,
+        {
+          method: "POST",
+        },
+      );
       if (!res.ok) throw new Error("Disconnect failed");
       const data = await res.json();
       setDisclosure({
@@ -66,13 +71,18 @@ export function ConnectionsManager() {
       >
         <Stack gap="normal">
           <div className="p-3 bg-obsidian border border-border-edge rounded-lg text-sm text-mist">
-            <strong>Important Boundary:</strong> Connecting an external account allows Vox to access the provider, but does <em>not</em> grant any agent permission to perform actions or side-effects. Agent capability grants must be explicitly configured separately.
+            <strong>Important Boundary:</strong> Connecting an external account
+            allows Vox to access the provider, but does <em>not</em> grant any
+            agent permission to perform actions or side-effects. Agent
+            capability grants must be explicitly configured separately.
           </div>
 
           {loading && <Text muted>Loading connections...</Text>}
           {error && (
             <div role="alert" aria-live="assertive">
-              <Notice title="Error" tone="error">{error}</Notice>
+              <Notice title="Error" tone="error">
+                {error}
+              </Notice>
             </div>
           )}
 
@@ -87,15 +97,19 @@ export function ConnectionsManager() {
           )}
 
           {!loading && connections.length === 0 && (
-            <Text muted>No connected accounts. Authorize an integration below to enable external capabilities.</Text>
+            <Text muted>
+              No connected accounts. Authorize an integration below to enable
+              external capabilities.
+            </Text>
           )}
 
           <div className="space-y-4">
             {connections.map((conn) => {
-              const isPlatformHeld = conn.credential_custody === "platform_held";
+              const isPlatformHeld =
+                conn.credential_custody === "platform_held";
               const isAuthorized = conn.authorization_state === "authorized";
               const statusIndicator = getAccessibleStatusIndicator(
-                isAuthorized ? "confirmed" : conn.authorization_state
+                isAuthorized ? "confirmed" : conn.authorization_state,
               );
 
               return (
@@ -120,12 +134,18 @@ export function ConnectionsManager() {
                           aria-label={statusIndicator.ariaLabel}
                           className="flex items-center gap-1.5"
                         >
-                          <span aria-hidden="true">{statusIndicator.symbol}</span>
+                          <span aria-hidden="true">
+                            {statusIndicator.symbol}
+                          </span>
                           <span>{statusIndicator.text}</span>
                         </Badge>
                       </div>
                       <p className="ui-text text-sm" data-muted="true">
-                        Account: <strong>{conn.account_display_id || conn.external_account_reference}</strong>
+                        Account:{" "}
+                        <strong>
+                          {conn.account_display_id ||
+                            conn.external_account_reference}
+                        </strong>
                       </p>
                     </div>
 
@@ -136,7 +156,9 @@ export function ConnectionsManager() {
                         disabled={disconnectingId === conn.id}
                         onClick={() => handleDisconnect(conn.id)}
                       >
-                        {disconnectingId === conn.id ? "Disconnecting..." : "Disconnect"}
+                        {disconnectingId === conn.id
+                          ? "Disconnecting..."
+                          : "Disconnect"}
                       </Button>
                     )}
                   </Row>
@@ -145,12 +167,17 @@ export function ConnectionsManager() {
                     <div>
                       <span className="text-smoke">Custody Model:</span>{" "}
                       <strong>
-                        {isPlatformHeld ? "Platform-held credentials" : "External operator authorization"}
+                        {isPlatformHeld
+                          ? "Platform-held credentials"
+                          : "External operator authorization"}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-smoke">Authorized Capabilities:</span>{" "}
-                      {conn.authorized_capabilities && conn.authorized_capabilities.length > 0 ? (
+                      <span className="text-smoke">
+                        Authorized Capabilities:
+                      </span>{" "}
+                      {conn.authorized_capabilities &&
+                      conn.authorized_capabilities.length > 0 ? (
                         <span>{conn.authorized_capabilities.join(", ")}</span>
                       ) : (
                         <span className="text-smoke">None</span>
@@ -163,16 +190,37 @@ export function ConnectionsManager() {
           </div>
 
           <div className="pt-2">
-            <h4 className="text-sm font-medium text-mist mb-2">Available Integrations</h4>
+            <h4 className="text-sm font-medium text-mist mb-2">
+              Available Integrations
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { key: "google-calendar", name: "Google Calendar", operator: "Google LLC", custody: "External operator authorization", scope: "calendar.read, calendar.write" },
-                { key: "uber", name: "Uber Rides", operator: "Uber Technologies", custody: "External operator authorization", scope: "rides.estimate, rides.request" },
+                {
+                  key: "google-calendar",
+                  name: "Google Calendar",
+                  operator: "Google LLC",
+                  custody: "External operator authorization",
+                  scope: "calendar.read, calendar.write",
+                },
+                {
+                  key: "uber",
+                  name: "Uber Rides",
+                  operator: "Uber Technologies",
+                  custody: "External operator authorization",
+                  scope: "rides.estimate, rides.request",
+                },
               ].map((provider) => (
-                <div key={provider.key} className="p-3 border border-border-edge rounded-lg space-y-2 bg-obsidian/50">
+                <div
+                  key={provider.key}
+                  className="p-3 border border-border-edge rounded-lg space-y-2 bg-obsidian/50"
+                >
                   <div className="font-medium text-mist">{provider.name}</div>
-                  <p className="ui-text text-xs" data-muted="true">Operator: {provider.operator}</p>
-                  <p className="ui-text text-xs" data-muted="true">Custody: {provider.custody}</p>
+                  <p className="ui-text text-xs" data-muted="true">
+                    Operator: {provider.operator}
+                  </p>
+                  <p className="ui-text text-xs" data-muted="true">
+                    Custody: {provider.custody}
+                  </p>
                   <Button
                     variant="primary"
                     aria-label={`Connect ${provider.name}`}

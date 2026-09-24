@@ -13,7 +13,10 @@ export async function POST(
 
   const { id: extensionId } = await params;
   if (!extensionId) {
-    return NextResponse.json({ error: "Extension ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Extension ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -27,14 +30,26 @@ export async function POST(
   try {
     const body = await request.json();
     if (typeof body.enabled !== "boolean") {
-      return NextResponse.json({ error: "Field 'enabled' (boolean) is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Field 'enabled' (boolean) is required" },
+        { status: 400 },
+      );
     }
 
-    const updated = await core.setExtensionEnabled(account.accountId, extensionId, body.enabled);
+    const updated = await core.setExtensionEnabled(
+      account.accountId,
+      extensionId,
+      body.enabled,
+    );
     return NextResponse.json({ extension: updated });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to toggle operator enablement" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to toggle operator enablement",
+      },
       { status: 400 },
     );
   }

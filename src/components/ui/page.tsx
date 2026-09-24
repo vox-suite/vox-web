@@ -22,7 +22,9 @@ export function Page({
           <h1 className="text-heading font-normal tracking-tight text-pure-white">
             {title}
           </h1>
-          {description ? <p className="text-body text-ash">{description}</p> : null}
+          {description ? (
+            <p className="text-body text-ash">{description}</p>
+          ) : null}
         </div>
         {actions ? <Row>{actions}</Row> : null}
       </header>

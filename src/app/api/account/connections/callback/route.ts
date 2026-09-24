@@ -26,7 +26,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ connection });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to verify connection callback" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to verify connection callback",
+      },
       { status: 400 },
     );
   }

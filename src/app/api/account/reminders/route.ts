@@ -69,41 +69,58 @@ export async function POST(request: NextRequest) {
     }
 
     if (!body.title || typeof body.title !== "string" || !body.title.trim()) {
-      return NextResponse.json(
-        { error: "title is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "title is required" }, { status: 400 });
     }
 
-    if (!body.message || typeof body.message !== "string" || !body.message.trim()) {
+    if (
+      !body.message ||
+      typeof body.message !== "string" ||
+      !body.message.trim()
+    ) {
       return NextResponse.json(
         { error: "message is required" },
         { status: 400 },
       );
     }
 
-    if (!body.channel || typeof body.channel !== "string" || !body.channel.trim()) {
+    if (
+      !body.channel ||
+      typeof body.channel !== "string" ||
+      !body.channel.trim()
+    ) {
       return NextResponse.json(
         { error: "channel is required" },
         { status: 400 },
       );
     }
 
-    if (!body.destination || typeof body.destination !== "string" || !body.destination.trim()) {
+    if (
+      !body.destination ||
+      typeof body.destination !== "string" ||
+      !body.destination.trim()
+    ) {
       return NextResponse.json(
         { error: "destination is required" },
         { status: 400 },
       );
     }
 
-    if (!body.timezone || typeof body.timezone !== "string" || !body.timezone.trim()) {
+    if (
+      !body.timezone ||
+      typeof body.timezone !== "string" ||
+      !body.timezone.trim()
+    ) {
       return NextResponse.json(
         { error: "timezone is required" },
         { status: 400 },
       );
     }
 
-    const validKinds: ReminderScheduleKind[] = ["one_time", "interval", "recurring"];
+    const validKinds: ReminderScheduleKind[] = [
+      "one_time",
+      "interval",
+      "recurring",
+    ];
     if (!body.schedule_kind || !validKinds.includes(body.schedule_kind)) {
       return NextResponse.json(
         { error: "schedule_kind must be one_time, interval, or recurring" },
@@ -119,7 +136,9 @@ export async function POST(request: NextRequest) {
       timezone: body.timezone.trim(),
       schedule_kind: body.schedule_kind,
       run_at: body.run_at || null,
-      interval_seconds: body.interval_seconds ? Number(body.interval_seconds) : null,
+      interval_seconds: body.interval_seconds
+        ? Number(body.interval_seconds)
+        : null,
       recurrence_expression: body.recurrence_expression || null,
       max_retries: body.max_retries ? Number(body.max_retries) : 3,
       metadata: body.metadata || null,

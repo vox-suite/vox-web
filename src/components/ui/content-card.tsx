@@ -28,13 +28,15 @@ export function Card({
         tone === "subtle" && "bg-obsidian",
         tone === "contrast" && "bg-graphite",
         tone === "plain" && "bg-transparent",
-        className
+        className,
       )}
     >
       {title ? (
         <CardHeader>
           <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+          {description ? (
+            <CardDescription>{description}</CardDescription>
+          ) : null}
         </CardHeader>
       ) : null}
       <CardContent>{children}</CardContent>

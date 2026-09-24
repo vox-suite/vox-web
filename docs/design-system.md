@@ -35,21 +35,21 @@ Route pages compose shared components without `className` or inline `style`; lin
 
 Primitives live under `src/components/ui` (shadcn + Raycast variants). Composition helpers preserve the page API:
 
-| Component | Responsibility |
-| --------- | -------------- |
-| `Page` | Management title, description, actions and content spacing |
-| `Section` | Public content width, vertical rhythm and section heading |
-| `Stack`, `Row`, `Grid` | Vertical, wrapping horizontal, and responsive column layouts |
-| `Card` | Related content with optional heading and surface tone |
-| `Text`, `Badge` | Body hierarchy and small state labels |
-| `Button`, `LinkButton` | Actions and navigation (`primary` Mist, `secondary` ghost border, `ghost`, `danger`) |
-| `Field`, `Select`, `TextArea` | Visible labels, inset controls, helper text |
-| `DataTable` | Caption, headers and keyboard-accessible overflow |
-| `Notice` | Informational, success or error feedback |
-| `EmptyState`, `LoadingState` | Recovery and loading patterns |
-| `CodeBlock` | Bounded, scrollable plain-text data |
-| `Stat`, `ModuleCard` | Overview data and links to management modules |
-| `Brand`, `AuthFrame` | Wordmark and auth shell |
+| Component                     | Responsibility                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| `Page`                        | Management title, description, actions and content spacing                           |
+| `Section`                     | Public content width, vertical rhythm and section heading                            |
+| `Stack`, `Row`, `Grid`        | Vertical, wrapping horizontal, and responsive column layouts                         |
+| `Card`                        | Related content with optional heading and surface tone                               |
+| `Text`, `Badge`               | Body hierarchy and small state labels                                                |
+| `Button`, `LinkButton`        | Actions and navigation (`primary` Mist, `secondary` ghost border, `ghost`, `danger`) |
+| `Field`, `Select`, `TextArea` | Visible labels, inset controls, helper text                                          |
+| `DataTable`                   | Caption, headers and keyboard-accessible overflow                                    |
+| `Notice`                      | Informational, success or error feedback                                             |
+| `EmptyState`, `LoadingState`  | Recovery and loading patterns                                                        |
+| `CodeBlock`                   | Bounded, scrollable plain-text data                                                  |
+| `Stat`, `ModuleCard`          | Overview data and links to management modules                                        |
+| `Brand`, `AuthFrame`          | Wordmark and auth shell                                                              |
 
 ## Extension rules
 

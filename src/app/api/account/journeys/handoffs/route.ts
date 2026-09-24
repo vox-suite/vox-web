@@ -63,7 +63,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to generate handoff" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to generate handoff",
+      },
       { status: 400 },
     );
   }

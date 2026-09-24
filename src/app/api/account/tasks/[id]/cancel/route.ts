@@ -24,11 +24,14 @@ export async function POST(
     const task = await core.cancelTask(account.accountId, id);
     return NextResponse.json({
       task,
-      disclosure: "Task cancellation halts future work without claiming undo of completed steps.",
+      disclosure:
+        "Task cancellation halts future work without claiming undo of completed steps.",
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to cancel task" },
+      {
+        error: error instanceof Error ? error.message : "Failed to cancel task",
+      },
       { status: 400 },
     );
   }

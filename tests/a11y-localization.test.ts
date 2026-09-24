@@ -14,7 +14,9 @@ test("authoritative currency formatting preserves provider currency and amount w
   assert.equal(quote1.isAuthoritative, true);
   assert.equal(quote1.formattedAmount, "189.99 USD");
   assert.ok(quote1.label.includes("authoritative provider quote"));
-  assert.ok(quote1.ariaLabel.includes("189.99 USD, authoritative provider quote"));
+  assert.ok(
+    quote1.ariaLabel.includes("189.99 USD, authoritative provider quote"),
+  );
 
   // Test case 2: Minor units (cents/paise)
   const quote2 = formatAuthoritativeCurrency(18999, "EUR", true, "en-US");
@@ -36,7 +38,11 @@ test("authoritative datetime formatting preserves provider timezone and prevents
   const isoTime = "2026-10-01T14:30:00.000Z";
 
   // Formatted in America/New_York (EDT)
-  const nyTime = formatAuthoritativeDateTime(isoTime, "America/New_York", "en-US");
+  const nyTime = formatAuthoritativeDateTime(
+    isoTime,
+    "America/New_York",
+    "en-US",
+  );
   assert.equal(nyTime.authoritativeTimezone, "America/New_York");
   assert.ok(nyTime.formattedDateTime.includes("10:30")); // 14:30 UTC = 10:30 EDT
   assert.ok(nyTime.ariaLabel.includes("America/New_York"));
@@ -101,7 +107,11 @@ test("WCAG 2.2 AA non-color reliance: status indicators provide distinct symbols
   const superseded = getAccessibleStatusIndicator("superseded");
   assert.equal(superseded.symbol, "⊘");
   assert.ok(superseded.text.includes("SUPERSEDED"));
-  assert.ok(superseded.ariaLabel.includes("details changed and existing approval voided"));
+  assert.ok(
+    superseded.ariaLabel.includes(
+      "details changed and existing approval voided",
+    ),
+  );
 
   // 6. Failed / Rejected
   const failed = getAccessibleStatusIndicator("failed");
@@ -123,7 +133,9 @@ test("WCAG 2.2 AA non-color reliance: status indicators provide distinct symbols
 });
 
 test("truthful delivery invariant: delivered_to_channel is never represented as seen or confirmed read", () => {
-  const indicator = getAccessibleStatusIndicator("delivered to channel (not confirmed seen)");
+  const indicator = getAccessibleStatusIndicator(
+    "delivered to channel (not confirmed seen)",
+  );
   assert.equal(indicator.symbol, "📨");
   assert.ok(!indicator.text.toLowerCase().includes("delivered and seen"));
   assert.ok(!indicator.ariaLabel.toLowerCase().includes("confirmed read"));

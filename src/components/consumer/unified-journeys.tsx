@@ -50,14 +50,20 @@ export function UnifiedJourneys({
   // 2. Consequential Write state (Expedia)
   const [destination, setDestination] = useState("Seattle, WA");
   const [properties, setProperties] = useState<LodgingProperty[]>([]);
-  const [selectedProperty, setSelectedProperty] = useState<LodgingProperty | null>(null);
+  const [selectedProperty, setSelectedProperty] =
+    useState<LodgingProperty | null>(null);
   const [paymentAuthorized, setPaymentAuthorized] = useState(false);
   const [booking, setBooking] = useState<LodgingBooking | null>(null);
-  const [cancellation, setCancellation] = useState<LodgingCancelResponse | null>(null);
+  const [cancellation, setCancellation] =
+    useState<LodgingCancelResponse | null>(null);
 
   // 3. Labelled Handoff state (Amazon, Zomato, Uber)
-  const [amazonHandoff, setAmazonHandoff] = useState<HandoffResponse | null>(null);
-  const [zomatoHandoff, setZomatoHandoff] = useState<HandoffResponse | null>(null);
+  const [amazonHandoff, setAmazonHandoff] = useState<HandoffResponse | null>(
+    null,
+  );
+  const [zomatoHandoff, setZomatoHandoff] = useState<HandoffResponse | null>(
+    null,
+  );
   const [uberHandoff, setUberHandoff] = useState<HandoffResponse | null>(null);
 
   // 4. Multi-Service Composite Journey state
@@ -81,7 +87,8 @@ export function UnifiedJourneys({
       status: "handoff_created",
       authoritative_reference: null,
       payment_status: "not_applicable",
-      handoff_url: "https://m.uber.com/ul/?action=setPickup&pickup[latitude]=47.4502&pickup[longitude]=-122.3088&dropoff[latitude]=47.6128&dropoff[longitude]=-122.3331",
+      handoff_url:
+        "https://m.uber.com/ul/?action=setPickup&pickup[latitude]=47.4502&pickup[longitude]=-122.3088&dropoff[latitude]=47.6128&dropoff[longitude]=-122.3331",
       summary: "UberX estimate $42.50 USD · Handed off to Uber app",
       completed: false,
     },
@@ -124,7 +131,9 @@ export function UnifiedJourneys({
         freshnessSeconds: data.freshness_seconds || 300,
         retrievedAt: data.retrieved_at || new Date().toISOString(),
       });
-      setSuccess("Authoritative trip history retrieved with location minimization.");
+      setSuccess(
+        "Authoritative trip history retrieved with location minimization.",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Read failed");
     } finally {
@@ -145,14 +154,18 @@ export function UnifiedJourneys({
         checkOut: "2026-10-05",
         occupancy: "2",
       });
-      const res = await fetch(`/api/account/journeys/lodging?${params.toString()}`);
+      const res = await fetch(
+        `/api/account/journeys/lodging?${params.toString()}`,
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Lodging search failed");
       }
       const data = await res.json();
       setProperties(data.properties || []);
-      setSuccess(`Found ${data.properties?.length || 0} lodging properties in ${destination}.`);
+      setSuccess(
+        `Found ${data.properties?.length || 0} lodging properties in ${destination}.`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Search failed");
     } finally {
@@ -165,7 +178,9 @@ export function UnifiedJourneys({
     setPaymentAuthorized(true);
     setBooking(null);
     setCancellation(null);
-    setSuccess("Payment hold authorized in escrow. Final booking requires authoritative confirmation.");
+    setSuccess(
+      "Payment hold authorized in escrow. Final booking requires authoritative confirmation.",
+    );
   }
 
   async function handleConfirmBooking() {
@@ -180,7 +195,9 @@ export function UnifiedJourneys({
           connection_id: connectionId,
           booking_request: {
             property_id: selectedProperty.property_id,
-            rate_plan_id: selectedProperty.available_rate_plans[0]?.rate_plan_id || "rate_standard",
+            rate_plan_id:
+              selectedProperty.available_rate_plans[0]?.rate_plan_id ||
+              "rate_standard",
             guest_name: "Vox Account Holder",
             check_in: "2026-10-01",
             check_out: "2026-10-05",
@@ -195,9 +212,13 @@ export function UnifiedJourneys({
       }
       const data: LodgingBooking = await res.json();
       setBooking(data);
-      setSuccess(`Booking confirmed by Expedia! Reference: ${data.expedia_booking_ref}`);
+      setSuccess(
+        `Booking confirmed by Expedia! Reference: ${data.expedia_booking_ref}`,
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Booking confirmation failed");
+      setError(
+        err instanceof Error ? err.message : "Booking confirmation failed",
+      );
     } finally {
       setLoading(false);
     }
@@ -226,7 +247,9 @@ export function UnifiedJourneys({
       const data: LodgingCancelResponse = await res.json();
       setCancellation(data);
       setBooking((prev) => (prev ? { ...prev, status: "cancelled" } : null));
-      setSuccess(`Booking ${data.expedia_booking_ref} cancelled. Full refund settled.`);
+      setSuccess(
+        `Booking ${data.expedia_booking_ref} cancelled. Full refund settled.`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cancellation failed");
     } finally {
@@ -284,7 +307,9 @@ export function UnifiedJourneys({
       if (provider === "zomato") setZomatoHandoff(data);
       if (provider === "uber") setUberHandoff(data);
 
-      setSuccess(`Labelled handoff generated for ${data.provider}. Transferred continuation without claiming completion.`);
+      setSuccess(
+        `Labelled handoff generated for ${data.provider}. Transferred continuation without claiming completion.`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Handoff failed");
     } finally {
@@ -331,12 +356,16 @@ export function UnifiedJourneys({
 
         {error && (
           <div role="alert" aria-live="assertive">
-            <Notice title="Journey Notice" tone="error">{error}</Notice>
+            <Notice title="Journey Notice" tone="error">
+              {error}
+            </Notice>
           </div>
         )}
         {success && (
           <div role="status" aria-live="polite">
-            <Notice title="Authoritative State Updated" tone="success">{success}</Notice>
+            <Notice title="Authoritative State Updated" tone="success">
+              {success}
+            </Notice>
           </div>
         )}
 
@@ -358,12 +387,16 @@ export function UnifiedJourneys({
             >
               <Stack gap="normal">
                 <Notice title="Authority Invariant" tone="info">
-                  <strong>FR-EXE-008:</strong> Payment authorization and handoff transitions are visibly distinct from completion. Each provider item maintains independent authoritative evidence.
+                  <strong>FR-EXE-008:</strong> Payment authorization and handoff
+                  transitions are visibly distinct from completion. Each
+                  provider item maintains independent authoritative evidence.
                 </Notice>
 
                 <div className="space-y-4">
                   {compositeItems.map((item, idx) => {
-                    const statusIndicator = getAccessibleStatusIndicator(item.status);
+                    const statusIndicator = getAccessibleStatusIndicator(
+                      item.status,
+                    );
                     return (
                       <div
                         key={idx}
@@ -385,15 +418,17 @@ export function UnifiedJourneys({
                                 aria-label={statusIndicator.ariaLabel}
                                 className="flex items-center gap-1.5"
                               >
-                                <span aria-hidden="true">{statusIndicator.symbol}</span>
+                                <span aria-hidden="true">
+                                  {statusIndicator.symbol}
+                                </span>
                                 <span>{statusIndicator.text}</span>
                               </Badge>
                               <Badge tone="neutral">
                                 {item.service_type === "consequential_write"
                                   ? "L3 Consequential Write"
                                   : item.service_type === "connected_read"
-                                  ? "L2 Connected Read"
-                                  : "L0 Labelled Handoff"}
+                                    ? "L2 Connected Read"
+                                    : "L0 Labelled Handoff"}
                               </Badge>
                             </Row>
                             {item.completed ? (
@@ -422,15 +457,22 @@ export function UnifiedJourneys({
                           <Row spread>
                             <Row>
                               <Text small muted>
-                                Provider: <strong>{item.provider.toUpperCase()}</strong>
+                                Provider:{" "}
+                                <strong>{item.provider.toUpperCase()}</strong>
                               </Text>
                               {item.authoritative_reference && (
                                 <Text small muted>
-                                  Reference: <strong>{item.authoritative_reference}</strong>
+                                  Reference:{" "}
+                                  <strong>
+                                    {item.authoritative_reference}
+                                  </strong>
                                 </Text>
                               )}
                               <Text small muted>
-                                Payment: <strong>{item.payment_status?.toUpperCase()}</strong>
+                                Payment:{" "}
+                                <strong>
+                                  {item.payment_status?.toUpperCase()}
+                                </strong>
                               </Text>
                             </Row>
 
@@ -443,7 +485,8 @@ export function UnifiedJourneys({
                                 className="ui-button"
                                 data-variant="secondary"
                               >
-                                Continue in {item.provider === "uber" ? "Uber" : "Zomato"} ↗
+                                Continue in{" "}
+                                {item.provider === "uber" ? "Uber" : "Zomato"} ↗
                               </a>
                             )}
                           </Row>
@@ -472,26 +515,40 @@ export function UnifiedJourneys({
                     disabled={loading}
                     aria-label="Retrieve trip history with context minimization"
                   >
-                    {loading ? "Reading Authoritative Trips..." : "Retrieve Trip History (L2)"}
+                    {loading
+                      ? "Reading Authoritative Trips..."
+                      : "Retrieve Trip History (L2)"}
                   </Button>
                   {readMetadata && (
                     <Row>
                       <Badge tone="positive">Total: {readMetadata.total}</Badge>
-                      <Badge tone="neutral">Freshness: {readMetadata.freshnessSeconds}s</Badge>
+                      <Badge tone="neutral">
+                        Freshness: {readMetadata.freshnessSeconds}s
+                      </Badge>
                     </Row>
                   )}
                 </Row>
 
                 <Notice title="Data Minimization Guarantee" tone="info">
-                  Location coordinates (lat/long) and internal rider tokens are strictly redacted. Vox only displays start city, timestamp, distance, and status.
+                  Location coordinates (lat/long) and internal rider tokens are
+                  strictly redacted. Vox only displays start city, timestamp,
+                  distance, and status.
                 </Notice>
 
                 {trips.length > 0 ? (
                   <div className="space-y-2">
                     {trips.map((trip) => {
-                      const authDist = formatAuthoritativeDistance(trip.distance_miles, "mi");
-                      const authDate = formatAuthoritativeDateTime(trip.request_time, "UTC");
-                      const statusIndicator = getAccessibleStatusIndicator(trip.status);
+                      const authDist = formatAuthoritativeDistance(
+                        trip.distance_miles,
+                        "mi",
+                      );
+                      const authDate = formatAuthoritativeDateTime(
+                        trip.request_time,
+                        "UTC",
+                      );
+                      const statusIndicator = getAccessibleStatusIndicator(
+                        trip.status,
+                      );
                       return (
                         <div
                           key={trip.trip_id}
@@ -500,12 +557,16 @@ export function UnifiedJourneys({
                           className="p-3 border border-neutral-800 bg-neutral-950 rounded-lg flex justify-between items-center"
                         >
                           <Stack gap="small">
-                            <strong id={`trip-${trip.trip_id}`} className="text-sm text-neutral-100">
+                            <strong
+                              id={`trip-${trip.trip_id}`}
+                              className="text-sm text-neutral-100"
+                            >
                               Trip #{trip.trip_id}
                             </strong>
                             <Text small muted>
                               <span aria-label={authDate.ariaLabel}>
-                                Date: {authDate.formattedDateTime} ({authDate.authoritativeTimezone})
+                                Date: {authDate.formattedDateTime} (
+                                {authDate.authoritativeTimezone})
                               </span>{" "}
                               · City: {trip.start_city || "Minimised"}
                             </Text>
@@ -522,7 +583,9 @@ export function UnifiedJourneys({
                               aria-label={statusIndicator.ariaLabel}
                               className="flex items-center gap-1"
                             >
-                              <span aria-hidden="true">{statusIndicator.symbol}</span>
+                              <span aria-hidden="true">
+                                {statusIndicator.symbol}
+                              </span>
                               <span>{statusIndicator.text}</span>
                             </Badge>
                           </Row>
@@ -531,7 +594,10 @@ export function UnifiedJourneys({
                     })}
                   </div>
                 ) : (
-                  <Text muted>Click &quot;Retrieve Trip History&quot; to inspect authoritative read data.</Text>
+                  <Text muted>
+                    Click &quot;Retrieve Trip History&quot; to inspect
+                    authoritative read data.
+                  </Text>
                 )}
               </Stack>
             </Card>
@@ -566,7 +632,7 @@ export function UnifiedJourneys({
                       const authCurr = formatAuthoritativeCurrency(
                         prop.price_amount_minor,
                         prop.currency,
-                        true
+                        true,
                       );
                       return (
                         <div
@@ -577,13 +643,23 @@ export function UnifiedJourneys({
                         >
                           <Row spread>
                             <Stack gap="small">
-                              <strong id={`prop-${prop.property_id}`} className="text-sm text-neutral-100">
+                              <strong
+                                id={`prop-${prop.property_id}`}
+                                className="text-sm text-neutral-100"
+                              >
                                 {prop.name}
                               </strong>
-                              <Text small muted>{prop.location} · {prop.star_rating} Stars</Text>
+                              <Text small muted>
+                                {prop.location} · {prop.star_rating} Stars
+                              </Text>
                               <Text small>
-                                Rate: <strong aria-label={authCurr.ariaLabel}>{authCurr.formattedAmount}</strong>{" "}
-                                <span className="text-[10px] text-neutral-500">(authoritative provider quote)</span>
+                                Rate:{" "}
+                                <strong aria-label={authCurr.ariaLabel}>
+                                  {authCurr.formattedAmount}
+                                </strong>{" "}
+                                <span className="text-[10px] text-neutral-500">
+                                  (authoritative provider quote)
+                                </span>
                               </Text>
                             </Stack>
                             <Button
@@ -602,10 +678,19 @@ export function UnifiedJourneys({
 
                 {/* Proposal & Payment Hold View */}
                 {paymentAuthorized && selectedProperty && !booking && (
-                  <Card tone="soft" title="Step 2: Payment Escrow & Proposal Approval">
+                  <Card
+                    tone="soft"
+                    title="Step 2: Payment Escrow & Proposal Approval"
+                  >
                     <Stack gap="normal">
-                      <Notice title="Payment Authentication != Completion" tone="info">
-                        <strong>AS-013:</strong> Authorizing a payment hold reserves funds but does NOT guarantee room inventory until the provider returns a confirmed booking reference.
+                      <Notice
+                        title="Payment Authentication != Completion"
+                        tone="info"
+                      >
+                        <strong>AS-013:</strong> Authorizing a payment hold
+                        reserves funds but does NOT guarantee room inventory
+                        until the provider returns a confirmed booking
+                        reference.
                       </Notice>
                       <Row spread>
                         <Stack gap="small">
@@ -614,17 +699,26 @@ export function UnifiedJourneys({
                             const authHold = formatAuthoritativeCurrency(
                               selectedProperty.price_amount_minor,
                               selectedProperty.currency,
-                              true
+                              true,
                             );
                             return (
                               <Text small>
-                                Amount: <strong aria-label={authHold.ariaLabel}>{authHold.formattedAmount}</strong>
+                                Amount:{" "}
+                                <strong aria-label={authHold.ariaLabel}>
+                                  {authHold.formattedAmount}
+                                </strong>
                               </Text>
                             );
                           })()}
-                          <Text small muted>Policy: Full refund if cancelled 48h prior to check-in.</Text>
+                          <Text small muted>
+                            Policy: Full refund if cancelled 48h prior to
+                            check-in.
+                          </Text>
                         </Stack>
-                        <Badge tone="accent" className="flex items-center gap-1">
+                        <Badge
+                          tone="accent"
+                          className="flex items-center gap-1"
+                        >
                           <span aria-hidden="true">🔒</span>
                           <span>Payment Held in Escrow</span>
                         </Badge>
@@ -634,7 +728,9 @@ export function UnifiedJourneys({
                         disabled={loading}
                         aria-label={`Confirm consequential booking for ${selectedProperty.name}`}
                       >
-                        {loading ? "Submitting to Expedia..." : "Confirm Consequential Booking (L3)"}
+                        {loading
+                          ? "Submitting to Expedia..."
+                          : "Confirm Consequential Booking (L3)"}
                       </Button>
                     </Stack>
                   </Card>
@@ -647,9 +743,14 @@ export function UnifiedJourneys({
                       <Row spread>
                         <Stack gap="small">
                           <Row>
-                            <strong>Expedia Confirmation: {booking.expedia_booking_ref}</strong>
+                            <strong>
+                              Expedia Confirmation:{" "}
+                              {booking.expedia_booking_ref}
+                            </strong>
                             {(() => {
-                              const ind = getAccessibleStatusIndicator(booking.status);
+                              const ind = getAccessibleStatusIndicator(
+                                booking.status,
+                              );
                               return (
                                 <Badge
                                   tone={ind.badgeTone}
@@ -669,11 +770,14 @@ export function UnifiedJourneys({
                             const authTotal = formatAuthoritativeCurrency(
                               booking.total_amount_minor,
                               booking.currency,
-                              true
+                              true,
                             );
                             return (
                               <Text small muted>
-                                Settled Total: <strong aria-label={authTotal.ariaLabel}>{authTotal.formattedAmount}</strong>
+                                Settled Total:{" "}
+                                <strong aria-label={authTotal.ariaLabel}>
+                                  {authTotal.formattedAmount}
+                                </strong>
                               </Text>
                             );
                           })()}
@@ -685,26 +789,33 @@ export function UnifiedJourneys({
                             disabled={loading}
                             aria-label={`Cancel Expedia booking: ${booking.expedia_booking_ref}`}
                           >
-                            {loading ? "Processing Cancellation..." : "Cancel Booking & Refund"}
+                            {loading
+                              ? "Processing Cancellation..."
+                              : "Cancel Booking & Refund"}
                           </Button>
                         )}
                       </Row>
 
-                      {cancellation && (() => {
-                        const authRefund = formatAuthoritativeCurrency(
-                          cancellation.refund_amount_minor,
-                          cancellation.currency,
-                          true
-                        );
-                        return (
-                          <div role="status" aria-live="polite">
-                            <Notice title="Cancellation Verified" tone="success">
-                              Booking {cancellation.expedia_booking_ref} cancelled by Expedia.
-                              Refund of {authRefund.formattedAmount} confirmed.
-                            </Notice>
-                          </div>
-                        );
-                      })()}
+                      {cancellation &&
+                        (() => {
+                          const authRefund = formatAuthoritativeCurrency(
+                            cancellation.refund_amount_minor,
+                            cancellation.currency,
+                            true,
+                          );
+                          return (
+                            <div role="status" aria-live="polite">
+                              <Notice
+                                title="Cancellation Verified"
+                                tone="success"
+                              >
+                                Booking {cancellation.expedia_booking_ref}{" "}
+                                cancelled by Expedia. Refund of{" "}
+                                {authRefund.formattedAmount} confirmed.
+                              </Notice>
+                            </div>
+                          );
+                        })()}
                     </Stack>
                   </Card>
                 )}
@@ -722,17 +833,27 @@ export function UnifiedJourneys({
               tone="plain"
             >
               <Stack gap="normal">
-                <Notice title="Handoff Honesty Invariant (FR-HND-004)" tone="info">
-                  <strong>Strict Rule:</strong> Vox NEVER marks an action complete because a handoff was opened or generated. Copy explicitly says &quot;Continue in [Provider]&quot;.
+                <Notice
+                  title="Handoff Honesty Invariant (FR-HND-004)"
+                  tone="info"
+                >
+                  <strong>Strict Rule:</strong> Vox NEVER marks an action
+                  complete because a handoff was opened or generated. Copy
+                  explicitly says &quot;Continue in [Provider]&quot;.
                 </Notice>
 
                 {/* Amazon Handoff */}
-                <Card tone="contrast" title="Amazon Product & Cart Handoff (L0)">
+                <Card
+                  tone="contrast"
+                  title="Amazon Product & Cart Handoff (L0)"
+                >
                   <Stack gap="small">
                     <Row spread>
                       <div>
                         <strong>Apple MacBook Air M3 (16GB, 512GB)</strong>
-                        <Text small muted>ASIN: B08N5WRWNW · Locale: US</Text>
+                        <Text small muted>
+                          ASIN: B08N5WRWNW · Locale: US
+                        </Text>
                       </div>
                       <Button
                         onClick={() => handleGenerateHandoff("amazon")}
@@ -747,7 +868,9 @@ export function UnifiedJourneys({
                         <Row spread>
                           <Row>
                             {(() => {
-                              const ind = getAccessibleStatusIndicator(amazonHandoff.status);
+                              const ind = getAccessibleStatusIndicator(
+                                amazonHandoff.status,
+                              );
                               return (
                                 <Badge
                                   tone={ind.badgeTone}
@@ -760,12 +883,18 @@ export function UnifiedJourneys({
                               );
                             })()}
                             <Badge
-                              tone={amazonHandoff.completed ? "positive" : "neutral"}
+                              tone={
+                                amazonHandoff.completed ? "positive" : "neutral"
+                              }
                               aria-label={`Completed state: ${amazonHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
                               className="flex items-center gap-1"
                             >
-                              <span aria-hidden="true">{amazonHandoff.completed ? "✓" : "⊘"}</span>
-                              <span>Completed: {String(amazonHandoff.completed)}</span>
+                              <span aria-hidden="true">
+                                {amazonHandoff.completed ? "✓" : "⊘"}
+                              </span>
+                              <span>
+                                Completed: {String(amazonHandoff.completed)}
+                              </span>
                             </Badge>
                           </Row>
                           <a
@@ -779,19 +908,28 @@ export function UnifiedJourneys({
                             Continue in Amazon ↗
                           </a>
                         </Row>
-                        <Text small muted>{amazonHandoff.disclaimer}</Text>
+                        <Text small muted>
+                          {amazonHandoff.disclaimer}
+                        </Text>
                       </Stack>
                     )}
                   </Stack>
                 </Card>
 
                 {/* Zomato Handoff */}
-                <Card tone="contrast" title="Zomato Restaurant & Cart Handoff (L0)">
+                <Card
+                  tone="contrast"
+                  title="Zomato Restaurant & Cart Handoff (L0)"
+                >
                   <Stack gap="small">
                     <Row spread>
                       <div>
-                        <strong>The Bombay Canteen (Lower Parel, Mumbai)</strong>
-                        <Text small muted>Restaurant ID: 18204 · Region: IN</Text>
+                        <strong>
+                          The Bombay Canteen (Lower Parel, Mumbai)
+                        </strong>
+                        <Text small muted>
+                          Restaurant ID: 18204 · Region: IN
+                        </Text>
                       </div>
                       <Button
                         onClick={() => handleGenerateHandoff("zomato")}
@@ -806,7 +944,9 @@ export function UnifiedJourneys({
                         <Row spread>
                           <Row>
                             {(() => {
-                              const ind = getAccessibleStatusIndicator(zomatoHandoff.status);
+                              const ind = getAccessibleStatusIndicator(
+                                zomatoHandoff.status,
+                              );
                               return (
                                 <Badge
                                   tone={ind.badgeTone}
@@ -819,12 +959,18 @@ export function UnifiedJourneys({
                               );
                             })()}
                             <Badge
-                              tone={zomatoHandoff.completed ? "positive" : "neutral"}
+                              tone={
+                                zomatoHandoff.completed ? "positive" : "neutral"
+                              }
                               aria-label={`Completed state: ${zomatoHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
                               className="flex items-center gap-1"
                             >
-                              <span aria-hidden="true">{zomatoHandoff.completed ? "✓" : "⊘"}</span>
-                              <span>Completed: {String(zomatoHandoff.completed)}</span>
+                              <span aria-hidden="true">
+                                {zomatoHandoff.completed ? "✓" : "⊘"}
+                              </span>
+                              <span>
+                                Completed: {String(zomatoHandoff.completed)}
+                              </span>
                             </Badge>
                           </Row>
                           <a
@@ -838,19 +984,26 @@ export function UnifiedJourneys({
                             Continue in Zomato ↗
                           </a>
                         </Row>
-                        <Text small muted>{zomatoHandoff.disclaimer}</Text>
+                        <Text small muted>
+                          {zomatoHandoff.disclaimer}
+                        </Text>
                       </Stack>
                     )}
                   </Stack>
                 </Card>
 
                 {/* Uber Ride Handoff */}
-                <Card tone="contrast" title="Uber Consumer Ride Request Handoff (L0)">
+                <Card
+                  tone="contrast"
+                  title="Uber Consumer Ride Request Handoff (L0)"
+                >
                   <Stack gap="small">
                     <Row spread>
                       <div>
                         <strong>Market St to Mission St (San Francisco)</strong>
-                        <Text small muted>UberX · Fare Quote: $18.50 USD (Expiring in 5m)</Text>
+                        <Text small muted>
+                          UberX · Fare Quote: $18.50 USD (Expiring in 5m)
+                        </Text>
                       </div>
                       <Button
                         onClick={() => handleGenerateHandoff("uber")}
@@ -865,7 +1018,9 @@ export function UnifiedJourneys({
                         <Row spread>
                           <Row>
                             {(() => {
-                              const ind = getAccessibleStatusIndicator(uberHandoff.status);
+                              const ind = getAccessibleStatusIndicator(
+                                uberHandoff.status,
+                              );
                               return (
                                 <Badge
                                   tone={ind.badgeTone}
@@ -878,12 +1033,18 @@ export function UnifiedJourneys({
                               );
                             })()}
                             <Badge
-                              tone={uberHandoff.completed ? "positive" : "neutral"}
+                              tone={
+                                uberHandoff.completed ? "positive" : "neutral"
+                              }
                               aria-label={`Completed state: ${uberHandoff.completed ? "Completed" : "Incomplete (honest handoff)"}`}
                               className="flex items-center gap-1"
                             >
-                              <span aria-hidden="true">{uberHandoff.completed ? "✓" : "⊘"}</span>
-                              <span>Completed: {String(uberHandoff.completed)}</span>
+                              <span aria-hidden="true">
+                                {uberHandoff.completed ? "✓" : "⊘"}
+                              </span>
+                              <span>
+                                Completed: {String(uberHandoff.completed)}
+                              </span>
                             </Badge>
                           </Row>
                           <a
@@ -897,7 +1058,9 @@ export function UnifiedJourneys({
                             Continue in Uber ↗
                           </a>
                         </Row>
-                        <Text small muted>{uberHandoff.disclaimer}</Text>
+                        <Text small muted>
+                          {uberHandoff.disclaimer}
+                        </Text>
                       </Stack>
                     )}
                   </Stack>

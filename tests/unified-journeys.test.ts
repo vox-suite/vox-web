@@ -60,7 +60,10 @@ test("readUberHistory posts signed host context and retrieves minimized trips", 
     "vox-account:user-1",
   );
   assert.equal(capturedBody.connection_id, "conn-uber-1");
-  assert.equal(capturedHeaders["X-Vox-Host-Credential"], "11111111-2222-4333-8444-555555555555");
+  assert.equal(
+    capturedHeaders["X-Vox-Host-Credential"],
+    "11111111-2222-4333-8444-555555555555",
+  );
   assert.equal(res.trips.length, 1);
   assert.equal(res.trips[0].trip_id, "trip_001");
   assert.equal(res.trips[0].start_city, "San Francisco");
@@ -106,18 +109,21 @@ test("searchLodging, bookLodging, and cancelLodgingBooking execute verified cons
       if (url.endsWith("/v1/lodging/bookings")) {
         capturedBookUrl = url;
         capturedBookBody = body;
-        return Response.json({
-          booking_id: "bkg_998877",
-          expedia_booking_ref: "EXP-99214",
-          property_id: "prop_seattle_1",
-          status: "confirmed",
-          check_in: "2026-10-01",
-          check_out: "2026-10-05",
-          total_amount_minor: 85000,
-          currency: "USD",
-          cancellation_policy: "Full refund if cancelled before deadline",
-          created_at: "2026-09-23T18:00:00Z",
-        }, { status: 201 });
+        return Response.json(
+          {
+            booking_id: "bkg_998877",
+            expedia_booking_ref: "EXP-99214",
+            property_id: "prop_seattle_1",
+            status: "confirmed",
+            check_in: "2026-10-01",
+            check_out: "2026-10-05",
+            total_amount_minor: 85000,
+            currency: "USD",
+            cancellation_policy: "Full refund if cancelled before deadline",
+            created_at: "2026-09-23T18:00:00Z",
+          },
+          { status: 201 },
+        );
       }
       if (url.includes("/cancel")) {
         capturedCancelUrl = url;
@@ -166,11 +172,22 @@ test("searchLodging, bookLodging, and cancelLodgingBooking execute verified cons
   assert.equal(booking.expedia_booking_ref, "EXP-99214");
   assert.equal(booking.status, "confirmed");
   assert.equal(booking.total_amount_minor, 85000);
-  assert.equal((capturedBookBody.booking_request as Record<string, unknown>).property_id, "prop_seattle_1");
+  assert.equal(
+    (capturedBookBody.booking_request as Record<string, unknown>).property_id,
+    "prop_seattle_1",
+  );
 
   // 3. Cancel
-  const cancellation = await client.cancelLodgingBooking("user-1", "bkg_998877", "conn-exp-1", "Trip cancelled");
-  assert.equal(capturedCancelUrl, "https://core.vox.test/v1/lodging/bookings/bkg_998877/cancel");
+  const cancellation = await client.cancelLodgingBooking(
+    "user-1",
+    "bkg_998877",
+    "conn-exp-1",
+    "Trip cancelled",
+  );
+  assert.equal(
+    capturedCancelUrl,
+    "https://core.vox.test/v1/lodging/bookings/bkg_998877/cancel",
+  );
   assert.equal(cancellation.status, "cancelled");
   assert.equal(cancellation.refund_amount_minor, 85000);
 });
@@ -186,7 +203,8 @@ test("createAmazonHandoff, createZomatoHandoff, and createUberRideHandoff enforc
           handoff_url: "https://www.amazon.com/dp/B08N5WRWNW?tag=vox-20",
           status: "handoff_created",
           completed: false,
-          disclaimer: "Vox does not place consumer orders directly. Cart and checkout will open in Amazon.",
+          disclaimer:
+            "Vox does not place consumer orders directly. Cart and checkout will open in Amazon.",
         });
       }
       if (url.endsWith("/v1/handoffs/zomato")) {
@@ -196,17 +214,20 @@ test("createAmazonHandoff, createZomatoHandoff, and createUberRideHandoff enforc
           handoff_url: "https://www.zomato.com/restaurant/18204",
           status: "handoff_created",
           completed: false,
-          disclaimer: "Vox does not place consumer food orders directly. Menu and ordering will open in Zomato.",
+          disclaimer:
+            "Vox does not place consumer food orders directly. Menu and ordering will open in Zomato.",
         });
       }
       if (url.endsWith("/v1/handoffs/uber")) {
         return Response.json({
           provider: "uber",
           action: "open_uber_ride_request",
-          handoff_url: "https://m.uber.com/ul/?action=setPickup&pickup[latitude]=37.774900&pickup[longitude]=-122.419400&dropoff[latitude]=37.783300&dropoff[longitude]=-122.416700&product_id=uberx",
+          handoff_url:
+            "https://m.uber.com/ul/?action=setPickup&pickup[latitude]=37.774900&pickup[longitude]=-122.419400&dropoff[latitude]=37.783300&dropoff[longitude]=-122.416700&product_id=uberx",
           status: "handoff_created",
           completed: false,
-          disclaimer: "Ride dispatch, driver matching, and fare charging are completed directly in the Uber app. Vox does not claim a confirmed ride.",
+          disclaimer:
+            "Ride dispatch, driver matching, and fare charging are completed directly in the Uber app. Vox does not claim a confirmed ride.",
         });
       }
       return new Response("Not found", { status: 404 });

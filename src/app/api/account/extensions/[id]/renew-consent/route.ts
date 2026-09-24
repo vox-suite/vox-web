@@ -13,7 +13,10 @@ export async function POST(
 
   const { id: extensionId } = await params;
   if (!extensionId) {
-    return NextResponse.json({ error: "Extension ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Extension ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -27,7 +30,10 @@ export async function POST(
   try {
     const body = await request.json();
     if (typeof body.version !== "number") {
-      return NextResponse.json({ error: "Field 'version' (number) is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Field 'version' (number) is required" },
+        { status: 400 },
+      );
     }
 
     const updated = await core.renewExtensionConsent(
@@ -38,7 +44,10 @@ export async function POST(
     return NextResponse.json({ extension: updated });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to renew consent" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to renew consent",
+      },
       { status: 400 },
     );
   }

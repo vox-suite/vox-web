@@ -35,7 +35,8 @@ export type Connection = {
   external_account_reference: string;
   account_display_id: string | null;
   credential_custody: "platform_held" | "external_operator";
-  authorization_state: "pending" | "authorized" | "expired" | "revoked" | "cancelled" | "failed";
+  authorization_state:
+    "pending" | "authorized" | "expired" | "revoked" | "cancelled" | "failed";
   authorized_capabilities: string[];
   expires_at: string | null;
   failure_code: string | null;
@@ -91,7 +92,15 @@ export type DurableTask = {
   title: string;
   instruction: string;
   agent_external_key: string | null;
-  state: "queued" | "running" | "waiting_for_clarification" | "waiting_for_approval" | "waiting_for_connection" | "completed" | "cancelled" | "failed";
+  state:
+    | "queued"
+    | "running"
+    | "waiting_for_clarification"
+    | "waiting_for_approval"
+    | "waiting_for_connection"
+    | "completed"
+    | "cancelled"
+    | "failed";
   run_id: string;
   wait_reason?: string | null;
   created_at: string;
@@ -150,7 +159,8 @@ export type ExtensionProtocol = "mcp" | "direct";
 export type ExtensionEffect = "read" | "write" | "mixed";
 export type ConformanceStatus = "pending" | "passed" | "failed";
 export type ConsentStatus = "consented" | "consent_required";
-export type LifecycleState = "installed" | "active" | "quarantined" | "disabled" | "removed";
+export type LifecycleState =
+  "installed" | "active" | "quarantined" | "disabled" | "removed";
 
 export type ExtensionOperator = {
   operator_id: string;
@@ -330,9 +340,21 @@ export type MultiServiceJourneyItem = {
   service_type: "connected_read" | "consequential_write" | "labelled_handoff";
   provider: "uber" | "expedia" | "amazon" | "zomato";
   action: string;
-  status: "confirmed" | "completed" | "handoff_created" | "pending" | "reconciling" | "failed" | "unknown";
+  status:
+    | "confirmed"
+    | "completed"
+    | "handoff_created"
+    | "pending"
+    | "reconciling"
+    | "failed"
+    | "unknown";
   authoritative_reference?: string | null;
-  payment_status?: "not_applicable" | "authorized_in_escrow" | "settled" | "refunded" | "failed";
+  payment_status?:
+    | "not_applicable"
+    | "authorized_in_escrow"
+    | "settled"
+    | "refunded"
+    | "failed";
   handoff_url?: string | null;
   summary: string;
   completed: boolean;
@@ -348,10 +370,7 @@ export type MultiServiceJourney = {
 export type ReminderScheduleKind = "one_time" | "interval" | "recurring";
 
 export type ReminderDeliveryStatus =
-  | "scheduled"
-  | "delivered_to_channel"
-  | "failed"
-  | "unknown";
+  "scheduled" | "delivered_to_channel" | "failed" | "unknown";
 
 export type Reminder = {
   id: string;
@@ -641,7 +660,9 @@ export class VoxCoreHostClient {
     );
     if (!response.ok) {
       const errText = await response.text().catch(() => "");
-      throw new Error(`Core request to ${path} failed (${response.status}): ${errText}`);
+      throw new Error(
+        `Core request to ${path} failed (${response.status}): ${errText}`,
+      );
     }
     if (response.status === 204) {
       return undefined as T;
@@ -662,13 +683,17 @@ export class VoxCoreHostClient {
     accountId: string,
     initiation: InitiateConnectionRequest,
   ): Promise<InitiateConnectionResponse> {
-    return this.signedPost<InitiateConnectionResponse>("/v1/connections/initiate", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
+    return this.signedPost<InitiateConnectionResponse>(
+      "/v1/connections/initiate",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        initiation,
       },
-      initiation,
-    });
+    );
   }
 
   async verifyConnectionCallback(
@@ -684,7 +709,10 @@ export class VoxCoreHostClient {
     });
   }
 
-  async disconnectConnection(accountId: string, connectionId: string): Promise<Connection> {
+  async disconnectConnection(
+    accountId: string,
+    connectionId: string,
+  ): Promise<Connection> {
     return this.signedPost<Connection>(
       `/v1/connections/${encodeURIComponent(connectionId)}/disconnect`,
       accountId,
@@ -697,7 +725,10 @@ export class VoxCoreHostClient {
     );
   }
 
-  async listEffectiveGrants(accountId: string, agentKey: string): Promise<CapabilityGrant[]> {
+  async listEffectiveGrants(
+    accountId: string,
+    agentKey: string,
+  ): Promise<CapabilityGrant[]> {
     return this.signedPost<CapabilityGrant[]>(
       `/v1/agents/${encodeURIComponent(agentKey)}/effective-capability-grants`,
       accountId,
@@ -708,17 +739,27 @@ export class VoxCoreHostClient {
     );
   }
 
-  async createGrant(accountId: string, grant: CreateGrantRequest): Promise<CapabilityGrant> {
-    return this.signedPost<CapabilityGrant>("/v1/capability-grants", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
+  async createGrant(
+    accountId: string,
+    grant: CreateGrantRequest,
+  ): Promise<CapabilityGrant> {
+    return this.signedPost<CapabilityGrant>(
+      "/v1/capability-grants",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        grant,
       },
-      grant,
-    });
+    );
   }
 
-  async revokeGrant(accountId: string, grant: CreateGrantRequest): Promise<void> {
+  async revokeGrant(
+    accountId: string,
+    grant: CreateGrantRequest,
+  ): Promise<void> {
     return this.signedPost<void>(
       "/v1/capability-grants",
       accountId,
@@ -733,7 +774,10 @@ export class VoxCoreHostClient {
     );
   }
 
-  async startTask(accountId: string, task: StartTaskRequest): Promise<DurableTask> {
+  async startTask(
+    accountId: string,
+    task: StartTaskRequest,
+  ): Promise<DurableTask> {
     return this.signedPost<DurableTask>("/v1/durable-tasks", accountId, {
       host_context: {
         host_user_id: `vox-account:${accountId}`,
@@ -801,15 +845,22 @@ export class VoxCoreHostClient {
   }
 
   async listExtensions(accountId: string): Promise<RemoteExtension[]> {
-    return this.signedPost<RemoteExtension[]>("/v1/remote-extensions/list", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
+    return this.signedPost<RemoteExtension[]>(
+      "/v1/remote-extensions/list",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
       },
-    });
+    );
   }
 
-  async getExtension(accountId: string, extensionId: string): Promise<RemoteExtension> {
+  async getExtension(
+    accountId: string,
+    extensionId: string,
+  ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
       `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
       accountId,
@@ -826,13 +877,17 @@ export class VoxCoreHostClient {
     accountId: string,
     extension: InstallExtensionRequest,
   ): Promise<RemoteExtension> {
-    return this.signedPost<RemoteExtension>("/v1/remote-extensions", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
+    return this.signedPost<RemoteExtension>(
+      "/v1/remote-extensions",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        extension,
       },
-      extension,
-    });
+    );
   }
 
   async updateExtension(
@@ -908,7 +963,10 @@ export class VoxCoreHostClient {
     );
   }
 
-  async removeExtension(accountId: string, extensionId: string): Promise<RemoteExtension> {
+  async removeExtension(
+    accountId: string,
+    extensionId: string,
+  ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
       `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
       accountId,
@@ -969,19 +1027,15 @@ export class VoxCoreHostClient {
     accountId: string,
     request: LodgingBookingRequest,
   ): Promise<LodgingBooking> {
-    return this.signedPost<LodgingBooking>(
-      "/v1/lodging/bookings",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: request.agent_external_key ?? "saathi",
-        connection_id: request.connection_id,
-        booking_request: request.booking_request,
+    return this.signedPost<LodgingBooking>("/v1/lodging/bookings", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      agent_external_key: request.agent_external_key ?? "saathi",
+      connection_id: request.connection_id,
+      booking_request: request.booking_request,
+    });
   }
 
   async cancelLodgingBooking(
@@ -1012,24 +1066,20 @@ export class VoxCoreHostClient {
     handoff: AmazonHandoffRequest,
     agentExternalKey?: string,
   ): Promise<HandoffResponse> {
-    return this.signedPost<HandoffResponse>(
-      "/v1/handoffs/amazon",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: agentExternalKey ?? "saathi",
-        connection_id: connectionId,
-        handoff: {
-          asin: handoff.asin,
-          locale: handoff.locale ?? "US",
-          quantity: handoff.quantity ?? 1,
-          partner_tag: handoff.partner_tag ?? "vox-20",
-        },
+    return this.signedPost<HandoffResponse>("/v1/handoffs/amazon", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      agent_external_key: agentExternalKey ?? "saathi",
+      connection_id: connectionId,
+      handoff: {
+        asin: handoff.asin,
+        locale: handoff.locale ?? "US",
+        quantity: handoff.quantity ?? 1,
+        partner_tag: handoff.partner_tag ?? "vox-20",
+      },
+    });
   }
 
   async createZomatoHandoff(
@@ -1038,23 +1088,19 @@ export class VoxCoreHostClient {
     handoff: ZomatoHandoffRequest,
     agentExternalKey?: string,
   ): Promise<HandoffResponse> {
-    return this.signedPost<HandoffResponse>(
-      "/v1/handoffs/zomato",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: agentExternalKey ?? "saathi",
-        connection_id: connectionId,
-        handoff: {
-          res_id: handoff.res_id ?? null,
-          order_id: handoff.order_id ?? null,
-          handoff_type: handoff.handoff_type ?? "ViewRestaurant",
-        },
+    return this.signedPost<HandoffResponse>("/v1/handoffs/zomato", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      agent_external_key: agentExternalKey ?? "saathi",
+      connection_id: connectionId,
+      handoff: {
+        res_id: handoff.res_id ?? null,
+        order_id: handoff.order_id ?? null,
+        handoff_type: handoff.handoff_type ?? "ViewRestaurant",
+      },
+    });
   }
 
   async createUberRideHandoff(
@@ -1063,26 +1109,22 @@ export class VoxCoreHostClient {
     handoff: UberHandoffRequest,
     agentExternalKey?: string,
   ): Promise<HandoffResponse> {
-    return this.signedPost<HandoffResponse>(
-      "/v1/handoffs/uber",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: agentExternalKey ?? "saathi",
-        connection_id: connectionId,
-        handoff: {
-          pickup_latitude: handoff.pickup_latitude,
-          pickup_longitude: handoff.pickup_longitude,
-          dropoff_latitude: handoff.dropoff_latitude,
-          dropoff_longitude: handoff.dropoff_longitude,
-          product_id: handoff.product_id ?? null,
-          fare_id: handoff.fare_id ?? null,
-        },
+    return this.signedPost<HandoffResponse>("/v1/handoffs/uber", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      agent_external_key: agentExternalKey ?? "saathi",
+      connection_id: connectionId,
+      handoff: {
+        pickup_latitude: handoff.pickup_latitude,
+        pickup_longitude: handoff.pickup_longitude,
+        dropoff_latitude: handoff.dropoff_latitude,
+        dropoff_longitude: handoff.dropoff_longitude,
+        product_id: handoff.product_id ?? null,
+        fare_id: handoff.fare_id ?? null,
+      },
+    });
   }
 
   async listReminders(accountId: string): Promise<Reminder[]> {
@@ -1163,12 +1205,16 @@ export class VoxCoreHostClient {
   }
 
   async listPreferences(accountId: string): Promise<UserPreference[]> {
-    return this.signedPost<UserPreference[]>("/v1/preferences/list", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
+    return this.signedPost<UserPreference[]>(
+      "/v1/preferences/list",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
       },
-    });
+    );
   }
 
   async setPreference(
@@ -1232,5 +1278,3 @@ export class VoxCoreHostClient {
     );
   }
 }
-
-

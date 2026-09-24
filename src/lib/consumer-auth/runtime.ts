@@ -40,10 +40,7 @@ export function getConsumerAuthRuntime(): Runtime | null {
     dialect: new PostgresDialect({ pool }),
   });
   const coreClient = new VoxCoreHostClient(config.core);
-  const accounts = new ConsumerAccountAuthority(
-    pool,
-    coreClient,
-  );
+  const accounts = new ConsumerAccountAuthority(pool, coreClient);
   const emailSender = new SmtpAuthEmailSender(
     config.emailFrom,
     nodemailer.createTransport(config.smtpUrl),

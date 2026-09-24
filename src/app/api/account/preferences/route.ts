@@ -24,9 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to list preferences",
+          error instanceof Error ? error.message : "Failed to list preferences",
       },
       { status: 400 },
     );
@@ -50,14 +48,22 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!body.category || typeof body.category !== "string" || !body.category.trim()) {
+    if (
+      !body.category ||
+      typeof body.category !== "string" ||
+      !body.category.trim()
+    ) {
       return NextResponse.json(
         { error: "category is required" },
         { status: 400 },
       );
     }
 
-    if (!body.preference_key || typeof body.preference_key !== "string" || !body.preference_key.trim()) {
+    if (
+      !body.preference_key ||
+      typeof body.preference_key !== "string" ||
+      !body.preference_key.trim()
+    ) {
       return NextResponse.json(
         { error: "preference_key is required" },
         { status: 400 },
@@ -65,10 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.value === undefined) {
-      return NextResponse.json(
-        { error: "value is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "value is required" }, { status: 400 });
     }
 
     // Invariant: Preferences provide advisory context only and grant NO execution authority
@@ -79,7 +82,9 @@ export async function POST(request: NextRequest) {
       body.execute_consequential ||
       (typeof body.value === "object" &&
         body.value !== null &&
-        ("action_id" in body.value || "grant_id" in body.value || "execute_consequential" in body.value))
+        ("action_id" in body.value ||
+          "grant_id" in body.value ||
+          "execute_consequential" in body.value))
     ) {
       return NextResponse.json(
         {
@@ -120,9 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to set preference",
+          error instanceof Error ? error.message : "Failed to set preference",
       },
       { status: 400 },
     );

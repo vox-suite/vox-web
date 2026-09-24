@@ -38,7 +38,10 @@ function AdminNav({
   onNavigate?: () => void;
 }) {
   return (
-    <nav aria-label="Administration" className="flex flex-1 flex-col gap-0.5 px-3 py-4">
+    <nav
+      aria-label="Administration"
+      className="flex flex-1 flex-col gap-0.5 px-3 py-4"
+    >
       <p className="px-3 pb-2 font-mono text-[11px] font-medium uppercase tracking-wider text-smoke">
         Workspace
       </p>
@@ -199,7 +202,9 @@ export function AdminShell({
                   firstName.slice(0, 1).toUpperCase()
                 )}
               </div>
-              <span className="hidden text-sm text-mist sm:inline">{firstName}</span>
+              <span className="hidden text-sm text-mist sm:inline">
+                {firstName}
+              </span>
             </div>
             <SignOutButton />
           </div>

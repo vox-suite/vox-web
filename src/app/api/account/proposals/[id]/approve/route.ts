@@ -13,7 +13,10 @@ export async function POST(
 
   const { id: proposalId } = await params;
   if (!proposalId) {
-    return NextResponse.json({ error: "Proposal ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Proposal ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -41,7 +44,10 @@ export async function POST(
     return NextResponse.json({ proposal: approved });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to approve proposal" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to approve proposal",
+      },
       { status: 409 },
     );
   }

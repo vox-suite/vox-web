@@ -24,7 +24,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ grants });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to list effective grants" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to list effective grants",
+      },
       { status: 400 },
     );
   }
@@ -54,7 +59,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ grant }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create capability grant" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create capability grant",
+      },
       { status: 400 },
     );
   }
@@ -84,7 +94,12 @@ export async function DELETE(request: NextRequest) {
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to revoke capability grant" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to revoke capability grant",
+      },
       { status: 400 },
     );
   }

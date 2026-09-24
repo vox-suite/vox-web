@@ -165,8 +165,9 @@ export function PipelineView({
             Vox System &amp; Pipeline Architecture
           </h1>
           <p className="mt-1 font-sans text-xs leading-relaxed text-ash">
-            Interactive architecture and execution flow diagram connecting Vox Desktop,
-            Telephony, Bridge, Jev System One, Core Engine, and Background Workers.
+            Interactive architecture and execution flow diagram connecting Vox
+            Desktop, Telephony, Bridge, Jev System One, Core Engine, and
+            Background Workers.
           </p>
         </div>
       )}
@@ -218,9 +219,7 @@ export function PipelineView({
               Math.min(activeScenario.steps.length - 1, idx + 1),
             )
           }
-          onStepPrev={() =>
-            setCurrentStepIndex((idx) => Math.max(0, idx - 1))
-          }
+          onStepPrev={() => setCurrentStepIndex((idx) => Math.max(0, idx - 1))}
           onReset={() => {
             setCurrentStepIndex(0);
           }}

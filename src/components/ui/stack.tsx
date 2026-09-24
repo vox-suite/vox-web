@@ -15,7 +15,7 @@ export function Stack({
         gap === "small" && "gap-2",
         gap === "normal" && "gap-4",
         gap === "large" && "gap-8",
-        className
+        className,
       )}
     >
       {children}
@@ -33,7 +33,7 @@ export function Row({
       className={cn(
         "flex flex-wrap items-center gap-3",
         spread && "justify-between",
-        className
+        className,
       )}
     >
       {children}
@@ -53,7 +53,7 @@ export function Grid({
         columns === 2 && "grid-cols-1 md:grid-cols-2",
         columns === 3 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
         columns === 4 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
-        className
+        className,
       )}
     >
       {children}

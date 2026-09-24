@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ proposal }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create proposal" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to create proposal",
+      },
       { status: 400 },
     );
   }

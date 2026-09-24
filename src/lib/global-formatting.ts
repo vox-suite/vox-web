@@ -126,12 +126,15 @@ export function formatAuthoritativeDistance(
   userPreferredUnit?: "km" | "mi",
 ): AuthoritativeDistanceDisplay {
   const provUnit = providerUnit.toLowerCase() as "km" | "mi";
-  const userUnit = userPreferredUnit ? userPreferredUnit.toLowerCase() : provUnit;
+  const userUnit = userPreferredUnit
+    ? userPreferredUnit.toLowerCase()
+    : provUnit;
 
   const authFormatted = `${distance.toFixed(2)} ${provUnit}`;
 
   if (userUnit !== provUnit) {
-    const converted = provUnit === "km" ? distance * 0.621371 : distance * 1.60934;
+    const converted =
+      provUnit === "km" ? distance * 0.621371 : distance * 1.60934;
     const convFormatted = `${converted.toFixed(2)} ${userUnit}`;
     return {
       authoritativeValue: authFormatted,
@@ -155,9 +158,7 @@ export function formatAuthoritativeDistance(
  * 1. An accessible symbol / text badge (does NOT rely on color alone)
  * 2. An explicit aria-label and status announcement
  */
-export function getAccessibleStatusIndicator(
-  state: string,
-): {
+export function getAccessibleStatusIndicator(state: string): {
   symbol: string;
   text: string;
   badgeTone: "positive" | "warning" | "error" | "accent" | "neutral";
@@ -206,7 +207,8 @@ export function getAccessibleStatusIndicator(
         symbol: "⊘",
         text: "SUPERSEDED (DETAILS CHANGED)",
         badgeTone: "warning",
-        ariaLabel: "Status: Superseded, details changed and existing approval voided",
+        ariaLabel:
+          "Status: Superseded, details changed and existing approval voided",
       };
     case "failed":
     case "rejection":

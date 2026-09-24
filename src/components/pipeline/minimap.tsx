@@ -88,7 +88,11 @@ export function Minimap({
               y={node.y * scaleY}
               width={node.width * scaleX}
               height={node.height * scaleY}
-              fill={isSelected ? "var(--color-coral-pulse)" : "var(--color-border-edge)"}
+              fill={
+                isSelected
+                  ? "var(--color-coral-pulse)"
+                  : "var(--color-border-edge)"
+              }
               fillOpacity={isSelected ? 1 : 0.75}
               rx={1}
             />

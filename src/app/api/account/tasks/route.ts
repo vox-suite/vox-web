@@ -57,7 +57,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to start task" },
+      {
+        error: error instanceof Error ? error.message : "Failed to start task",
+      },
       { status: 400 },
     );
   }

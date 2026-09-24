@@ -51,13 +51,22 @@ test("public platform boundaries: host requests use signed assertions and public
 
       // Assert all host calls include canonical host authentication headers (case-insensitive check)
       const lowerHeaders = Object.fromEntries(
-        Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v])
+        Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
       );
 
-      assert.ok(lowerHeaders["x-vox-host-credential"], "Missing x-vox-host-credential");
-      assert.ok(lowerHeaders["x-vox-host-signature"], "Missing x-vox-host-signature");
+      assert.ok(
+        lowerHeaders["x-vox-host-credential"],
+        "Missing x-vox-host-credential",
+      );
+      assert.ok(
+        lowerHeaders["x-vox-host-signature"],
+        "Missing x-vox-host-signature",
+      );
       assert.ok(lowerHeaders["x-vox-host-nonce"], "Missing x-vox-host-nonce");
-      assert.ok(lowerHeaders["x-vox-host-timestamp"], "Missing x-vox-host-timestamp");
+      assert.ok(
+        lowerHeaders["x-vox-host-timestamp"],
+        "Missing x-vox-host-timestamp",
+      );
 
       if (url.includes("/v1/connections/list")) {
         return Response.json({ connections: [] });
@@ -155,7 +164,12 @@ test("reconnect and recovery: reconstructs authoritative Core state without opti
 
 test("accessibility & localization: authoritative prices, datetimes, and distances", () => {
   // 1. Authoritative Currency Quote
-  const currencyQuote = formatAuthoritativeCurrency(189.99, "USD", false, "en-US");
+  const currencyQuote = formatAuthoritativeCurrency(
+    189.99,
+    "USD",
+    false,
+    "en-US",
+  );
   assert.equal(currencyQuote.currencyCode, "USD");
   assert.equal(currencyQuote.formattedAmount, "189.99 USD");
   assert.equal(currencyQuote.isAuthoritative, true);
@@ -164,7 +178,7 @@ test("accessibility & localization: authoritative prices, datetimes, and distanc
   const dtQuote = formatAuthoritativeDateTime(
     "2026-10-01T14:30:00.000Z",
     "America/New_York",
-    "en-US"
+    "en-US",
   );
   assert.equal(dtQuote.authoritativeTimezone, "America/New_York");
   assert.ok(dtQuote.formattedDateTime.includes("10:30"));
@@ -185,11 +199,13 @@ test("honest provider handoff: handoffs explicitly report completed: false", asy
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async () => {
       return Response.json({
-        handoff_id: "handoff-az-1",
+        provider: "amazon",
+        action: "open_cart",
+        handoff_url: "https://amazon.com/gp/cart/view.html?ref=vox",
+        status: "handoff_created",
         completed: false,
-        url: "https://amazon.com/gp/cart/view.html?ref=vox",
-        label: "Open Amazon Cart",
-        disclaimer: "Vox has not completed this purchase. Review and pay on Amazon.",
+        disclaimer:
+          "Vox has not completed this purchase. Review and pay on Amazon.",
       });
     },
     now: () => 1_795_622_400,
@@ -203,21 +219,24 @@ test("honest provider handoff: handoffs explicitly report completed: false", asy
 
   assert.equal(handoff.completed, false);
   assert.ok(handoff.disclaimer.includes("Vox has not completed this purchase"));
-  assert.ok(handoff.url.includes("amazon.com"));
+  assert.ok(handoff.handoff_url.includes("amazon.com"));
 });
 
 test("truthful delivery & non-action authority invariants", () => {
   // Invariant 1: Notification and reminder status is truthful
   const deliveredStatus = getAccessibleStatusIndicator("delivered_to_channel");
-  assert.equal(deliveredStatus.text, "DELIVERED TO CHANNEL (NOT CONFIRMED SEEN)");
+  assert.equal(
+    deliveredStatus.text,
+    "DELIVERED TO CHANNEL (NOT CONFIRMED SEEN)",
+  );
   assert.equal(deliveredStatus.symbol, "📨");
   assert.ok(
     !deliveredStatus.text.toLowerCase().includes("seen by human"),
-    "Delivery status must not claim human seen"
+    "Delivery status must not claim human seen",
   );
   assert.ok(
     deliveredStatus.ariaLabel.includes("not confirmed seen by human"),
-    "Aria label explicitly discloses delivery is not confirmed seen"
+    "Aria label explicitly discloses delivery is not confirmed seen",
   );
 
   // Invariant 4: Deletion disclosure guarantees

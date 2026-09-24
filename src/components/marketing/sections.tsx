@@ -62,9 +62,14 @@ const currentCapabilities = [
         aria-hidden="true"
       >
         <div className="flex h-6 items-end gap-0.5">
-          {["h-[9px]", "h-[15px]", "h-3", "h-[18px]", "h-[9px]"].map((height, i) => (
-            <span key={i} className={`w-0.5 rounded-full bg-coral-pulse ${height}`} />
-          ))}
+          {["h-[9px]", "h-[15px]", "h-3", "h-[18px]", "h-[9px]"].map(
+            (height, i) => (
+              <span
+                key={i}
+                className={`w-0.5 rounded-full bg-coral-pulse ${height}`}
+              />
+            ),
+          )}
         </div>
         <span className="flex-1 truncate font-mono text-xs text-smoke">
           Live barge-in · Streaming VAD
@@ -235,7 +240,8 @@ export function HeroAppMockup() {
         </div>
         <div className="flex min-w-0 flex-1 items-center gap-0.5 text-[13px] text-mist">
           <span className="truncate">
-            Protect two hours for the proposal and move internal sync to Thursday
+            Protect two hours for the proposal and move internal sync to
+            Thursday
           </span>
           <span
             className="ml-0.5 inline-block h-3.5 w-px animate-pulse bg-coral-pulse"
@@ -264,8 +270,8 @@ export function HeroAppMockup() {
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="text-[13px] leading-snug text-mist">
-              <strong className="font-medium text-pure-white">Calendar:</strong> Block
-              Thu 9:00 AM – 11:00 AM (Proposal Preparation)
+              <strong className="font-medium text-pure-white">Calendar:</strong>{" "}
+              Block Thu 9:00 AM – 11:00 AM (Proposal Preparation)
             </div>
             <div className="font-mono text-[11px] text-ash">
               Moved Internal Sync to Thu 2:00 PM · Zero conflicts detected
@@ -291,8 +297,8 @@ export function HeroAppMockup() {
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="text-[13px] leading-snug text-mist">
-              <strong className="font-medium text-pure-white">WhatsApp:</strong> Dispatch
-              follow-up brief to Rahul
+              <strong className="font-medium text-pure-white">WhatsApp:</strong>{" "}
+              Dispatch follow-up brief to Rahul
             </div>
             <div className="font-mono text-[11px] text-ash">
               Scheduled Thursday 4:30 PM · Cross-channel notification
@@ -317,8 +323,10 @@ export function HeroAppMockup() {
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="text-[13px] leading-snug text-mist">
-              <strong className="font-medium text-pure-white">Biometrics:</strong> Speaker
-              verified (Rahul)
+              <strong className="font-medium text-pure-white">
+                Biometrics:
+              </strong>{" "}
+              Speaker verified (Rahul)
             </div>
             <div className="font-mono text-[11px] text-ash">
               ResNet-34 neural voice biometrics · 99.4% confidence match
@@ -343,7 +351,9 @@ export function HeroAppMockup() {
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="text-[13px] leading-snug text-mist">
-              <strong className="font-medium text-pure-white">Outbound Call:</strong>{" "}
+              <strong className="font-medium text-pure-white">
+                Outbound Call:
+              </strong>{" "}
               Morning Review Briefing
             </div>
             <div className="font-mono text-[11px] text-ash">
@@ -418,8 +428,8 @@ export function Hero() {
         </h1>
 
         <p className="mt-6 max-w-[480px] text-base leading-relaxed text-ash">
-          Call to untangle the day, put decisions into motion, and stay ahead without
-          another app to manage.
+          Call to untangle the day, put decisions into motion, and stay ahead
+          without another app to manage.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -549,7 +559,7 @@ export function FeatureSection() {
               className={cn(
                 "flex flex-col rounded-2xl border border-border-edge bg-ink p-6 shadow-subtle-3",
                 (index === 0 || index === currentCapabilities.length - 1) &&
-                  "ring-1 ring-coral-pulse/15"
+                  "ring-1 ring-coral-pulse/15",
               )}
             >
               <div className="mb-4 flex items-start justify-between gap-3">
@@ -559,7 +569,9 @@ export function FeatureSection() {
                 >
                   <Icon size={18} />
                 </div>
-                <span className="font-mono text-[11px] text-smoke">{badge}</span>
+                <span className="font-mono text-[11px] text-smoke">
+                  {badge}
+                </span>
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <h3 className="text-lg font-medium text-pure-white">{title}</h3>
@@ -567,7 +579,7 @@ export function FeatureSection() {
               </div>
               {visual}
             </article>
-          )
+          ),
         )}
       </Grid>
     </Section>
@@ -584,13 +596,13 @@ export function StorySection() {
             The work continues after you hang up.
           </h2>
           <p>
-            A useful assistant should not disappear when the conversation ends. Vox keeps
-            commitments durable, watches what is due, and brings the next important update
-            back to you.
+            A useful assistant should not disappear when the conversation ends.
+            Vox keeps commitments durable, watches what is due, and brings the
+            next important update back to you.
           </p>
           <p>
-            That can mean a reminder, a WhatsApp update, or a scheduled call—whichever way
-            fits the moment.
+            That can mean a reminder, a WhatsApp update, or a scheduled
+            call—whichever way fits the moment.
           </p>
           <LinkButton href="#recently-shipped" variant="secondary">
             See what changed recently
@@ -600,7 +612,9 @@ export function StorySection() {
           <div className="w-full max-w-md rounded-2xl border border-border-edge bg-ink p-6 shadow-key-window">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <Badge tone="positive">Follow-up scheduled</Badge>
-              <span className="font-mono text-xs text-smoke">Tomorrow · 8:30 AM</span>
+              <span className="font-mono text-xs text-smoke">
+                Tomorrow · 8:30 AM
+              </span>
             </div>
             <h3 className="mb-5 text-xl font-medium text-pure-white">
               Prepare the project review briefing.
@@ -614,7 +628,11 @@ export function StorySection() {
               Open items will be checked overnight
             </div>
             <div className="flex items-center gap-2 rounded-md border border-coral-pulse/30 bg-ember-hush/50 px-3 py-2 text-sm text-mist">
-              <PhoneCall size={16} className="text-coral-pulse" aria-hidden="true" />
+              <PhoneCall
+                size={16}
+                className="text-coral-pulse"
+                aria-hidden="true"
+              />
               Vox will call with the briefing
             </div>
           </div>
@@ -655,7 +673,10 @@ export function PrinciplesSection() {
         </div>
         <div className="divide-y divide-border-edge">
           {principles.map(([title, body]) => (
-            <article key={title} className="space-y-2 py-6 first:pt-0 last:pb-0">
+            <article
+              key={title}
+              className="space-y-2 py-6 first:pt-0 last:pb-0"
+            >
               <h3 className="text-lg font-medium text-pure-white">{title}</h3>
               <p className="text-sm text-ash">{body}</p>
             </article>
@@ -684,7 +705,9 @@ export function LatestSection() {
               <time dateTime={release.date}>{release.formattedDate}</time>
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <h3 className="text-lg font-medium text-pure-white">{release.title}</h3>
+              <h3 className="text-lg font-medium text-pure-white">
+                {release.title}
+              </h3>
               <p className="text-sm text-ash">{release.summary}</p>
             </div>
             <LinkButton href={`/changelog#${release.id}`} variant="ghost">
@@ -709,7 +732,9 @@ export function ClosingSection() {
         <h2 className="mb-3 text-heading font-normal text-pure-white">
           Make one call. Leave with less to carry.
         </h2>
-        <p className="mx-auto mb-8 max-w-lg text-ash">Vox turns conversation into continuity.</p>
+        <p className="mx-auto mb-8 max-w-lg text-ash">
+          Vox turns conversation into continuity.
+        </p>
         <Row className="justify-center">
           <LinkButton href="/request-access">Request access</LinkButton>
           <LinkButton href="/changelog" variant="secondary">

@@ -61,8 +61,14 @@ test("listConnections posts signed host context and parses connection list", asy
 
   const connections = await client.listConnections("user-1");
   assert.equal(capturedUrl, "https://core.vox.test/v1/connections/list");
-  assert.equal(get(capturedBody, "host_context.host_user_id"), "vox-account:user-1");
-  assert.equal(get(capturedHeaders, "X-Vox-Host-Credential"), "11111111-2222-4333-8444-555555555555");
+  assert.equal(
+    get(capturedBody, "host_context.host_user_id"),
+    "vox-account:user-1",
+  );
+  assert.equal(
+    get(capturedHeaders, "X-Vox-Host-Credential"),
+    "11111111-2222-4333-8444-555555555555",
+  );
   assert.equal(connections.length, 1);
   assert.equal(connections[0].account_display_id, "alex@example.test");
   assert.equal(connections[0].credential_custody, "external_operator");
@@ -80,7 +86,8 @@ test("initiateConnection returns authorization challenge and url", async () => {
         session_id: "sess-abc",
         integration_external_key: "google-calendar",
         state_token: "state-token-xyz",
-        authorization_url: "https://accounts.google.com/o/oauth2/auth?state=state-token-xyz",
+        authorization_url:
+          "https://accounts.google.com/o/oauth2/auth?state=state-token-xyz",
         expires_at: "2026-09-23T01:00:00Z",
       });
     },
@@ -96,7 +103,10 @@ test("initiateConnection returns authorization challenge and url", async () => {
   });
 
   assert.equal(capturedUrl, "https://core.vox.test/v1/connections/initiate");
-  assert.equal(get(capturedBody, "initiation.integration_external_key"), "google-calendar");
+  assert.equal(
+    get(capturedBody, "initiation.integration_external_key"),
+    "google-calendar",
+  );
   assert.equal(res.session_id, "sess-abc");
   assert.equal(res.state_token, "state-token-xyz");
 });
@@ -126,7 +136,10 @@ test("disconnectConnection calls Core disconnect endpoint and revokes connection
   });
 
   const res = await client.disconnectConnection("user-1", "conn-123");
-  assert.equal(capturedUrl, "https://core.vox.test/v1/connections/conn-123/disconnect");
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/connections/conn-123/disconnect",
+  );
   assert.equal(res.authorization_state, "revoked");
 });
 
@@ -253,12 +266,21 @@ test("durable task start, get, and cancel call Core endpoints", async () => {
   assert.equal(task.state, "running");
 
   const polled = await client.getTask("user-1", "task-999");
-  assert.equal(capturedGetUrl, "https://core.vox.test/v1/durable-tasks/task-999");
+  assert.equal(
+    capturedGetUrl,
+    "https://core.vox.test/v1/durable-tasks/task-999",
+  );
   assert.equal(polled.state, "waiting_for_approval");
-  assert.equal(polled.wait_reason, "User confirmation required for dinner booking");
+  assert.equal(
+    polled.wait_reason,
+    "User confirmation required for dinner booking",
+  );
 
   const cancelled = await client.cancelTask("user-1", "task-999");
-  assert.equal(capturedCancelUrl, "https://core.vox.test/v1/durable-tasks/task-999/cancel");
+  assert.equal(
+    capturedCancelUrl,
+    "https://core.vox.test/v1/durable-tasks/task-999/cancel",
+  );
   assert.equal(cancelled.state, "cancelled");
 });
 
@@ -273,14 +295,17 @@ test("action proposal creation and exact-match approval call Core endpoints", as
       const body = JSON.parse(String(init?.body || "{}"));
       if (url.endsWith("/v1/action-proposals")) {
         capturedProposalUrl = url;
-        return Response.json({
-          id: "prop-123",
-          capability_external_key: "travel.book",
-          expires_at: "2026-09-24T00:00:00Z",
-          approval_id: null,
-          state: "pending",
-          details: body.proposal.details,
-        }, { status: 201 });
+        return Response.json(
+          {
+            id: "prop-123",
+            capability_external_key: "travel.book",
+            expires_at: "2026-09-24T00:00:00Z",
+            approval_id: null,
+            state: "pending",
+            details: body.proposal.details,
+          },
+          { status: 201 },
+        );
       }
       if (url.endsWith("/approve")) {
         capturedApproveUrl = url;
@@ -316,12 +341,22 @@ test("action proposal creation and exact-match approval call Core endpoints", as
     expires_at: "2026-09-24T00:00:00Z",
   });
 
-  assert.equal(capturedProposalUrl, "https://core.vox.test/v1/action-proposals");
+  assert.equal(
+    capturedProposalUrl,
+    "https://core.vox.test/v1/action-proposals",
+  );
   assert.equal(proposal.id, "prop-123");
   assert.equal(proposal.details.title, "Flight Booking BLR to DEL");
 
-  const approved = await client.approveProposal("user-1", "prop-123", proposal.details);
-  assert.equal(capturedApproveUrl, "https://core.vox.test/v1/action-proposals/prop-123/approve");
+  const approved = await client.approveProposal(
+    "user-1",
+    "prop-123",
+    proposal.details,
+  );
+  assert.equal(
+    capturedApproveUrl,
+    "https://core.vox.test/v1/action-proposals/prop-123/approve",
+  );
   assert.equal(approved.state, "approved");
   assert.equal(approved.approval_id, "appr-456");
   assert.deepEqual(get(capturedApproveBody, "details"), proposal.details);

@@ -65,8 +65,7 @@
   --shadow-key-window:
     rgba(255, 255, 255, 0.05) 0px 1px 0px 0px inset,
     rgba(255, 255, 255, 0.25) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset,
-    0px 24px 60px rgba(0, 0, 0, 0.6);
+    rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset, 0px 24px 60px rgba(0, 0, 0, 0.6);
   --shadow-btn-lift:
     rgba(0, 0, 0, 0.03) 0px 7px 3px 0px, rgba(0, 0, 0, 0.25) 0px 4px 4px 0px;
   --shadow-subtle:
@@ -86,9 +85,11 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  --font-mono:
+    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     monospace;
   --font-heading: "Inter", ui-sans-serif, system-ui, sans-serif;
 
@@ -158,8 +159,7 @@
   --shadow-key-window:
     rgba(255, 255, 255, 0.05) 0px 1px 0px 0px inset,
     rgba(255, 255, 255, 0.25) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset,
-    0px 24px 60px rgba(0, 0, 0, 0.6);
+    rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset, 0px 24px 60px rgba(0, 0, 0, 0.6);
   --shadow-btn-lift:
     rgba(0, 0, 0, 0.03) 0px 7px 3px 0px, rgba(0, 0, 0, 0.25) 0px 4px 4px 0px;
   --shadow-subtle:
@@ -212,7 +212,8 @@
 
   body {
     @apply min-h-screen bg-void-black text-ash antialiased;
-    font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
     text-rendering: optimizeLegibility;

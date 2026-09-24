@@ -17,7 +17,7 @@ export function Brand({
     <Link
       className={cn(
         "inline-flex items-center gap-2 text-pure-white no-underline hover:text-pure-white",
-        className
+        className,
       )}
       href={href}
       aria-label="Vox home"

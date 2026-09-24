@@ -65,9 +65,10 @@ export function checkRateLimit(
     cleanupExpired(now, windowMs);
   }
 
-  const bucketKey = pathname?.startsWith("/auth") || pathname?.startsWith("/api/auth")
-    ? `auth:${key}`
-    : `global:${key}`;
+  const bucketKey =
+    pathname?.startsWith("/auth") || pathname?.startsWith("/api/auth")
+      ? `auth:${key}`
+      : `global:${key}`;
 
   let timestamps = store.get(bucketKey);
   if (!timestamps) {

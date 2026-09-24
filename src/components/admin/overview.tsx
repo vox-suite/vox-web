@@ -7,14 +7,7 @@ import {
   ShieldCheck,
   Waves,
 } from "lucide-react";
-import {
-  Badge,
-  Card,
-  Grid,
-  ModuleCard,
-  Notice,
-  Stat,
-} from "@/components/ui";
+import { Badge, Card, Grid, ModuleCard, Notice, Stat } from "@/components/ui";
 import { adminModules, adminHref } from "@/lib/admin-modules";
 import type { SystemHealthData } from "@/lib/system-health";
 
@@ -98,11 +91,7 @@ export function OverviewStats({
 
   return (
     <Grid columns={4}>
-      <Stat
-        label="Host CPU Load"
-        value={cpuPercent}
-        description={cpuDesc}
-      />
+      <Stat label="Host CPU Load" value={cpuPercent} description={cpuDesc} />
       <Stat
         label="Memory Utilization"
         value={memPercent}
@@ -199,7 +188,9 @@ export function WorkspaceRuntimeCard({
           <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
             Active Administrator
           </dt>
-          <dd className="mt-1.5 truncate font-mono text-sm text-mist">{email}</dd>
+          <dd className="mt-1.5 truncate font-mono text-sm text-mist">
+            {email}
+          </dd>
         </div>
         <div className="rounded-md border border-border-edge bg-obsidian p-4">
           <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">

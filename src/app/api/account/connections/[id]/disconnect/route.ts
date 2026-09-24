@@ -29,7 +29,12 @@ export async function POST(
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to disconnect connection" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to disconnect connection",
+      },
       { status: 400 },
     );
   }

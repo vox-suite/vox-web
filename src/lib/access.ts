@@ -46,7 +46,8 @@ export function decodeAdminE2ESession(raw: string, secret: string) {
     .digest("base64url");
   const left = Buffer.from(signature);
   const right = Buffer.from(expected);
-  if (left.length !== right.length || !timingSafeEqual(left, right)) return null;
+  if (left.length !== right.length || !timingSafeEqual(left, right))
+    return null;
   try {
     return JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
       email?: string;

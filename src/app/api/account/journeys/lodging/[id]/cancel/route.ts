@@ -41,7 +41,12 @@ export async function POST(
     return NextResponse.json(cancelResult);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to cancel lodging booking" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to cancel lodging booking",
+      },
       { status: 400 },
     );
   }

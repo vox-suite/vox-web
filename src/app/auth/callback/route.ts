@@ -24,7 +24,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/app";
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const host =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   const login = adminLoginPath(host);
 
   if (!code) {
@@ -45,7 +46,11 @@ export async function GET(request: Request) {
     const verified =
       user?.email_confirmed_at != null ||
       user?.app_metadata?.provider === "google";
-    if (!email || !verified || !isSuperuser(email, process.env.SUPERUSER_EMAILS)) {
+    if (
+      !email ||
+      !verified ||
+      !isSuperuser(email, process.env.SUPERUSER_EMAILS)
+    ) {
       await supabase.auth.signOut();
       return NextResponse.redirect(redirectUrl(request, `${login}?error=auth`));
     }

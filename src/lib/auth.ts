@@ -2,10 +2,7 @@ import "server-only";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import {
-  decodeAdminE2ESession,
-  isSuperuser,
-} from "./access";
+import { decodeAdminE2ESession, isSuperuser } from "./access";
 
 export type AdminUser = {
   email: string;
@@ -30,8 +27,8 @@ export function extractFirstName(name?: string | null, email?: string): string {
 export function authConfigured() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() &&
-      process.env.SUPERUSER_EMAILS?.trim(),
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() &&
+    process.env.SUPERUSER_EMAILS?.trim(),
   );
 }
 
@@ -77,7 +74,12 @@ export async function currentSuperuser(): Promise<AdminUser | null> {
     if (!isSuperuser(user.email, process.env.SUPERUSER_EMAILS)) return null;
 
     const identityData = user.identities?.[0]?.identity_data as
-      | { avatar_url?: string; picture?: string; full_name?: string; name?: string }
+      | {
+          avatar_url?: string;
+          picture?: string;
+          full_name?: string;
+          name?: string;
+        }
       | undefined;
 
     const rawName =

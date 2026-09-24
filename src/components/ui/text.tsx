@@ -18,7 +18,7 @@ export function Text({
         "text-body leading-relaxed",
         muted ? "text-smoke" : "text-ash",
         small && "text-sm",
-        className
+        className,
       )}
     >
       {children}

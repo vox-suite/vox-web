@@ -15,10 +15,7 @@ export function LinkButton({
   className?: string;
 }) {
   return (
-    <Link
-      href={href}
-      className={cn(buttonVariants({ variant }), className)}
-    >
+    <Link href={href} className={cn(buttonVariants({ variant }), className)}>
       {children}
     </Link>
   );

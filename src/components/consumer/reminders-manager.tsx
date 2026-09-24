@@ -70,29 +70,38 @@ export function RemindersManager() {
   const [channel, setChannel] = useState("whatsapp");
   const [destination, setDestination] = useState("");
   const [timezone, setTimezone] = useState("UTC");
-  const [scheduleKind, setScheduleKind] = useState<ReminderScheduleKind>("one_time");
+  const [scheduleKind, setScheduleKind] =
+    useState<ReminderScheduleKind>("one_time");
   const [runAt, setRunAt] = useState("");
   const [intervalSeconds, setIntervalSeconds] = useState(3600);
   const [recurrencePreset, setRecurrencePreset] = useState("0 9 * * *");
   const [customCron, setCustomCron] = useState("");
-  const [maxRetries, setMaxRetries] = useState(3);
+  const maxRetries = 3;
 
   // Deliveries inspection
-  const [expandedReminderId, setExpandedReminderId] = useState<string | null>(null);
-  const [deliveries, setDeliveries] = useState<Record<string, ReminderDelivery[]>>({});
-  const [loadingDeliveries, setLoadingDeliveries] = useState<Record<string, boolean>>({});
+  const [expandedReminderId, setExpandedReminderId] = useState<string | null>(
+    null,
+  );
+  const [deliveries, setDeliveries] = useState<
+    Record<string, ReminderDelivery[]>
+  >({});
+  const [loadingDeliveries, setLoadingDeliveries] = useState<
+    Record<string, boolean>
+  >({});
 
   // Detect user's local timezone on mount
   useEffect(() => {
-    try {
-      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (detected) {
-        setTimezone(detected);
+    (async () => {
+      try {
+        const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (detected) {
+          setTimezone(detected);
+        }
+      } catch {
+        setTimezone("UTC");
       }
-    } catch {
-      setTimezone("UTC");
-    }
-    loadReminders();
+      await loadReminders();
+    })();
   }, []);
 
   async function loadReminders() {
@@ -136,8 +145,12 @@ export function RemindersManager() {
         destination: destination.trim(),
         timezone,
         schedule_kind: scheduleKind,
-        run_at: scheduleKind === "one_time" && runAt ? new Date(runAt).toISOString() : null,
-        interval_seconds: scheduleKind === "interval" ? Number(intervalSeconds) : null,
+        run_at:
+          scheduleKind === "one_time" && runAt
+            ? new Date(runAt).toISOString()
+            : null,
+        interval_seconds:
+          scheduleKind === "interval" ? Number(intervalSeconds) : null,
         recurrence_expression: recurrenceExpression,
         max_retries: Number(maxRetries),
       };
@@ -154,12 +167,16 @@ export function RemindersManager() {
       }
 
       setReminders((prev) => [data.reminder, ...prev]);
-      setSuccess("Reminder successfully created and registered with Core scheduler.");
+      setSuccess(
+        "Reminder successfully created and registered with Core scheduler.",
+      );
       setTitle("");
       setMessage("");
       setRunAt("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create reminder");
+      setError(
+        err instanceof Error ? err.message : "Failed to create reminder",
+      );
     } finally {
       setCreating(false);
     }
@@ -168,9 +185,12 @@ export function RemindersManager() {
   async function handleCancel(reminderId: string) {
     try {
       setError(null);
-      const res = await fetch(`/api/account/reminders/${encodeURIComponent(reminderId)}/cancel`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/account/reminders/${encodeURIComponent(reminderId)}/cancel`,
+        {
+          method: "POST",
+        },
+      );
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to cancel reminder");
@@ -180,7 +200,9 @@ export function RemindersManager() {
       );
       setSuccess("Reminder cancelled. Scheduled runs halted.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to cancel reminder");
+      setError(
+        err instanceof Error ? err.message : "Failed to cancel reminder",
+      );
     }
   }
 
@@ -198,7 +220,10 @@ export function RemindersManager() {
         );
         if (res.ok) {
           const data = await res.json();
-          setDeliveries((prev) => ({ ...prev, [reminderId]: data.deliveries || [] }));
+          setDeliveries((prev) => ({
+            ...prev,
+            [reminderId]: data.deliveries || [],
+          }));
         }
       } catch {
         // Silently preserve empty
@@ -210,17 +235,23 @@ export function RemindersManager() {
 
   function getRecurrenceLabel(): string {
     if (scheduleKind === "one_time") {
-      return runAt ? `One-time on ${new Date(runAt).toLocaleString()}` : "One-time (upon due time)";
+      return runAt
+        ? `One-time on ${new Date(runAt).toLocaleString()}`
+        : "One-time (upon due time)";
     }
     if (scheduleKind === "interval") {
-      const match = INTERVAL_PRESETS.find((p) => p.value === Number(intervalSeconds));
+      const match = INTERVAL_PRESETS.find(
+        (p) => p.value === Number(intervalSeconds),
+      );
       return match ? match.label : `Every ${intervalSeconds} seconds`;
     }
     if (scheduleKind === "recurring") {
       if (recurrencePreset === "custom") {
         return `Custom cron: ${customCron || "None specified"}`;
       }
-      const match = RECURRENCE_PRESETS.find((p) => p.value === recurrencePreset);
+      const match = RECURRENCE_PRESETS.find(
+        (p) => p.value === recurrencePreset,
+      );
       return match ? match.label : recurrencePreset;
     }
     return "";
@@ -343,7 +374,9 @@ export function RemindersManager() {
                       id={`${formId}-interval`}
                       label="Interval Period"
                       value={intervalSeconds}
-                      onChange={(e) => setIntervalSeconds(Number(e.target.value))}
+                      onChange={(e) =>
+                        setIntervalSeconds(Number(e.target.value))
+                      }
                     >
                       {INTERVAL_PRESETS.map((p) => (
                         <option key={p.value} value={p.value}>
@@ -398,16 +431,24 @@ export function RemindersManager() {
               <div>
                 • <strong>Channel & Retries:</strong> Dispatches via{" "}
                 <span className="text-neutral-200">{channel}</span> to{" "}
-                <span className="text-neutral-200">{destination || "(unspecified)"}</span>. Up to{" "}
-                {maxRetries} delivery attempts within a 1-hour retry window.
+                <span className="text-neutral-200">
+                  {destination || "(unspecified)"}
+                </span>
+                . Up to {maxRetries} delivery attempts within a 1-hour retry
+                window.
               </div>
               <div className="text-amber-300/90">
-                • <strong>Non-Action Authority Invariant:</strong> Reminders provide informational notification only and strictly cannot execute transactions, authorize payments, or trigger external agent writes.
+                • <strong>Non-Action Authority Invariant:</strong> Reminders
+                provide informational notification only and strictly cannot
+                execute transactions, authorize payments, or trigger external
+                agent writes.
               </div>
             </div>
 
             <Button type="submit" variant="primary" disabled={creating}>
-              {creating ? "Registering Reminder with Core..." : "Schedule Reminder"}
+              {creating
+                ? "Registering Reminder with Core..."
+                : "Schedule Reminder"}
             </Button>
           </form>
 
@@ -445,7 +486,8 @@ export function RemindersManager() {
 
             {reminders.length === 0 && !loading && (
               <Text muted>
-                No active or historical reminders found. Use the schedule form above to create your first reminder.
+                No active or historical reminders found. Use the schedule form
+                above to create your first reminder.
               </Text>
             )}
 
@@ -459,12 +501,12 @@ export function RemindersManager() {
                 const statusKey = missed
                   ? "missed"
                   : isDelivered
-                  ? "delivered_to_channel"
-                  : isFailed
-                  ? "failed"
-                  : isUnknown
-                  ? "unknown"
-                  : reminder.status;
+                    ? "delivered_to_channel"
+                    : isFailed
+                      ? "failed"
+                      : isUnknown
+                        ? "unknown"
+                        : reminder.status;
                 const statusIndicator = getAccessibleStatusIndicator(statusKey);
 
                 return (
@@ -490,7 +532,9 @@ export function RemindersManager() {
                             aria-label={statusIndicator.ariaLabel}
                             className="flex items-center gap-1.5"
                           >
-                            <span aria-hidden="true">{statusIndicator.symbol}</span>
+                            <span aria-hidden="true">
+                              {statusIndicator.symbol}
+                            </span>
                             <span>{statusIndicator.text}</span>
                           </Badge>
                         </div>
@@ -533,16 +577,25 @@ export function RemindersManager() {
                         <p>
                           This reminder was scheduled for{" "}
                           {(() => {
-                            const target = reminder.next_run_at || reminder.run_at;
-                            if (!target) return <strong>(unspecified time)</strong>;
-                            const dt = formatAuthoritativeDateTime(target, reminder.timezone);
+                            const target =
+                              reminder.next_run_at || reminder.run_at;
+                            if (!target)
+                              return <strong>(unspecified time)</strong>;
+                            const dt = formatAuthoritativeDateTime(
+                              target,
+                              reminder.timezone,
+                            );
                             return (
                               <strong aria-label={dt.ariaLabel}>
-                                {dt.formattedDateTime} ({dt.authoritativeTimezone})
+                                {dt.formattedDateTime} (
+                                {dt.authoritativeTimezone})
                               </strong>
                             );
                           })()}
-                          , but the delivery window elapsed during system or provider unavailability. Per Vox policy, missed reminders are surfaced for human review rather than silently delivered late.
+                          , but the delivery window elapsed during system or
+                          provider unavailability. Per Vox policy, missed
+                          reminders are surfaced for human review rather than
+                          silently delivered late.
                         </p>
                         <Row>
                           <Button
@@ -565,11 +618,11 @@ export function RemindersManager() {
 
                     {isFailed && (
                       <div className="p-3 bg-rose-950/60 border border-rose-900 rounded text-xs text-rose-200 space-y-2">
-                        <div className="font-semibold">
-                          Delivery Failed:
-                        </div>
+                        <div className="font-semibold">Delivery Failed:</div>
                         <p>
-                          Provider rejected delivery to {reminder.destination}. You can inspect provider receipts below or re-configure destination.
+                          Provider rejected delivery to {reminder.destination}.
+                          You can inspect provider receipts below or
+                          re-configure destination.
                         </p>
                         <Row>
                           <Button
@@ -592,7 +645,9 @@ export function RemindersManager() {
                     {isDelivered && (
                       <div className="p-2 bg-emerald-950/40 border border-emerald-900/60 rounded text-xs text-emerald-300">
                         ✓ Notification accepted by {reminder.channel} carrier at{" "}
-                        {reminder.last_attempt_at || "scheduled time"}. (Delivered to carrier does not guarantee recipient has viewed the message.)
+                        {reminder.last_attempt_at || "scheduled time"}.
+                        (Delivered to carrier does not guarantee recipient has
+                        viewed the message.)
                       </div>
                     )}
 
@@ -600,12 +655,13 @@ export function RemindersManager() {
                     <div className="border-t border-neutral-900 pt-2 text-xs text-neutral-400">
                       <Row spread>
                         <span>
-                          Timezone: <strong>{reminder.timezone}</strong> · Schedule:{" "}
-                          <strong>{reminder.schedule_kind}</strong> (
+                          Timezone: <strong>{reminder.timezone}</strong> ·
+                          Schedule: <strong>{reminder.schedule_kind}</strong> (
                           {reminder.channel} → {reminder.destination})
                         </span>
                         <span>
-                          Attempts: {reminder.retry_count} / {reminder.max_retries}
+                          Attempts: {reminder.retry_count} /{" "}
+                          {reminder.max_retries}
                         </span>
                       </Row>
                     </div>
@@ -617,7 +673,9 @@ export function RemindersManager() {
                           Provider Delivery Receipts:
                         </div>
                         {loadingDeliveries[reminder.id] ? (
-                          <div className="text-neutral-400">Loading delivery logs...</div>
+                          <div className="text-neutral-400">
+                            Loading delivery logs...
+                          </div>
                         ) : !deliveries[reminder.id] ||
                           deliveries[reminder.id].length === 0 ? (
                           <div className="text-neutral-500">
@@ -637,7 +695,9 @@ export function RemindersManager() {
                                   </div>
                                   <div className="text-neutral-500">
                                     Attempted at:{" "}
-                                    {new Date(deliv.attempted_at).toLocaleString()}
+                                    {new Date(
+                                      deliv.attempted_at,
+                                    ).toLocaleString()}
                                   </div>
                                   {deliv.failure_reason && (
                                     <div className="text-rose-400">
@@ -647,14 +707,19 @@ export function RemindersManager() {
                                 </div>
                                 <div className="text-right">
                                   {(() => {
-                                    const delivInd = getAccessibleStatusIndicator(deliv.status);
+                                    const delivInd =
+                                      getAccessibleStatusIndicator(
+                                        deliv.status,
+                                      );
                                     return (
                                       <Badge
                                         tone={delivInd.badgeTone}
                                         aria-label={delivInd.ariaLabel}
                                         className="flex items-center gap-1"
                                       >
-                                        <span aria-hidden="true">{delivInd.symbol}</span>
+                                        <span aria-hidden="true">
+                                          {delivInd.symbol}
+                                        </span>
                                         <span>{delivInd.text}</span>
                                       </Badge>
                                     );

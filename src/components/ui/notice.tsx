@@ -16,7 +16,7 @@ export function Notice({
         "rounded-2xl p-4 shadow-subtle-3",
         tone === "info" && "bg-obsidian",
         tone === "error" && "bg-ember-hush",
-        tone === "success" && "bg-obsidian"
+        tone === "success" && "bg-obsidian",
       )}
       role={tone === "error" ? "alert" : "status"}
     >
@@ -25,7 +25,7 @@ export function Notice({
           "block text-sm font-medium",
           tone === "error" && "text-coral-pulse",
           tone === "success" && "text-success-green",
-          tone === "info" && "text-pure-white"
+          tone === "info" && "text-pure-white",
         )}
       >
         {title}

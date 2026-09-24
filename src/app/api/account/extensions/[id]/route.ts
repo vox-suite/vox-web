@@ -13,7 +13,10 @@ export async function GET(
 
   const { id: extensionId } = await params;
   if (!extensionId) {
-    return NextResponse.json({ error: "Extension ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Extension ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -29,7 +32,10 @@ export async function GET(
     return NextResponse.json({ extension });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to get extension" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to get extension",
+      },
       { status: 404 },
     );
   }
@@ -46,7 +52,10 @@ export async function PUT(
 
   const { id: extensionId } = await params;
   if (!extensionId) {
-    return NextResponse.json({ error: "Extension ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Extension ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -67,7 +76,10 @@ export async function PUT(
     return NextResponse.json({ extension: updated });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to update extension" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to update extension",
+      },
       { status: 400 },
     );
   }
@@ -84,7 +96,10 @@ export async function DELETE(
 
   const { id: extensionId } = await params;
   if (!extensionId) {
-    return NextResponse.json({ error: "Extension ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Extension ID is required" },
+      { status: 400 },
+    );
   }
 
   const core = getCoreHostClient();
@@ -100,7 +115,10 @@ export async function DELETE(
     return NextResponse.json({ extension: removed });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to remove extension" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to remove extension",
+      },
       { status: 400 },
     );
   }

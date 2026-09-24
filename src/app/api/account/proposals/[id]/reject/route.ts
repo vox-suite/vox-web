@@ -12,13 +12,17 @@ export async function POST(
 
   const { id: proposalId } = await params;
   if (!proposalId) {
-    return NextResponse.json({ error: "Proposal ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Proposal ID is required" },
+      { status: 400 },
+    );
   }
 
   // Rejecting proposal marks it explicitly rejected for the client session
   return NextResponse.json({
     status: "rejected",
     proposal_id: proposalId,
-    message: "Action proposal has been rejected by user. The agent will not execute this action.",
+    message:
+      "Action proposal has been rejected by user. The agent will not execute this action.",
   });
 }

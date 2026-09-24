@@ -65,7 +65,11 @@ export function ConversationDemo() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Explore conversations">
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Explore conversations"
+      >
         {examples.map(({ label, icon: Icon }, index) => (
           <button
             type="button"
@@ -77,7 +81,7 @@ export function ConversationDemo() {
               "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
               index === selected
                 ? "border-coral-pulse/40 bg-ember-hush text-mist shadow-subtle-3"
-                : "border-border-edge bg-graphite/50 text-ash hover:border-ash hover:text-pure-white"
+                : "border-border-edge bg-graphite/50 text-ash hover:border-ash hover:text-pure-white",
             )}
           >
             <Icon size={15} aria-hidden="true" />
@@ -95,14 +99,20 @@ export function ConversationDemo() {
           <p className="mb-2 font-mono text-xs uppercase tracking-wide text-smoke">
             Real-life conversations
           </p>
-          <h3 className="mb-4 text-lg font-medium text-pure-white">{example.title}</h3>
+          <h3 className="mb-4 text-lg font-medium text-pure-white">
+            {example.title}
+          </h3>
           <div className="flex flex-col gap-2">
             {example.details.map((detail) => (
               <span
                 key={detail}
                 className="inline-flex items-start gap-2 text-sm text-ash"
               >
-                <Check size={13} className="mt-0.5 shrink-0 text-mist" aria-hidden="true" />
+                <Check
+                  size={13}
+                  className="mt-0.5 shrink-0 text-mist"
+                  aria-hidden="true"
+                />
                 {detail}
               </span>
             ))}
@@ -124,7 +134,9 @@ export function ConversationDemo() {
         </div>
         <div className="rounded-2xl border border-border-edge bg-ink p-6 shadow-subtle-3">
           <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <span className="font-mono text-xs text-smoke">Conversation preview</span>
+            <span className="font-mono text-xs text-smoke">
+              Conversation preview
+            </span>
             <Badge>Illustrative</Badge>
           </header>
           <div className="mb-3 rounded-md border border-border-edge bg-graphite/60 px-3 py-2.5 text-sm text-mist">
@@ -141,8 +153,8 @@ export function ConversationDemo() {
             {example.outcome}
           </div>
           <small className="block text-xs leading-relaxed text-smoke">
-            Illustrative conversation based on current Vox capabilities. No active call is
-            taking place.
+            Illustrative conversation based on current Vox capabilities. No
+            active call is taking place.
           </small>
         </div>
       </div>

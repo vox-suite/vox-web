@@ -55,14 +55,14 @@ Call `requireSuperuser()` in server pages that retrieve data. Every new API hand
 
 See `docs/deployment.md` for exact Google callback, domain mapping and backend routing. This source change alone does not provision a domain or enable production sign-in.
 
-| Variable                       | Purpose                                                                                            |
-| ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`     | Supabase project URL                                                                               |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`| Supabase anon key for browser/server auth                                                          |
-| `SUPERUSER_EMAILS`             | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone                  |
-| `VOX_ADMIN_ORIGIN`             | Canonical admin origin (`https://admin.voxagent.in`) for host redirects                            |
-| `VOX_CORE_ADMIN_URL`           | HTTPS origin routing `/v1/admin/redis` to Core; loopback HTTP is accepted locally                  |
-| `VOX_ADMIN_TOKEN`              | Dedicated shared admin credential, also configured in Core; separate from `VOX_AUTH_TOKEN`         |
+| Variable                        | Purpose                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                                                       |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key for browser/server auth                                                  |
+| `SUPERUSER_EMAILS`              | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone          |
+| `VOX_ADMIN_ORIGIN`              | Canonical admin origin (`https://admin.voxagent.in`) for host redirects                    |
+| `VOX_CORE_ADMIN_URL`            | HTTPS origin routing `/v1/admin/redis` to Core; loopback HTTP is accepted locally          |
+| `VOX_ADMIN_TOKEN`               | Dedicated shared admin credential, also configured in Core; separate from `VOX_AUTH_TOKEN` |
 
 Admin Google sign-in is configured in the Supabase dashboard (Auth → Providers → Google). Redirect URLs must include `https://admin.voxagent.in/auth/callback` and `http://localhost:3000/auth/callback`. Redis stays on the backend private network. Web instances are stateless; there is no local session database. Changes to the allowlist apply on subsequent requests after environment configuration is rolled out. Signing out clears the Supabase session cookies.
 

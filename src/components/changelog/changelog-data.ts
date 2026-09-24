@@ -5,7 +5,9 @@ export interface ChangelogItem {
   version: string;
   title: string;
   summary: string;
-  subsystems: ("vox-desktop" | "vox-bridge" | "vox-core" | "vox-web" | "vox-deploy")[];
+  subsystems: (
+    "vox-desktop" | "vox-bridge" | "vox-core" | "vox-web" | "vox-deploy"
+  )[];
   category: "voice" | "core" | "biometrics" | "web" | "infra";
   tags: string[];
   metrics?: {

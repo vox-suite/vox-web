@@ -96,12 +96,12 @@ Midnight command center inspired by Raycast: almost-black canvas, Mist neutral a
 
 ## Surfaces
 
-| Level | Token | Value |
-| ----- | ----- | ----- |
-| Canvas | void-black | `#040506` |
-| Card | ink | `#07080a` |
-| Recessed | obsidian | `#111214` |
-| Badge | graphite | `#1b1c1e` |
+| Level       | Token      | Value     |
+| ----------- | ---------- | --------- |
+| Canvas      | void-black | `#040506` |
+| Card        | ink        | `#07080a` |
+| Recessed    | obsidian   | `#111214` |
+| Badge       | graphite   | `#1b1c1e` |
 | Accent tint | ember-hush | `#452324` |
 
 ## Implementation
