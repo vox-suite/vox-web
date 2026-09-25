@@ -169,6 +169,14 @@
   --text-heading: 32px;
   --text-heading-lg: 56px;
   --text-display: 64px;
+
+  --shadow-key: var(--shadow-key);
+  --shadow-key-window: var(--shadow-key-window);
+  --shadow-btn-lift: var(--shadow-btn-lift);
+  --shadow-subtle: var(--shadow-subtle);
+  --shadow-subtle-3: var(--shadow-subtle-3);
+  --shadow-subtle-4: var(--shadow-subtle-4);
+  --shadow-xl: var(--shadow-xl);
 }
 
 @layer base {

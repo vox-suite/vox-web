@@ -119,10 +119,6 @@ export function AdminShell({
             <ShieldCheck size={12} aria-hidden="true" />
             Superuser cockpit
           </Badge>
-          <div className="flex flex-col gap-1 font-mono text-[10px] leading-relaxed text-smoke">
-            <span>v1.104.21 · Raycast Engine</span>
-            <span>Zero-trust perimeter</span>
-          </div>
         </div>
       </aside>
 

@@ -12,7 +12,7 @@ export function Card({
   children,
   title,
   description,
-  tone = "plain",
+  tone = "soft",
   className,
 }: {
   children: ReactNode;

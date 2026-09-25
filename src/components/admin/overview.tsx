@@ -23,7 +23,7 @@ export function WorkspaceWelcome({
   coreConfigured: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-6 rounded-2xl bg-ink p-6 shadow-subtle-3 md:flex-row md:items-center md:justify-between md:p-8">
+    <div className="flex flex-col gap-6 rounded-2xl border border-border-edge bg-ink p-6 shadow-subtle-3 md:flex-row md:items-center md:justify-between md:p-8">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex flex-wrap gap-2">
           <Badge tone="positive">

@@ -11,7 +11,7 @@ export function Stat({
   description: string;
 }) {
   return (
-    <Card>
+    <Card tone="subtle">
       <p className="text-[13px] font-medium text-smoke">{label}</p>
       <p className="mt-2 font-[family-name:var(--font-inter)] text-heading-sm font-medium text-pure-white">
         {value}
