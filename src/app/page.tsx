@@ -1,11 +1,9 @@
 import { SiteHeader, SiteFooter } from "@/components/marketing/shell";
 import {
   Hero,
-  FollowThroughSection,
+  SocialProofBar,
+  BenefitsGrid,
   DemoSection,
-  FeatureSection,
-  StorySection,
-  PrinciplesSection,
   LatestSection,
   ClosingSection,
 } from "@/components/marketing/sections";
@@ -16,11 +14,9 @@ export default function HomePage() {
       <SiteHeader />
       <main id="main">
         <Hero />
-        <FollowThroughSection />
+        <SocialProofBar />
+        <BenefitsGrid />
         <DemoSection />
-        <FeatureSection />
-        <StorySection />
-        <PrinciplesSection />
         <LatestSection />
         <ClosingSection />
       </main>
