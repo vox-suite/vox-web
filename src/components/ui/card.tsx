@@ -11,8 +11,8 @@ function CardRoot({
       data-slot="card"
       data-size={size}
       className={cn(
-        "flex flex-col gap-4 overflow-hidden rounded-2xl border border-border-edge bg-ink p-6 text-sm text-card-foreground shadow-subtle-3",
-        size === "sm" && "gap-3 p-4",
+        "flex flex-col gap-4 overflow-hidden rounded-xl border border-border-edge bg-ink p-6 text-sm text-card-foreground shadow-subtle-3",
+        size === "sm" && "gap-3 p-4 md:p-5",
         className,
       )}
       {...props}

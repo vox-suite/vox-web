@@ -11,7 +11,7 @@ export function DataTable({
 }) {
   return (
     <div
-      className="w-full overflow-x-auto rounded-2xl shadow-subtle-3"
+      className="w-full overflow-x-auto"
       tabIndex={0}
       role="region"
       aria-label={caption}

@@ -22,8 +22,8 @@
   --color-deep-space: #02193b;
   --color-info-blue: #56c2ff;
   --color-success-green: #59d499;
-  --color-border-edge: #363739;
-  --color-line: #232427;
+  --color-border-edge: rgba(255, 255, 255, 0.08);
+  --color-line: rgba(255, 255, 255, 0.06);
 
   --background: #040506;
   --foreground: #ffffff;
@@ -40,7 +40,7 @@
   --accent: #111214;
   --accent-foreground: #ffffff;
   --destructive: #ff6363;
-  --border: #363739;
+  --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.05);
   --ring: #9c9c9d;
   --chart-1: #ff6363;
@@ -55,7 +55,7 @@
   --sidebar-primary-foreground: #454647;
   --sidebar-accent: #111214;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #363739;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #9c9c9d;
 
   --shadow-key:
@@ -73,9 +73,8 @@
     rgba(0, 0, 0, 0.25) 0px 2px 1px 1px inset,
     rgba(255, 255, 255, 0.2) 0px 1px 1px 1px inset;
   --shadow-subtle-3:
-    rgba(255, 255, 255, 0.05) 0px 1px 0px 0px inset,
-    rgba(255, 255, 255, 0.25) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+    0 1px 2px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
   --shadow-subtle-4:
     rgba(0, 0, 0, 0.03) 0px 7px 3px 0px, rgba(0, 0, 0, 0.25) 0px 4px 4px 0px;
   --shadow-xl:
@@ -118,8 +117,8 @@
   --color-deep-space: #02193b;
   --color-info-blue: #56c2ff;
   --color-success-green: #59d499;
-  --color-border-edge: #363739;
-  --color-line: #232427;
+  --color-border-edge: var(--color-border-edge);
+  --color-line: var(--color-line);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

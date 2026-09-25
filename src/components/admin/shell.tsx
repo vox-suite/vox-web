@@ -60,7 +60,7 @@ function AdminNav({
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-ash no-underline transition-colors duration-150 hover:bg-graphite hover:text-pure-white",
               active &&
-                "bg-graphite text-pure-white shadow-subtle-3 hover:bg-graphite hover:text-pure-white",
+                "bg-graphite text-pure-white hover:bg-graphite hover:text-pure-white",
             )}
             aria-current={active ? "page" : undefined}
           >
@@ -108,8 +108,8 @@ export function AdminShell({
   const avatarUrl = user?.image;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-void-black">
-      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border-edge bg-ink shadow-subtle-3 md:flex h-full">
+    <div className="fixed inset-0 flex overflow-hidden bg-void-black">
+      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border-edge bg-ink md:flex h-full">
         <div className="flex h-14 shrink-0 items-center border-b border-border-edge px-5">
           <Brand href={basePath || "/"} />
         </div>
@@ -130,7 +130,7 @@ export function AdminShell({
             aria-label="Close navigation"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative z-10 flex h-full w-[280px] flex-col border-r border-border-edge bg-ink shadow-subtle-3">
+          <aside className="relative z-10 flex h-full w-[280px] flex-col border-r border-border-edge bg-ink">
             <div className="flex h-14 shrink-0 items-center justify-between border-b border-border-edge px-5">
               <Brand href={basePath || "/"} />
               <Button
@@ -153,7 +153,7 @@ export function AdminShell({
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border-edge bg-ink px-4 shadow-subtle-3 md:px-6">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border-edge bg-ink px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -215,7 +215,7 @@ export function AdminShell({
             "flex-1 min-h-0",
             isPipeline
               ? "h-full overflow-hidden p-0"
-              : "overflow-auto p-4 md:p-6 lg:p-8",
+              : "overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8",
           )}
         >
           {children}

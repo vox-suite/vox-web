@@ -23,7 +23,7 @@ export function WorkspaceWelcome({
   coreConfigured: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-border-edge bg-ink p-6 shadow-subtle-3 md:flex-row md:items-center md:justify-between md:p-8">
+    <div className="flex flex-col gap-6 rounded-xl border border-border-edge bg-ink p-6 shadow-subtle-3 md:flex-row md:items-center md:justify-between md:p-8">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex flex-wrap gap-2">
           <Badge tone="positive">
@@ -45,7 +45,7 @@ export function WorkspaceWelcome({
         </p>
       </div>
       {avatarUrl ? (
-        <div className="size-20 shrink-0 overflow-hidden rounded-2xl border border-border-edge bg-obsidian shadow-subtle-3 md:size-24">
+        <div className="size-20 shrink-0 overflow-hidden rounded-xl border border-border-edge bg-obsidian shadow-subtle-3 md:size-24">
           {/* eslint-disable-next-line @next/next/no-img-element -- external OAuth avatar, no remote pattern configured for next/image */}
           <img
             src={avatarUrl}
@@ -56,7 +56,7 @@ export function WorkspaceWelcome({
         </div>
       ) : (
         <div
-          className="flex size-20 shrink-0 items-center justify-center rounded-2xl border border-border-edge bg-obsidian text-smoke shadow-subtle-3 md:size-24"
+          className="flex size-20 shrink-0 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-smoke shadow-subtle-3 md:size-24"
           aria-hidden="true"
         >
           <Waves size={64} strokeWidth={1.25} />
@@ -160,51 +160,51 @@ export function WorkspaceRuntimeCard({
       description="Host operating environment, node process parameters, and identity boundaries."
     >
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Node.js Runtime
           </dt>
-          <dd className="mt-1.5 font-mono text-sm text-mist">
+          <dd className="mt-1 font-mono text-sm text-mist">
             {host?.process?.nodeVersion || process.version}
           </dd>
         </div>
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Host Platform
           </dt>
-          <dd className="mt-1.5 font-mono text-sm text-mist">
+          <dd className="mt-1 font-mono text-sm text-mist">
             {host ? `${host.platform} (${host.arch})` : "Standard Serverless"}
           </dd>
         </div>
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             System Uptime
           </dt>
-          <dd className="mt-1.5 font-mono text-sm text-mist">
+          <dd className="mt-1 font-mono text-sm text-mist">
             {host?.uptimeFormatted || "Continuous"}
           </dd>
         </div>
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Active Administrator
           </dt>
-          <dd className="mt-1.5 truncate font-mono text-sm text-mist">
+          <dd className="mt-1 truncate font-mono text-sm text-mist">
             {email}
           </dd>
         </div>
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Core Admin Endpoint
           </dt>
-          <dd className="mt-1.5 font-mono text-sm text-mist">
+          <dd className="mt-1 font-mono text-sm text-mist">
             {coreConfigured ? "Configured" : "Not Set"}
           </dd>
         </div>
-        <div className="rounded-md border border-border-edge bg-obsidian p-4">
-          <dt className="font-mono text-[11px] uppercase tracking-wide text-smoke">
+        <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
+          <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Docker Daemon
           </dt>
-          <dd className="mt-1.5 font-mono text-sm text-mist">
+          <dd className="mt-1 font-mono text-sm text-mist">
             {health?.docker?.available
               ? `${health.docker.runningContainers} running / ${health.docker.totalContainers} total`
               : "Not Available (Managed Host)"}

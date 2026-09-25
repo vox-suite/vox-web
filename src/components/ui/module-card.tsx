@@ -16,9 +16,9 @@ export function ModuleCard({
   return (
     <Link
       href={href}
-      className="group flex flex-col gap-4 rounded-2xl border border-border-edge bg-ink p-6 text-inherit no-underline shadow-subtle-3 transition-all hover:border-smoke hover:bg-graphite"
+      className="group flex flex-col gap-4 rounded-xl border border-border-edge bg-ink p-6 text-inherit no-underline shadow-subtle-3 transition-all hover:border-smoke/40 hover:bg-graphite/40"
     >
-      <span className="flex size-12 items-center justify-center rounded-full bg-obsidian p-5 text-mist">
+      <span className="flex size-11 items-center justify-center rounded-lg border border-border-edge/60 bg-obsidian text-mist">
         {icon}
       </span>
       <h2 className="text-subheading font-medium text-pure-white">{title}</h2>

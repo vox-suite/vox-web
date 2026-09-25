@@ -13,16 +13,19 @@ export function Card({
   title,
   description,
   tone = "soft",
+  size = "default",
   className,
 }: {
   children: ReactNode;
   title?: string;
   description?: string;
   tone?: "plain" | "soft" | "subtle" | "contrast";
+  size?: "default" | "sm";
   className?: string;
 }) {
   return (
     <CardRoot
+      size={size}
       className={cn(
         tone === "soft" && "bg-ink",
         tone === "subtle" && "bg-obsidian",

@@ -141,10 +141,15 @@ export function SystemHealthDashboard() {
         </Notice>
       )}
 
-      <Card
-        title="Host system metrics"
-        description="CPU, memory and operating system environment"
-      >
+      <div className="flex flex-col gap-3">
+        <div className="space-y-0.5">
+          <h2 className="text-subheading font-medium text-pure-white">
+            Host system metrics
+          </h2>
+          <p className="text-sm text-ash">
+            CPU, memory and operating system environment
+          </p>
+        </div>
         <Grid columns={3}>
           <Stat
             label="Host CPU usage"
@@ -166,7 +171,7 @@ export function SystemHealthDashboard() {
             }
           />
         </Grid>
-      </Card>
+      </div>
 
       <Grid columns={2}>
         <Card
@@ -231,10 +236,15 @@ export function SystemHealthDashboard() {
         </Card>
       </Grid>
 
-      <Card
-        title="Runtime details"
-        description="Node process environment and system release"
-      >
+      <div className="flex flex-col gap-3">
+        <div className="space-y-0.5">
+          <h2 className="text-subheading font-medium text-pure-white">
+            Runtime details
+          </h2>
+          <p className="text-sm text-ash">
+            Node process environment and system release
+          </p>
+        </div>
         <Grid columns={3}>
           <Stat
             label="Node runtime"
@@ -252,7 +262,7 @@ export function SystemHealthDashboard() {
             description={host.platform}
           />
         </Grid>
-      </Card>
+      </div>
 
       <Card
         title="Container resources"
