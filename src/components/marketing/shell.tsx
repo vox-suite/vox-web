@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Brand } from "@/components/ui";
-import { cn } from "@/lib/utils";
-
-const signInHref =
-  process.env.NODE_ENV === "production"
-    ? "https://app.voxagent.in/sign-in"
-    : "/app/sign-in";
 
 const navLinks = [
+  { href: "/#follow-through", label: "How it works" },
   { href: "/#capabilities", label: "Capabilities" },
-  { href: "/#workflow-automation", label: "Workflows" },
-  { href: "/#security", label: "Security & Governance" },
-  { href: "/#telemetry", label: "Telemetry" },
+  { href: "/pipeline", label: "Pipeline" },
+  { href: "/#principles", label: "Principles" },
   { href: "/changelog", label: "Changelog" },
 ];
 
@@ -44,16 +38,10 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           <Link
-            href={signInHref}
-            className="btn-secondary-obsidian hidden h-8 items-center px-3.5 text-[13px] sm:inline-flex"
-          >
-            Sign in
-          </Link>
-          <Link
             href="/request-access"
             className="btn-primary-mist inline-flex h-8 items-center px-3.5 text-[13px]"
           >
-            Book free Demo
+            Request access
           </Link>
 
           <details className="group relative lg:hidden">
@@ -67,17 +55,15 @@ export function SiteHeader() {
               className="absolute right-0 top-[calc(100%+8px)] flex w-48 flex-col rounded-xl border border-[#2f3031] bg-[#07080a] p-2 shadow-2xl backdrop-blur-xl"
               aria-label="Mobile navigation"
             >
-              {[...navLinks, { href: signInHref, label: "Sign in" }].map(
-                ({ href, label }) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    className="flex min-h-10 items-center rounded-lg px-3 text-[14px] text-ash transition-colors hover:bg-white/[0.04] hover:text-pure-white"
-                  >
-                    {label}
-                  </Link>
-                ),
-              )}
+              {navLinks.map(({ href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="flex min-h-10 items-center rounded-lg px-3 text-[14px] text-ash transition-colors hover:bg-white/[0.04] hover:text-pure-white"
+                >
+                  {label}
+                </Link>
+              ))}
             </nav>
           </details>
         </div>
@@ -88,33 +74,21 @@ export function SiteHeader() {
 
 const footerColumns = [
   {
-    title: "Product",
+    title: "Discover",
     links: [
+      { href: "/#follow-through", label: "How it works" },
       { href: "/#capabilities", label: "Capabilities" },
-      { href: "/#workflow-automation", label: "Workflows" },
-      { href: "/#security", label: "Security & Governance" },
-      { href: "/request-access", label: "Request Access" },
-    ],
-  },
-  {
-    title: "Platform",
-    links: [
+      { href: "/pipeline", label: "Pipeline architecture" },
+      { href: "/#principles", label: "Our principles" },
       { href: "/changelog", label: "Changelog" },
-      { href: "/pipeline", label: "Pipeline" },
-      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/request-access", label: "Request access" },
     ],
   },
   {
-    title: "Account",
+    title: "Vox",
     links: [
-      { href: signInHref, label: "Sign In" },
-      {
-        href:
-          process.env.NODE_ENV === "production"
-            ? "https://admin.voxagent.in/login"
-            : "/admin/login",
-        label: "Administration",
-      },
+      { href: "/privacy", label: "Privacy" },
+      { href: "/#main", label: "Back to top" },
     ],
   },
 ];
@@ -127,10 +101,10 @@ export function SiteFooter() {
           <div className="max-w-xs space-y-4">
             <Brand animated={false} size={24} />
             <p className="text-[14px] text-ash">
-              Security & Approvals for AI-Driven Workflows. Built with Raycast design tokens on a dark command center canvas.
+              Your chief of staff, on speed dial.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-12 gap-y-10">
             {footerColumns.map(({ title, links }) => (
               <div key={title} className="flex flex-col">
                 <p className="mb-3 font-mono text-[12px] uppercase tracking-wider text-pure-white">
@@ -150,8 +124,14 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#232427] py-8 font-mono text-[12px] text-smoke">
-          <span>&copy; {new Date().getFullYear()} Vox Inc. All rights reserved.</span>
-          <span>Tactical Command Center · v0.1.0</span>
+          <span>&copy; {new Date().getFullYear()} Vox</span>
+          <span>Less screen time. More human.</span>
+        </div>
+        <div
+          aria-hidden="true"
+          className="select-none pb-4 text-center font-display text-[clamp(6rem,26vw,20rem)] font-bold leading-[0.9] tracking-[-0.06em] text-[#0d0e10] transition-colors duration-500 hover:text-transparent hover:[background:linear-gradient(135deg,#0d0e10_0%,#ff6363_45%,#452324_75%,#0d0e10_100%)] hover:bg-clip-text"
+        >
+          vox
         </div>
       </div>
     </footer>
