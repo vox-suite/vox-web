@@ -160,7 +160,7 @@ export function PipelineView({
       }`}
     >
       {showHeader && (
-        <div className="absolute z-10 pointer-events-none select-none max-w-xl p-5">
+        <div className="absolute top-0 left-0 z-10 pointer-events-none select-none max-w-xl px-4 py-4 md:px-6 md:py-4">
           <h1 className="font-sans text-xl font-medium tracking-tight text-pure-white">
             Vox System &amp; Pipeline Architecture
           </h1>

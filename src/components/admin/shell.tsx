@@ -92,6 +92,10 @@ export function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const isClean = !pathname.startsWith("/admin");
   const basePath = isClean ? "" : "/admin";
+  const isPipeline =
+    pathname === "/admin/pipeline" ||
+    pathname === "/pipeline" ||
+    pathname.endsWith("/pipeline");
 
   const emailStr = user?.email || email || "";
   const rawFirst = user?.name?.trim()
@@ -104,9 +108,9 @@ export function AdminShell({
   const avatarUrl = user?.image;
 
   return (
-    <div className="flex min-h-screen bg-void-black">
-      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border-edge bg-ink shadow-subtle-3 md:flex">
-        <div className="border-b border-border-edge px-5 py-5">
+    <div className="flex h-screen overflow-hidden bg-void-black">
+      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border-edge bg-ink shadow-subtle-3 md:flex h-full">
+        <div className="flex h-14 shrink-0 items-center border-b border-border-edge px-5">
           <Brand href={basePath || "/"} />
         </div>
         <AdminNav basePath={basePath} pathname={pathname} />
@@ -131,7 +135,7 @@ export function AdminShell({
             onClick={() => setMobileOpen(false)}
           />
           <aside className="relative z-10 flex h-full w-[280px] flex-col border-r border-border-edge bg-ink shadow-subtle-3">
-            <div className="flex items-center justify-between border-b border-border-edge px-5 py-4">
+            <div className="flex h-14 shrink-0 items-center justify-between border-b border-border-edge px-5">
               <Brand href={basePath || "/"} />
               <Button
                 type="button"
@@ -152,8 +156,8 @@ export function AdminShell({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border-edge bg-ink px-4 py-3 shadow-subtle-3 md:px-6">
+      <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border-edge bg-ink px-4 shadow-subtle-3 md:px-6">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -209,7 +213,15 @@ export function AdminShell({
             <SignOutButton />
           </div>
         </header>
-        <main id="main" className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <main
+          id="main"
+          className={cn(
+            "flex-1 min-h-0",
+            isPipeline
+              ? "h-full overflow-hidden p-0"
+              : "overflow-auto p-4 md:p-6 lg:p-8",
+          )}
+        >
           {children}
         </main>
       </div>
