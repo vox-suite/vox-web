@@ -29,7 +29,7 @@ export function PrivacyControls() {
     "preferences" | "history" | "governance"
   >("preferences");
   const [preferences, setPreferences] = useState<UserPreference[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -37,22 +37,10 @@ export function PrivacyControls() {
   const [category, setCategory] = useState("locale");
   const [prefKey, setPrefKey] = useState("display_currency");
   const [prefValue, setPrefValue] = useState("USD");
-  const isSensitive =
-    category === "sensitive_personal" ||
-    SENSITIVE_PREFERENCE_KEYS.includes(prefKey);
-  const [prevIsSensitive, setPrevIsSensitive] = useState(isSensitive);
   const [confirmedSensitive, setConfirmedSensitive] = useState(false);
   const [pendingConfirmationKey, setPendingConfirmationKey] = useState<
     string | null
   >(null);
-
-  if (isSensitive !== prevIsSensitive) {
-    setPrevIsSensitive(isSensitive);
-    if (!isSensitive) {
-      setConfirmedSensitive(false);
-      setPendingConfirmationKey(null);
-    }
-  }
 
   // Deletion state
   const [deletingHistory, setDeletingHistory] = useState(false);
@@ -77,10 +65,15 @@ export function PrivacyControls() {
     })();
   }, []);
 
+  const isSensitive = category === "sensitive_personal" || SENSITIVE_PREFERENCE_KEYS.includes(prefKey);
+
+  function resetSensitiveConfirmation() {
+    setConfirmedSensitive(false);
+    setPendingConfirmationKey(null);
+  }
+
   async function loadPreferences() {
     try {
-      setLoading(true);
-      setError(null);
       const res = await fetch("/api/account/preferences");
       if (!res.ok) throw new Error("Failed to load preferences from Core");
       const data = await res.json();
@@ -321,6 +314,7 @@ export function PrivacyControls() {
                       value={category}
                       onChange={(e) => {
                         setCategory(e.target.value);
+                        resetSensitiveConfirmation();
                         if (e.target.value === "sensitive_personal") {
                           setPrefKey("home_address");
                         } else if (e.target.value === "locale") {
@@ -340,7 +334,10 @@ export function PrivacyControls() {
                       id={`${formId}-key`}
                       label="Preference Key"
                       value={prefKey}
-                      onChange={(e) => setPrefKey(e.target.value)}
+                      onChange={(e) => {
+                        setPrefKey(e.target.value);
+                        resetSensitiveConfirmation();
+                      }}
                       placeholder="e.g. display_currency"
                       required
                     />

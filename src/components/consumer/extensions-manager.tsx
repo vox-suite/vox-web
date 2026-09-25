@@ -105,8 +105,6 @@ export function ExtensionsManager() {
 
   async function loadExtensions() {
     try {
-      setLoading(true);
-      setError(null);
       const res = await fetch("/api/account/extensions");
       if (!res.ok) throw new Error("Failed to load extensions");
       const data = await res.json();
@@ -121,9 +119,7 @@ export function ExtensionsManager() {
   }
 
   useEffect(() => {
-    (async () => {
-      await loadExtensions();
-    })();
+    void Promise.resolve().then(loadExtensions);
   }, []);
 
   function applyPreset(presetIndex: number) {

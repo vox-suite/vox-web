@@ -59,7 +59,7 @@ const INTERVAL_PRESETS = [
 export function RemindersManager() {
   const formId = useId();
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -91,23 +91,19 @@ export function RemindersManager() {
 
   // Detect user's local timezone on mount
   useEffect(() => {
-    (async () => {
-      try {
-        const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (detected) {
-          setTimezone(detected);
-        }
-      } catch {
-        setTimezone("UTC");
+    try {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detected) {
+        queueMicrotask(() => setTimezone(detected));
       }
-      await loadReminders();
-    })();
+    } catch {
+      // UTC remains the explicit fallback.
+    }
+    void loadReminders();
   }, []);
 
   async function loadReminders() {
     try {
-      setLoading(true);
-      setError(null);
       const res = await fetch("/api/account/reminders");
       if (!res.ok) throw new Error("Failed to load reminders from Core");
       const data = await res.json();

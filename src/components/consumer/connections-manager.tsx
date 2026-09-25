@@ -19,7 +19,6 @@ export function ConnectionsManager() {
 
   async function loadConnections() {
     try {
-      setLoading(true);
       const res = await fetch("/api/account/connections");
       if (!res.ok) throw new Error("Failed to load connections");
       const data = await res.json();
@@ -34,9 +33,7 @@ export function ConnectionsManager() {
   }
 
   useEffect(() => {
-    (async () => {
-      await loadConnections();
-    })();
+    void Promise.resolve().then(loadConnections);
   }, []);
 
   async function handleDisconnect(connectionId: string) {
