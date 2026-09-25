@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { VoxLogo } from "./vox-logo";
 
-// Anodised crimson key: the single Vox mark. `animated` kept for call-site compatibility.
 export function Brand({
   href = "/",
   size = 28,
+  animated = false,
   className,
 }: {
   href?: string;
@@ -24,24 +25,9 @@ export function Brand({
     >
       <span
         data-brand-mark
-        className="anodised flex shrink-0 items-center justify-center rounded-[8px]"
-        style={{ width: key, height: key }}
-        aria-hidden="true"
+        className="flex shrink-0 items-center justify-center text-coral-pulse"
       >
-        <svg
-          width={key * 0.5}
-          height={key * 0.5}
-          viewBox="0 0 12 12"
-          fill="none"
-        >
-          <path
-            d="M2 2.5 6 9.5 10 2.5"
-            stroke="white"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <VoxLogo animated={animated} size={key} aria-hidden="true" />
       </span>
       <span className="font-display text-[17px] font-semibold tracking-[-0.02em]">
         Vox

@@ -10,11 +10,12 @@ import {
   LatestSection,
   ClosingSection,
 } from "@/components/marketing/sections";
-import { BlueprintFrame } from "@/components/marketing/blueprint-frame";
+import { BlueprintFrame, PageNoise } from "@/components/marketing/blueprint-frame";
 
 export default function HomePage() {
   return (
     <>
+      <PageNoise />
       <SiteHeader />
       <BlueprintFrame>
         <main id="main">

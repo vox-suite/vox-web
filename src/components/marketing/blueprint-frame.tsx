@@ -23,6 +23,17 @@ export function BlueprintFrame({ children }: { children: ReactNode }) {
   );
 }
 
+// Fixed, full-viewport film-grain overlay — the same generator the desktop
+// app uses (`.page-noise`), applied over the whole marketing page.
+export function PageNoise() {
+  return (
+    <div
+      className="page-noise pointer-events-none fixed inset-0 z-[60]"
+      aria-hidden="true"
+    />
+  );
+}
+
 // Small crosshair ticks marking where a section boundary meets the
 // construction guides. Place inside a `relative` max-w-[1200px] wrapper.
 export function CornerTicks() {
