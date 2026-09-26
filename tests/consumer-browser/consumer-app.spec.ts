@@ -64,3 +64,32 @@ test("start a durable task", async ({ page }) => {
     page.getByRole("article", { name: "Plan the week" }),
   ).toBeVisible();
 });
+
+test("plugin library keeps registration and skills reachable", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await expect(
+    page.getByRole("heading", { name: "Plugins", level: 1 }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Public" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Public plugin catalog" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Personal" }).click();
+  await page.getByRole("button", { name: "Add server" }).click();
+  await expect(
+    page.getByRole("form", { name: "Add MCP server" }),
+  ).toBeVisible();
+  await page.getByLabel("Name (optional)").fill("Team notes");
+  await page.getByLabel("MCP server URL").fill("https://notes.example.com/mcp");
+  await page.getByRole("button", { name: "Save server" }).click();
+  await expect(page.getByText(/Team notes.*saved/)).toBeVisible();
+  await page.getByRole("button", { name: /Team notes MCP/ }).click();
+  await expect(page.getByText("Server details not verified")).toBeVisible();
+  await page.getByRole("button", { name: "Skills", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Skills", level: 1 }),
+  ).toBeVisible();
+});

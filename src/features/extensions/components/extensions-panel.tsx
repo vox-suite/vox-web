@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui";
 import {
   Callout,
-  EmptyMessage,
   ItemCard,
   MetaList,
-  Panel,
   QueryContent,
   Tag,
   type TagTone,
@@ -17,6 +15,7 @@ import { errorMessage } from "@/lib/api/http";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import { useExtensions, useRemoveExtension } from "../queries";
 import { InstallExtensionForm } from "./install-extension-form";
+import { QuickAddMcpForm } from "./quick-add-mcp-form";
 
 function lifecycleTone(state: RemoteExtension["lifecycle_state"]): TagTone {
   if (state === "active") return "positive";
@@ -37,6 +36,8 @@ function ExtensionCard({
   const readyForConsequential =
     conformant && extension.operator_enabled && !consentRequired;
   const removed = extension.lifecycle_state === "removed";
+  const unverifiedOperator =
+    extension.operator.operator_id.startsWith("unverified:");
 
   return (
     <ItemCard
@@ -106,11 +107,24 @@ function ExtensionCard({
           </p>
         </Callout>
       ) : null}
+      {unverifiedOperator ? (
+        <Callout tone="warning" title="Server details not verified">
+          <p>
+            Vox has saved this MCP URL, but has not verified the server
+            operator, discovered its tools, or connected an account. No agent
+            can use it yet.
+          </p>
+        </Callout>
+      ) : null}
       <MetaList
         items={[
           {
-            label: "Operator legal entity",
-            value: `${extension.operator.operator_name} (${extension.operator.operator_id})`,
+            label: unverifiedOperator
+              ? "Saved endpoint"
+              : "Operator legal entity",
+            value: unverifiedOperator
+              ? extension.endpoint_url
+              : `${extension.operator.operator_name} (${extension.operator.operator_id})`,
           },
           {
             label: "Support contact",
@@ -234,98 +248,255 @@ function ExtensionCard({
 export function ExtensionsPanel({ id }: { id?: string }) {
   const extensions = useExtensions();
   const [showForm, setShowForm] = useState(false);
+  const [advancedForm, setAdvancedForm] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [source, setSource] = useState<"personal" | "public">("personal");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <Panel
-      id={id}
-      title="Apps you added"
-      description="Inspect remote app operators, recipients, and status. Registration does not grant access."
-      actions={
-        <Button
-          size="sm"
-          variant={showForm ? "secondary" : "primary"}
-          aria-expanded={showForm}
-          onClick={() => {
-            setNotice(null);
-            setShowForm((open) => !open);
-          }}
-        >
-          {showForm ? (
-            "Cancel installation"
-          ) : (
-            <>
-              <Plus aria-hidden="true" /> Register remote extension
-            </>
-          )}
-        </Button>
-      }
-    >
-      <Callout title="How remote apps are governed">
-        <ul className="list-disc space-y-1 pl-4">
-          <li>
-            <strong>Remote-only execution:</strong> integration code runs at the
-            remote operator endpoint, outside Core.
-          </li>
-          <li>
-            <strong>Default-deny authority:</strong> installation grants{" "}
-            <strong>zero</strong> connection, context, capability, or action
-            authority.
-          </li>
-          <li>
-            <strong>Consequential fail-closed:</strong> consequential actions
-            also require conformance, operator enablement, a connected account,
-            an agent grant, and exact approval.
-          </li>
-          <li>
-            <strong>Renewed consent:</strong> a material change (operator
-            transfer or expanded data recipients) suspends affected actions
-            until consent is renewed.
-          </li>
-        </ul>
-      </Callout>
+    <section id={id} aria-label="Plugin library" className="space-y-7">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="relative min-w-0 flex-1 sm:max-w-sm">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-smoke"
+          />
+          <input
+            type="search"
+            aria-label="Search plugins"
+            placeholder={
+              source === "public"
+                ? "Catalog unavailable"
+                : "Search saved extensions"
+            }
+            value={search}
+            disabled={source === "public"}
+            onChange={(event) => setSearch(event.target.value)}
+            className="h-10 w-full rounded-full border border-border-edge bg-obsidian pl-10 pr-4 text-sm text-pure-white outline-none placeholder:text-smoke focus-visible:border-mist disabled:opacity-50"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Refresh plugins"
+            disabled={extensions.isRefetching}
+            onClick={() => void extensions.refetch()}
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={extensions.isRefetching ? "animate-spin" : ""}
+            />
+          </Button>
+          <Button
+            size="sm"
+            variant={showForm ? "secondary" : "primary"}
+            aria-expanded={showForm}
+            onClick={() => {
+              setNotice(null);
+              setSource("personal");
+              setShowForm((open) => !open);
+            }}
+          >
+            {showForm ? (
+              "Close"
+            ) : (
+              <>
+                <Plus aria-hidden="true" /> Add server
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
       {notice ? (
-        <Callout tone="success" title="Status update" live="polite">
+        <Callout title="Extension update" live="polite">
           <p>{notice}</p>
         </Callout>
       ) : null}
       {showForm ? (
-        <InstallExtensionForm
-          onCancel={() => setShowForm(false)}
-          onInstalled={(name) => {
-            setShowForm(false);
-            setNotice(
-              `Extension "${name}" registered successfully (default-denied, no authority granted).`,
-            );
-          }}
-        />
+        <div className="space-y-3">
+          {advancedForm ? (
+            <InstallExtensionForm
+              onCancel={() => setShowForm(false)}
+              onInstalled={(name) => {
+                setShowForm(false);
+                setNotice(
+                  `Extension "${name}" registered (no authority granted).`,
+                );
+              }}
+            />
+          ) : (
+            <QuickAddMcpForm
+              onCancel={() => setShowForm(false)}
+              onAdded={(name) => {
+                setShowForm(false);
+                setNotice(
+                  `"${name}" saved. Vox still needs to verify and connect this server before an agent can use it.`,
+                );
+              }}
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setAdvancedForm((value) => !value)}
+            className="text-sm text-ash underline underline-offset-4 hover:text-mist focus-visible:outline-2 focus-visible:outline-mist"
+          >
+            {advancedForm
+              ? "Use simple MCP setup"
+              : "Advanced developer registration"}
+          </button>
+        </div>
       ) : null}
       <QueryContent
         query={extensions}
         loadingLabel="Loading extension registry"
         errorTitle="Extensions could not be loaded"
-        isEmpty={(data) => data.length === 0}
-        empty={
-          <EmptyMessage title="No remote extensions installed yet">
-            Register a remote MCP or Direct service to inspect its operator and
-            declared tools.
-          </EmptyMessage>
-        }
+        isEmpty={() => false}
+        empty={null}
       >
-        {(data) => (
-          <div className="space-y-3">
-            {data.map((extension) => (
-              <ExtensionCard
-                key={extension.id}
-                extension={extension}
-                onRemoved={() =>
-                  setNotice("Extension removed from active state.")
-                }
-              />
-            ))}
-          </div>
-        )}
+        {(data) => {
+          const installed = data.filter(
+            (extension) => extension.lifecycle_state !== "removed",
+          );
+          const matches = installed.filter((extension) =>
+            [
+              extension.display_name,
+              extension.external_key,
+              extension.operator.operator_name,
+            ].some((value) =>
+              value.toLowerCase().includes(search.trim().toLowerCase()),
+            ),
+          );
+          const selected = matches.find(
+            (extension) => extension.id === selectedId,
+          );
+          return (
+            <div className="space-y-8">
+              <section aria-label="Saved extensions" className="space-y-4">
+                <h2 className="text-base font-medium text-mist">Saved</h2>
+                <div className="border-t border-border-edge pt-4">
+                  {installed.length ? (
+                    <div className="flex flex-wrap gap-3">
+                      {installed.map((extension) => (
+                        <button
+                          key={extension.id}
+                          type="button"
+                          title={extension.display_name}
+                          aria-label={`Show ${extension.display_name}`}
+                          onClick={() => {
+                            setSource("personal");
+                            setSelectedId(extension.id);
+                          }}
+                          className="flex size-12 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-lg font-semibold text-mist transition-colors hover:border-ash hover:bg-graphite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
+                        >
+                          {extension.display_name.slice(0, 1).toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-smoke">
+                      No servers saved yet. Add an MCP server URL to start.
+                    </p>
+                  )}
+                </div>
+              </section>
+              <div
+                role="group"
+                aria-label="Plugin source"
+                className="flex gap-2"
+              >
+                <button
+                  type="button"
+                  aria-pressed={source === "personal"}
+                  onClick={() => setSource("personal")}
+                  className={`rounded-md px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-mist ${source === "personal" ? "bg-graphite text-mist" : "text-smoke hover:text-mist"}`}
+                >
+                  Personal
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={source === "public"}
+                  onClick={() => setSource("public")}
+                  className={`rounded-md px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-mist ${source === "public" ? "bg-graphite text-mist" : "text-smoke hover:text-mist"}`}
+                >
+                  Public
+                </button>
+              </div>
+              {source === "public" ? (
+                <div className="rounded-xl border border-border-edge bg-ink p-8">
+                  <h2 className="text-lg font-medium text-mist">
+                    Public plugin catalog
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-smoke">
+                    This deployment does not provide a public plugin catalog
+                    yet. You can add a remote server under Personal; it will
+                    remain unavailable to agents until account authorization and
+                    tool execution are supported.
+                  </p>
+                </div>
+              ) : (
+                <section aria-label="Personal plugins" className="space-y-4">
+                  <h2 className="text-base font-medium text-mist">
+                    Your saved extensions
+                  </h2>
+                  {matches.length ? (
+                    <div className="grid gap-x-10 lg:grid-cols-2">
+                      {matches.map((extension) => (
+                        <button
+                          key={extension.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedId(
+                              extension.id === selectedId ? null : extension.id,
+                            )
+                          }
+                          aria-expanded={extension.id === selectedId}
+                          className="group flex w-full items-center gap-4 border-b border-border-edge/60 px-2 py-4 text-left transition-colors hover:bg-ink focus-visible:outline-2 focus-visible:outline-mist"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-lg font-semibold text-mist"
+                          >
+                            {extension.display_name.slice(0, 1).toUpperCase()}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-mist">
+                              {extension.display_name}
+                            </span>
+                            <span className="block truncate text-xs text-smoke">
+                              {extension.protocol.toUpperCase()} ·{" "}
+                              {extension.operator.operator_name}
+                            </span>
+                          </span>
+                          <span className="text-sm text-smoke group-hover:text-mist">
+                            {extension.id === selectedId ? "−" : "+"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-smoke">
+                      {search
+                        ? "No plugins match your search."
+                        : "No extensions saved yet. Add a server to start."}
+                    </p>
+                  )}
+                  {selected ? (
+                    <ExtensionCard
+                      extension={selected}
+                      onRemoved={() => {
+                        setSelectedId(null);
+                        setNotice("Extension removed from active state.");
+                      }}
+                    />
+                  ) : null}
+                </section>
+              )}
+            </div>
+          );
+        }}
       </QueryContent>
-    </Panel>
+    </section>
   );
 }

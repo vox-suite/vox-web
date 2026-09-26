@@ -1,79 +1,79 @@
+"use client";
+
+import { useState } from "react";
 import { PageHeader } from "@/components/app";
 import { ConnectionsPanel } from "@/features/connections/components/connections-panel";
 import { ExtensionsPanel } from "@/features/extensions/components/extensions-panel";
 import { GrantsPanel } from "@/features/grants/components/grants-panel";
 import { SkillsPanel } from "@/features/skills/components/skills-panel";
 
-const ACCESS_STEPS = [
-  { label: "Installed", detail: "An app or skill is available to configure." },
-  { label: "Connected", detail: "A verified external account is linked." },
-  {
-    label: "Agent enabled",
-    detail: "You choose which agent gets each capability.",
-  },
-  {
-    label: "Approved",
-    detail: "A consequential action needs your exact approval.",
-  },
-];
-
-const SECTIONS = [
-  { id: "accounts", label: "Accounts" },
-  { id: "apps", label: "Apps" },
-  { id: "access", label: "Agent access" },
-  { id: "skills", label: "Skills" },
-];
-
 export function AppsScreen() {
+  const [view, setView] = useState<"plugins" | "skills">("plugins");
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Apps and skills"
-        description="See what is installed, which account is connected, which agents can use it, and when an action needs approval."
-      />
-      <section aria-labelledby="access-steps" className="space-y-3">
-        <h2 id="access-steps" className="sr-only">
-          How access works
-        </h2>
-        <ol className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {ACCESS_STEPS.map((step, index) => (
-            <li
-              key={step.label}
-              className="rounded-lg border border-border-edge bg-ink px-4 py-3"
-            >
-              <p className="font-mono text-[11px] text-smoke">
-                Step {index + 1}
-              </p>
-              <p className="text-[13px] font-medium text-pure-white">
-                {step.label}
-              </p>
-              <p className="text-xs leading-relaxed text-smoke">
-                {step.detail}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <nav
-        aria-label="Apps and skills sections"
-        className="sticky top-14 z-20 -mx-4 flex gap-1 overflow-x-auto border-b border-border-edge bg-void-black/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:top-0 lg:-mx-10 lg:px-10"
-      >
-        {SECTIONS.map((section) => (
-          <a
-            key={section.id}
-            href={`#${section.id}`}
-            className="shrink-0 rounded-md px-3 py-1.5 text-[13px] text-ash no-underline hover:bg-graphite hover:text-pure-white"
+      <div className="flex justify-center">
+        <div
+          role="group"
+          aria-label="Apps and skills"
+          className="inline-flex rounded-full border border-border-edge bg-ink p-1"
+        >
+          <button
+            type="button"
+            aria-pressed={view === "plugins"}
+            onClick={() => setView("plugins")}
+            className={`rounded-full px-8 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist ${view === "plugins" ? "bg-graphite text-pure-white" : "text-smoke hover:text-mist"}`}
           >
-            {section.label}
-          </a>
-        ))}
-      </nav>
-      <div className="space-y-6">
-        <ConnectionsPanel id="accounts" />
-        <ExtensionsPanel id="apps" />
-        <GrantsPanel id="access" />
-        <SkillsPanel id="skills" />
+            Plugins
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "skills"}
+            onClick={() => setView("skills")}
+            className={`rounded-full px-8 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist ${view === "skills" ? "bg-graphite text-pure-white" : "text-smoke hover:text-mist"}`}
+          >
+            Skills
+          </button>
+        </div>
       </div>
+      <PageHeader
+        title={view === "plugins" ? "Plugins" : "Skills"}
+        description={
+          view === "plugins"
+            ? "Save MCP servers and review account access. Agents can use a service after it is connected and granted."
+            : "Install reusable guidance and choose which agent can load it."
+        }
+      />
+      {view === "plugins" ? (
+        <div className="space-y-8">
+          <ExtensionsPanel id="apps" />
+          <details className="group border-t border-border-edge pt-5">
+            <summary className="cursor-pointer list-none text-sm font-medium text-mist hover:text-pure-white focus-visible:outline-2 focus-visible:outline-mist">
+              Connected accounts and agent access
+              <span
+                aria-hidden="true"
+                className="ml-2 text-smoke group-open:hidden"
+              >
+                +
+              </span>
+              <span
+                aria-hidden="true"
+                className="ml-2 hidden text-smoke group-open:inline"
+              >
+                −
+              </span>
+            </summary>
+            <div className="mt-5 grid gap-6 xl:grid-cols-2">
+              <ConnectionsPanel id="accounts" />
+              <GrantsPanel id="access" />
+            </div>
+          </details>
+        </div>
+      ) : (
+        <div>
+          <SkillsPanel id="skills" />
+        </div>
+      )}
     </div>
   );
 }
