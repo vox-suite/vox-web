@@ -128,7 +128,7 @@ export function InstalledPluginsDock({
                 type="button"
                 onClick={() => handleInspect(plugin, ext)}
                 title={`${plugin.displayName} · ${isQuarantined ? "Quarantined" : "Active"}`}
-                aria-label={`Inspect ${plugin.displayName} (${isQuarantined ? "quarantined" : "active"})`}
+                aria-label={`${plugin.displayName} ${isQuarantined ? "quarantined" : "active"}`}
                 className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
               >
                 <PluginLogo

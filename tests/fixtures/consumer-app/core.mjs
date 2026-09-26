@@ -951,20 +951,44 @@ export function createCoreFixture() {
           )
         )
           fail(404, "not_found", "Agent not found");
-        const connection = requireAuthorizedConnection(
-          user,
-          grant.connection_id,
+        const connection = user.connections.find(
+          (c) => c.id === grant.connection_id,
         );
-        if (
-          !connection.authorized_capabilities.includes(
-            grant.capability_external_key,
-          )
-        ) {
-          fail(
-            409,
-            "capability_not_authorized",
-            `Connection does not authorize ${grant.capability_external_key}`,
+        const extension = !connection
+          ? user.extensions.find(
+              (e) =>
+                e.id === grant.connection_id && e.lifecycle_state !== "removed",
+            )
+          : null;
+        if (!connection && !extension) {
+          fail(404, "not_found", "Connection or extension not found");
+        }
+        if (connection) {
+          if (
+            !connection.authorized_capabilities.includes(
+              grant.capability_external_key,
+            )
+          ) {
+            fail(
+              409,
+              "capability_not_authorized",
+              `Connection does not authorize ${grant.capability_external_key}`,
+            );
+          }
+        } else if (extension) {
+          const authorizedCaps = (extension.capabilities ?? []).map(
+            (c) => c.external_key ?? c.name,
           );
+          if (
+            authorizedCaps.length > 0 &&
+            !authorizedCaps.includes(grant.capability_external_key)
+          ) {
+            fail(
+              409,
+              "capability_not_authorized",
+              `Extension does not authorize ${grant.capability_external_key}`,
+            );
+          }
         }
         const existing = user.grants.find(
           (g) =>

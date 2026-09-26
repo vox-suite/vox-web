@@ -93,3 +93,33 @@ test("plugin library keeps registration and skills reachable", async ({
     page.getByRole("heading", { name: "Skills", level: 1 }),
   ).toBeVisible();
 });
+
+test("consumer plugin marketplace enables 1-click install with brand assets and top dock", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+
+  // Verify Plugins marketplace headings & categories
+  await expect(
+    page.getByRole("heading", { name: "Plugins", level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Popular" })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Food & Groceries" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "DoorDash", level: 3 }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Uber", level: 3 }).first(),
+  ).toBeVisible();
+
+  // Perform 1-click install on DoorDash
+  await page.getByRole("button", { name: "Install DoorDash" }).first().click();
+
+  // Verify DoorDash installed in top dock
+  await expect(
+    page.getByRole("button", { name: /DoorDash active/i }),
+  ).toBeVisible();
+});
