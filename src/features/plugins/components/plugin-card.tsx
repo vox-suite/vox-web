@@ -45,6 +45,7 @@ export function PluginCard({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.target !== e.currentTarget) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onInspect?.(plugin);
@@ -94,7 +95,11 @@ export function PluginCard({
       </div>
 
       {/* Right: 1-Click Install / Status Action */}
-      <div className="shrink-0 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="shrink-0 flex items-center gap-1.5"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         {isInstalling ? (
           <div
             className="flex items-center gap-1.5 rounded-lg border border-border-edge bg-obsidian px-2.5 py-1.5 text-xs text-smoke"

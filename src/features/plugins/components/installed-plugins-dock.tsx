@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
@@ -11,6 +11,7 @@ import {
 } from "../catalog";
 import { useExtensions } from "@/features/extensions/queries";
 import { PluginLogo } from "./plugin-logo";
+import { PluginInspectorModal } from "./plugin-inspector-modal";
 
 export interface InstalledPluginsDockProps {
   onInspect?: (plugin: CatalogPlugin, extension: RemoteExtension) => void;
@@ -56,11 +57,21 @@ export function InstalledPluginsDock({
   onInspect,
   className,
 }: InstalledPluginsDockProps) {
+  const [inspected, setInspected] = useState<{
+    plugin: CatalogPlugin;
+    ext: RemoteExtension;
+  } | null>(null);
+
   const { data: extensions = [], isLoading } = useExtensions();
 
   const activeExtensions = extensions.filter(
     (ext) => ext.lifecycle_state !== "removed",
   );
+
+  const handleInspect = (plugin: CatalogPlugin, ext: RemoteExtension) => {
+    onInspect?.(plugin, ext);
+    setInspected({ plugin, ext });
+  };
 
   if (!isLoading && activeExtensions.length === 0) {
     return (
@@ -87,53 +98,62 @@ export function InstalledPluginsDock({
   }
 
   return (
-    <div
-      data-testid="installed-plugins-dock"
-      className={cn(
-        "flex items-center gap-3 overflow-x-auto rounded-2xl border border-border-edge bg-ink/70 px-4 py-3 backdrop-blur shadow-subtle-3",
-        className,
-      )}
-    >
-      <div className="flex flex-col shrink-0 pr-3 border-r border-border-edge">
-        <span className="text-xs font-semibold text-pure-white">
-          Installed Apps
-        </span>
-        <span className="text-[11px] text-smoke">
-          {activeExtensions.length} active {activeExtensions.length === 1 ? "tool" : "tools"}
-        </span>
+    <>
+      <div
+        data-testid="installed-plugins-dock"
+        className={cn(
+          "flex items-center gap-3 overflow-x-auto rounded-2xl border border-border-edge bg-ink/70 px-4 py-3 backdrop-blur shadow-subtle-3",
+          className,
+        )}
+      >
+        <div className="flex flex-col shrink-0 pr-3 border-r border-border-edge">
+          <span className="text-xs font-semibold text-pure-white">
+            Installed Apps
+          </span>
+          <span className="text-[11px] text-smoke">
+            {activeExtensions.length} active {activeExtensions.length === 1 ? "tool" : "tools"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5 overflow-x-auto py-0.5">
+          {activeExtensions.map((ext) => {
+            const plugin = resolvePlugin(ext);
+            const isQuarantined = ext.lifecycle_state === "quarantined";
+
+            return (
+              <button
+                key={ext.id}
+                type="button"
+                onClick={() => handleInspect(plugin, ext)}
+                title={`${plugin.displayName} · ${isQuarantined ? "Quarantined" : "Active"}`}
+                aria-label={`Inspect ${plugin.displayName}`}
+                className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
+              >
+                <PluginLogo
+                  logoFile={plugin.logoFile}
+                  alt={plugin.displayName}
+                  size="md"
+                  backgroundColor={plugin.backgroundColor}
+                />
+                <span
+                  className={cn(
+                    "absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-void-black shadow-xs",
+                    isQuarantined ? "bg-amber-400" : "bg-success-green",
+                  )}
+                  aria-hidden="true"
+                />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex items-center gap-2.5 overflow-x-auto py-0.5">
-        {activeExtensions.map((ext) => {
-          const plugin = resolvePlugin(ext);
-          const isQuarantined = ext.lifecycle_state === "quarantined";
-
-          return (
-            <button
-              key={ext.id}
-              type="button"
-              onClick={() => onInspect?.(plugin, ext)}
-              title={`${plugin.displayName} · ${isQuarantined ? "Quarantined" : "Active"}`}
-              aria-label={`Inspect ${plugin.displayName}`}
-              className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
-            >
-              <PluginLogo
-                logoFile={plugin.logoFile}
-                alt={plugin.displayName}
-                size="md"
-                backgroundColor={plugin.backgroundColor}
-              />
-              <span
-                className={cn(
-                  "absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-void-black shadow-xs",
-                  isQuarantined ? "bg-amber-400" : "bg-success-green",
-                )}
-                aria-hidden="true"
-              />
-            </button>
-          );
-        })}
-      </div>
-    </div>
+      <PluginInspectorModal
+        plugin={inspected?.plugin ?? null}
+        installedExtension={inspected?.ext ?? null}
+        isOpen={Boolean(inspected)}
+        onClose={() => setInspected(null)}
+      />
+    </>
   );
 }
