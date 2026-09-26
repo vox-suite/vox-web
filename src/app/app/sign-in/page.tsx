@@ -1,4 +1,4 @@
-import { ConsumerSignInForm } from "@/components/consumer/sign-in-form";
+import { ConsumerSignInForm } from "@/features/account/components/sign-in-form";
 import { AuthFrame, Badge, Notice, Stack, Text } from "@/components/ui";
 import { readConsumerAuthConfig } from "@/lib/consumer-auth/config";
 import { currentConsumer } from "@/lib/consumer-auth/session";

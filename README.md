@@ -23,6 +23,7 @@ npm run lint
 npm run build
 npx playwright install chromium
 npm run test:e2e
+npm run test:e2e:consumer   # consumer app happy paths on the fixture harness (tests/fixtures/consumer-app)
 ```
 
 Browser tests start isolated servers on 3100 and 3101 with synthetic identities and data. They exercise encrypted sessions through the real authentication boundary. No production authentication bypass exists. Tests do not complete a real Google OAuth exchange.
@@ -34,7 +35,10 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/components/ui`: shared layout, controls, feedback, cards, tables and typography.
 - `src/components/marketing`: public website sections and illustrative conversation preview.
 - `src/components/admin`: navigation, management features and sign-in controls.
-- `src/components/consumer`: standalone account sign-in, recovery, identity linking, and session controls.
+- `src/app/app/(workspace)`: the signed-in consumer app (app.voxagent.in). One layout resolves the session and renders the sidebar shell; each page renders a feature screen.
+- `src/features/<domain>`: consumer features. `api.ts` holds typed calls to `/api/account/*`, `queries.ts` holds TanStack Query keys, queries and mutations, and `components/` holds the UI.
+- `src/components/app`, `src/components/app-shell`: consumer app primitives and the responsive sidebar shell. They are kept separate from `src/components/ui`, which the public website also uses.
+- `src/lib/api/http.ts`, `src/lib/query`: the single HTTP client (error normalization) and the QueryClient defaults (a 401 returns the user to sign-in).
 - `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
 - `src/lib/admin-modules.ts`: management navigation registry.
 - `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
