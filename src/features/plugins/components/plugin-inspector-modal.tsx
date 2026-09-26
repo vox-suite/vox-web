@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Badge, Button, Notice } from "@/components/ui";
+import type { ConnectedAppTool } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
 import type { PluginConnection } from "../connection-state";
 import {
@@ -27,6 +28,22 @@ export interface PluginInspectorModalProps {
   connection: PluginConnection;
   isOpen: boolean;
   onClose: () => void;
+}
+
+function toolBadge(tool: ConnectedAppTool): {
+  label: string;
+  tone: "neutral" | "accent" | "warning";
+} {
+  const policy =
+    tool.policy ??
+    (tool.read_only
+      ? "read"
+      : tool.asks_first === false
+        ? "change"
+        : "confirm");
+  if (policy === "read") return { label: "Read", tone: "neutral" };
+  if (policy === "change") return { label: "Makes changes", tone: "warning" };
+  return { label: "Asks you first", tone: "accent" };
 }
 
 export function PluginInspectorModal({
@@ -126,10 +143,10 @@ export function PluginInspectorModal({
                           )}
                         </div>
                         <Badge
-                          tone={tool.read_only ? "neutral" : "accent"}
+                          tone={toolBadge(tool).tone}
                           className="shrink-0 text-[10px] whitespace-nowrap"
                         >
-                          {tool.read_only ? "Read" : "Asks you first"}
+                          {toolBadge(tool).label}
                         </Badge>
                       </div>
                     ))}

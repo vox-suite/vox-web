@@ -218,7 +218,10 @@ export type ConnectedAppTool = {
   name: string;
   title?: string | null;
   description?: string | null;
+  /** read: only reads; change: easy to undo; confirm: Vox asks first. */
+  policy?: "read" | "change" | "confirm";
   read_only: boolean;
+  asks_first?: boolean;
 };
 
 export type ConnectedAppsStatus = {
