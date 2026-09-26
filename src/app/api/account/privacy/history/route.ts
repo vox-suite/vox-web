@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest) {
     );
 
     return NextResponse.json({
-      deleted_tasks_count: result.deleted_tasks_count,
+      deleted_spans_count: result.deleted_spans_count,
       deleted_conversations_count: result.deleted_conversations_count,
       disclosure: DELETION_DISCLOSURE,
     });

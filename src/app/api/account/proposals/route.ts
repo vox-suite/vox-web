@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const proposal = await core.createProposal(account.accountId, {
-      task_id: body.task_id,
+      span_id: body.span_id,
       task_run_id: body.task_run_id,
       agent_external_key: body.agent_external_key,
       capability_external_key: body.capability_external_key,

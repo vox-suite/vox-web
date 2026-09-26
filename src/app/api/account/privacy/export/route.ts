@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const categories = body.categories || ["preferences", "config", "tasks"];
+    const categories = body.categories || ["preferences", "config", "spans"];
 
     const exportResult = await core.requestPortableExport(
       account.accountId,

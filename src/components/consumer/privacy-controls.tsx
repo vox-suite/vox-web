@@ -45,7 +45,7 @@ export function PrivacyControls() {
   // Deletion state
   const [deletingHistory, setDeletingHistory] = useState(false);
   const [deletionResult, setDeletionResult] = useState<{
-    tasks: number;
+    spans: number;
     conversations: number;
     disclosure: string;
   } | null>(null);
@@ -194,7 +194,7 @@ export function PrivacyControls() {
         throw new Error(data.error || "Failed to delete task history");
 
       setDeletionResult({
-        tasks: data.deleted_tasks_count,
+        spans: data.deleted_spans_count,
         conversations: data.deleted_conversations_count,
         disclosure: data.disclosure,
       });
@@ -218,7 +218,7 @@ export function PrivacyControls() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          categories: ["preferences", "config", "tasks"],
+          categories: ["preferences", "config", "spans"],
         }),
       });
       const data = await res.json();
@@ -576,7 +576,7 @@ export function PrivacyControls() {
                     Deletion Summary:
                   </div>
                   <p className="text-neutral-400">
-                    Purged <strong>{deletionResult.tasks}</strong> tasks and{" "}
+                    Purged <strong>{deletionResult.spans}</strong> timeline entries and{" "}
                     <strong>{deletionResult.conversations}</strong> conversation
                     turns from platform database.
                   </p>

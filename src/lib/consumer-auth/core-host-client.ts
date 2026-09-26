@@ -146,7 +146,7 @@ export type ActionProposal = {
 };
 
 export type CreateProposalRequest = {
-  task_id: string;
+  span_id: string;
   task_run_id: string;
   agent_external_key: string;
   capability_external_key: string;
@@ -441,7 +441,7 @@ export type SetPreferenceInput = {
 };
 
 export type DeleteHistoryResponse = {
-  deleted_tasks_count: number;
+  deleted_spans_count: number;
   deleted_conversations_count: number;
   disclosure: string;
 };
@@ -1263,7 +1263,7 @@ export class VoxCoreHostClient {
 
   async requestPortableExport(
     accountId: string,
-    categories: ("preferences" | "config" | "tasks")[],
+    categories: ("preferences" | "config" | "spans")[],
   ): Promise<PortableExportResponse> {
     return this.signedPost<PortableExportResponse>(
       "/v1/privacy/portable-export",

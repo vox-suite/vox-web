@@ -326,7 +326,7 @@ test("action proposal creation and exact-match approval call Core endpoints", as
   });
 
   const proposal = await client.createProposal("user-1", {
-    task_id: "task-1",
+    span_id: "task-1",
     task_run_id: "run-1",
     agent_external_key: "planner",
     capability_external_key: "travel.book",

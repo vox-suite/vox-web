@@ -142,7 +142,7 @@ test("deleteTaskHistory posts to /v1/privacy/delete-history and verifies disclos
       capturedUrl = String(input);
       capturedBody = JSON.parse(String(init?.body));
       return Response.json({
-        deleted_tasks_count: 5,
+        deleted_spans_count: 5,
         deleted_conversations_count: 12,
         disclosure: DELETION_DISCLOSURE,
       });
@@ -154,7 +154,7 @@ test("deleteTaskHistory posts to /v1/privacy/delete-history and verifies disclos
   const result = await client.deleteTaskHistory("user-1", true);
   assert.equal(capturedUrl, "https://core.vox.test/v1/privacy/delete-history");
   assert.equal(capturedBody?.delete_conversations, true);
-  assert.equal(result.deleted_tasks_count, 5);
+  assert.equal(result.deleted_spans_count, 5);
   assert.equal(result.deleted_conversations_count, 12);
 });
 
