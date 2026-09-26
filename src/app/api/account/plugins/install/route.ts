@@ -12,15 +12,18 @@ import {
 import type {
   ExtensionCapability,
   ExtensionOperator,
-  CapabilityGrant,
   RemoteExtension,
 } from "@/lib/consumer-auth/core-host-client";
 
-type InstallResult = { extension: RemoteExtension; grants: CapabilityGrant[] };
+/**
+ * Installing an MCP plugin is one Core remote-extension install. Remote
+ * extensions carry their own conformance/enablement lifecycle; they are not
+ * external connections, so `/v1/capability-grants` rejects them with 403.
+ */
+type InstallResult = { extension: RemoteExtension };
 
 /**
- * Installs run for ~10s+ (one Core call per capability grant), so a second
- * click or a second card for the same plugin easily overlaps the first.
+ * A second click or a second card for the same plugin easily overlaps the first.
  * Overlapping requests for one account and plugin share a single attempt.
  */
 const inFlightInstalls = new Map<string, Promise<InstallResult>>();
@@ -43,7 +46,6 @@ async function installPlugin(
 
   // Check existing extensions for idempotency
   let extension: RemoteExtension | undefined = await findInstalled();
-  let isNewInstall = false;
 
   if (!extension) {
     const operator: ExtensionOperator = plugin.operator
@@ -92,7 +94,6 @@ async function installPlugin(
         operator,
         capabilities,
       });
-      isNewInstall = true;
     } catch (error) {
       // Core answers 409 when this key is already installed for the account,
       // e.g. an install from another tab or server instance won the race.
@@ -103,49 +104,7 @@ async function installPlugin(
     }
   }
 
-  // Resolve active agent key (e.g. from core.selectedAgents(accountId) or fallback "saathi")
-  let agentKey = "saathi";
-  try {
-    const agents = await core.selectedAgents(accountId);
-    if (agents && agents.length > 0 && agents[0].definition?.external_key) {
-      agentKey = agents[0].definition.external_key;
-    }
-  } catch {
-    agentKey = "saathi";
-  }
-
-  // Create capability grants for all declared capabilities
-  const grants: CapabilityGrant[] = [];
-  try {
-    const existingGrants = await core
-      .listEffectiveGrants(accountId, agentKey)
-      .catch(() => []);
-
-    for (const cap of plugin.capabilities) {
-      const existingGrant = existingGrants.find(
-        (g) =>
-          g.connection_id === extension!.id &&
-          g.capability_external_key === cap.name,
-      );
-
-      if (existingGrant) {
-        grants.push(existingGrant);
-      } else {
-        const grant = await core.createGrant(accountId, {
-          agent_external_key: agentKey,
-          connection_id: extension!.id,
-          capability_external_key: cap.name,
-        });
-        grants.push(grant);
-      }
-    }
-  } catch (grantError) {
-    if (isNewInstall && extension?.id) {
-      await core.removeExtension(accountId, extension.id).catch(() => {});
-    }
-    throw grantError;
-  }
-  return { extension, grants };
+  return { extension };
 }
 
 export async function POST(request: NextRequest) {
@@ -192,8 +151,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { extension, grants } = await attempt;
-    return NextResponse.json({ success: true, extension, grants });
+    const { extension } = await attempt;
+    return NextResponse.json({ success: true, extension });
   } catch (error) {
     return NextResponse.json(
       {

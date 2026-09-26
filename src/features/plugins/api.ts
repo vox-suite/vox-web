@@ -1,14 +1,10 @@
 import { apiRequest } from "@/lib/api/http";
-import type {
-  CapabilityGrant,
-  RemoteExtension,
-} from "@/lib/consumer-auth/core-host-client";
+import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "./catalog";
 
 export type InstallPluginResponse = {
   success: boolean;
   extension: RemoteExtension;
-  grants: CapabilityGrant[];
 };
 
 export type UninstallPluginResponse = {

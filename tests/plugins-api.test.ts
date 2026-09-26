@@ -29,10 +29,7 @@ import {
 import { pluginKeys } from "../src/features/plugins/queries";
 import type {
   RemoteExtension,
-  CapabilityGrant,
-  SelectedAgent,
   InstallExtensionRequest,
-  CreateGrantRequest,
   VoxCoreHostClient,
 } from "../src/lib/consumer-auth/core-host-client";
 import { CoreHostRequestError } from "../src/lib/consumer-auth/core-host-client";
@@ -73,7 +70,7 @@ const mockSession: ConsumerSession = {
   recoveryEnabled: true,
 };
 
-test("installPlugin compound request maps catalog plugin to Core extension and grants", async () => {
+test("installPlugin compound request maps catalog plugin to Core extension", async () => {
   const plugin = getCatalogPlugin("doordash");
   assert.ok(plugin);
   assert.equal(plugin.id, "doordash");
@@ -178,7 +175,7 @@ test("POST /api/account/plugins/install enforces authentication, validation, and
   resetConsumerAuthRuntimeForTests();
 });
 
-test("POST /api/account/plugins/install installs extension and grants capabilities to active agent", async () => {
+test("POST /api/account/plugins/install installs the extension without touching capability grants", async () => {
   const {
     installRoute,
     setMockConsumerForTests,
@@ -189,7 +186,8 @@ test("POST /api/account/plugins/install installs extension and grants capabiliti
   setMockConsumerForTests(mockSession);
 
   const installedExtensions: RemoteExtension[] = [];
-  const createdGrants: CapabilityGrant[] = [];
+  let installs = 0;
+  let grantCalls = 0;
 
   const mockCore = {
     async listExtensions(): Promise<RemoteExtension[]> {
@@ -200,185 +198,54 @@ test("POST /api/account/plugins/install installs extension and grants capabiliti
       req: InstallExtensionRequest,
     ): Promise<RemoteExtension> {
       void _accountId;
-      const ext: RemoteExtension = {
+      installs += 1;
+      const ext = extensionFixture({
         id: `ext-${req.external_key}`,
         external_key: req.external_key,
         display_name: req.display_name,
         protocol: req.protocol,
         endpoint_url: req.endpoint_url,
         operator: req.operator,
-        current_version: 1,
-        conformance_status: "passed",
-        operator_enabled: true,
-        consent_status: "consented",
-        lifecycle_state: "installed",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         capabilities: req.capabilities,
-      };
+      });
       installedExtensions.push(ext);
       return ext;
     },
-    async selectedAgents(): Promise<SelectedAgent[]> {
-      return [
-        { definition: { external_key: "primary-agent", purpose: "assistant" } },
-      ];
-    },
-    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
-      return [...createdGrants];
-    },
-    async createGrant(
-      _accountId: string,
-      req: CreateGrantRequest,
-    ): Promise<CapabilityGrant> {
-      void _accountId;
-      const grant: CapabilityGrant = {
-        id: `grant-${createdGrants.length + 1}`,
-        agent_external_key: req.agent_external_key,
-        connection_id: req.connection_id,
-        capability_external_key: req.capability_external_key,
-      };
-      createdGrants.push(grant);
-      return grant;
-    },
-    async removeExtension(
-      _accountId: string,
-      extensionId: string,
-    ): Promise<RemoteExtension> {
-      void _accountId;
-      const idx = installedExtensions.findIndex((e) => e.id === extensionId);
-      if (idx >= 0) {
-        installedExtensions[idx].lifecycle_state = "removed";
-        return installedExtensions[idx];
-      }
-      throw new Error("Extension not found");
+    // Core's /v1/capability-grants only accepts external connections and
+    // answers 403 for a remote extension id, so install must never call it.
+    async createGrant(): Promise<never> {
+      grantCalls += 1;
+      throw new CoreHostRequestError(403, "/v1/capability-grants");
     },
   };
 
   setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
 
-  const req = new NextRequest("http://localhost/api/account/plugins/install", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pluginId: "doordash" }),
-  });
+  const post = () =>
+    installRoute(
+      new NextRequest("http://localhost/api/account/plugins/install", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pluginId: "airbnb" }),
+      }),
+    );
 
-  const res = await installRoute(req);
+  const res = await post();
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.success, true);
-  assert.equal(body.extension.external_key, "doordash");
+  assert.equal(body.extension.external_key, "airbnb");
   assert.equal(body.extension.protocol, "mcp");
-  assert.ok(body.grants.length >= 3);
-  for (const g of body.grants) {
-    assert.equal(g.agent_external_key, "primary-agent");
-    assert.equal(g.connection_id, body.extension.id);
-  }
+  assert.equal(grantCalls, 0);
 
-  // Idempotent second install: should not re-install extension, reuses existing grants
-  const req2 = new NextRequest("http://localhost/api/account/plugins/install", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pluginId: "doordash" }),
-  });
-  const res2 = await installRoute(req2);
+  // Idempotent second install reuses the existing extension.
+  const res2 = await post();
   assert.equal(res2.status, 200);
   const body2 = await res2.json();
-  assert.equal(body2.success, true);
   assert.equal(body2.extension.id, body.extension.id);
-  assert.equal(body2.grants.length, body.grants.length);
+  assert.equal(installs, 1);
+  assert.equal(grantCalls, 0);
 
-  // Cleanup
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/install rolls back newly installed extension if granting fails", async () => {
-  const {
-    installRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-
-  setMockConsumerForTests(mockSession);
-
-  let installedExtensionId: string | null = null;
-  let rolledBackId: string | null = null;
-
-  const mockCore = {
-    async listExtensions(): Promise<RemoteExtension[]> {
-      return [];
-    },
-    async installExtension(
-      _accountId: string,
-      req: InstallExtensionRequest,
-    ): Promise<RemoteExtension> {
-      void _accountId;
-      installedExtensionId = `ext-${req.external_key}`;
-      return {
-        id: installedExtensionId,
-        external_key: req.external_key,
-        display_name: req.display_name,
-        protocol: req.protocol,
-        endpoint_url: req.endpoint_url,
-        operator: req.operator,
-        current_version: 1,
-        conformance_status: "passed",
-        operator_enabled: true,
-        consent_status: "consented",
-        lifecycle_state: "installed",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    },
-    async selectedAgents(): Promise<SelectedAgent[]> {
-      return [];
-    },
-    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
-      return [];
-    },
-    async createGrant(): Promise<CapabilityGrant> {
-      throw new Error("Core database lock during grant creation");
-    },
-    async removeExtension(
-      _accountId: string,
-      extensionId: string,
-    ): Promise<RemoteExtension> {
-      void _accountId;
-      rolledBackId = extensionId;
-      return {
-        id: extensionId,
-        external_key: "airbnb",
-        display_name: "Airbnb",
-        protocol: "mcp",
-        endpoint_url: "https://mcp.airbnb.com/sse",
-        operator: { operator_id: "airbnb", operator_name: "Airbnb" },
-        current_version: 1,
-        conformance_status: "passed",
-        operator_enabled: true,
-        consent_status: "consented",
-        lifecycle_state: "removed",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    },
-  };
-
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
-
-  const req = new NextRequest("http://localhost/api/account/plugins/install", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pluginId: "airbnb" }),
-  });
-
-  const res = await installRoute(req);
-  assert.equal(res.status, 500);
-  assert.ok(installedExtensionId);
-  assert.equal(rolledBackId, installedExtensionId);
-
-  // Cleanup
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
@@ -423,19 +290,6 @@ test("POST /api/account/plugins/install shares one attempt between overlapping r
       await new Promise((resolve) => setTimeout(resolve, 20));
       return extensionFixture();
     },
-    async selectedAgents(): Promise<SelectedAgent[]> {
-      return [];
-    },
-    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
-      return [];
-    },
-    async createGrant(
-      _accountId: string,
-      req: CreateGrantRequest,
-    ): Promise<CapabilityGrant> {
-      void _accountId;
-      return { ...req } as unknown as CapabilityGrant;
-    },
   };
   setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
 
@@ -476,19 +330,6 @@ test("POST /api/account/plugins/install adopts the extension when Core reports i
     },
     async installExtension(): Promise<RemoteExtension> {
       throw new CoreHostRequestError(409, "/v1/remote-extensions");
-    },
-    async selectedAgents(): Promise<SelectedAgent[]> {
-      return [];
-    },
-    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
-      return [];
-    },
-    async createGrant(
-      _accountId: string,
-      req: CreateGrantRequest,
-    ): Promise<CapabilityGrant> {
-      void _accountId;
-      return { ...req } as unknown as CapabilityGrant;
     },
     async removeExtension(): Promise<RemoteExtension> {
       removed = true;
