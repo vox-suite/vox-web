@@ -36,11 +36,11 @@ export function SignInShell({
   return (
     <main
       id="main"
-      className="relative grid min-h-screen bg-void-black lg:grid-cols-[minmax(420px,5fr)_7fr]"
+      className="relative grid min-h-screen bg-void-black lg:h-screen lg:grid-cols-[minmax(420px,5fr)_7fr] lg:grid-rows-[minmax(0,1fr)]"
     >
       <PageNoise />
 
-      <section className="relative flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:px-14">
+      <section className="relative flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:min-h-0 lg:overflow-y-auto lg:px-14">
         <header className="flex items-center justify-between">
           <Brand href={brandHref} animated size={26} />
           <Link
@@ -142,14 +142,13 @@ export function SignInShell({
 
         <div
           aria-hidden="true"
-          className="pointer-events-none relative -mx-14 mt-12 [mask-image:linear-gradient(to_bottom,transparent,black_30%,black_70%,transparent)] xl:-mx-20"
+          className="pointer-events-none relative -mx-14 mt-12 min-h-0 flex-1 [mask-image:linear-gradient(to_bottom,transparent,black_30%,black_70%,transparent)] xl:-mx-20"
         >
           <Image
             src="/artwork/signal-ring.svg"
             alt=""
-            width={1160}
-            height={436}
-            className="w-full opacity-80"
+            fill
+            className="object-cover opacity-80"
             sizes="(min-width: 1024px) 60vw, 0px"
           />
         </div>
