@@ -106,6 +106,15 @@ function ExtensionCard({
           </p>
         </Callout>
       ) : null}
+      {extension.protocol === "mcp" ? (
+        <Callout tone="warning" title="MCP server registered, not connected">
+          <p>
+            This server and its declared tools are saved in Vox. Account
+            authorization and agent tool use are not available yet. Registering
+            the server does not give any agent access to it.
+          </p>
+        </Callout>
+      ) : null}
       <MetaList
         items={[
           {
@@ -239,8 +248,8 @@ export function ExtensionsPanel({ id }: { id?: string }) {
   return (
     <Panel
       id={id}
-      title="Apps you added"
-      description="Inspect remote app operators, recipients, and status. Registration does not grant access."
+      title="MCP servers and remote apps"
+      description="Add a remote server and review its operator, declared tools, and access status."
       actions={
         <Button
           size="sm"
@@ -255,32 +264,26 @@ export function ExtensionsPanel({ id }: { id?: string }) {
             "Cancel installation"
           ) : (
             <>
-              <Plus aria-hidden="true" /> Register remote extension
+              <Plus aria-hidden="true" /> Add MCP server or remote app
             </>
           )}
         </Button>
       }
     >
-      <Callout title="How remote apps are governed">
+      <Callout title="What adding an MCP server does today">
         <ul className="list-disc space-y-1 pl-4">
           <li>
-            <strong>Remote-only execution:</strong> integration code runs at the
-            remote operator endpoint, outside Core.
+            Enter a public HTTPS endpoint, identify its operator, and declare
+            the tools you expect it to expose.
           </li>
           <li>
-            <strong>Default-deny authority:</strong> installation grants{" "}
-            <strong>zero</strong> connection, context, capability, or action
-            authority.
+            Vox saves that declaration for your account. It does not yet
+            discover tools, authorize an external account, or let an agent call
+            the server.
           </li>
           <li>
-            <strong>Consequential fail-closed:</strong> consequential actions
-            also require conformance, operator enablement, a connected account,
-            an agent grant, and exact approval.
-          </li>
-          <li>
-            <strong>Renewed consent:</strong> a material change (operator
-            transfer or expanded data recipients) suspends affected actions
-            until consent is renewed.
+            Agent use will require a verified connection, a capability grant to
+            that agent, and approval for each consequential action.
           </li>
         </ul>
       </Callout>
@@ -295,7 +298,7 @@ export function ExtensionsPanel({ id }: { id?: string }) {
           onInstalled={(name) => {
             setShowForm(false);
             setNotice(
-              `Extension "${name}" registered successfully (default-denied, no authority granted).`,
+              `"${name}" registered. It is not connected and no agent can use it yet.`,
             );
           }}
         />

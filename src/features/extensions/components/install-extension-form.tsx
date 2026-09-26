@@ -96,7 +96,7 @@ export function InstallExtensionForm({
     >
       <fieldset className="space-y-4">
         <legend className="text-[13px] font-medium text-pure-white">
-          Remote extension
+          MCP server or remote app
         </legend>
         <div className="grid gap-4 md:grid-cols-2">
           <Field
@@ -134,7 +134,7 @@ export function InstallExtensionForm({
           </Select>
           <Field
             id="ext-url"
-            label="Remote endpoint URL"
+            label="Server endpoint URL"
             type="url"
             hint="Use a public HTTPS endpoint. Local addresses are reserved for isolated tests."
             required
@@ -215,8 +215,9 @@ export function InstallExtensionForm({
       </fieldset>
       <Callout tone="warning">
         <p>
-          Registration stores a declaration only. It does not connect an account
-          or enable the server for agent use.
+          This saves a server declaration only. Vox cannot discover its tools,
+          connect your account, or let an agent use it yet. Do not enter a token
+          or password in the endpoint URL or any field.
         </p>
       </Callout>
       {install.isError ? (
@@ -228,9 +229,9 @@ export function InstallExtensionForm({
         <Button
           type="submit"
           disabled={install.isPending}
-          aria-label="Confirm extension registration"
+          aria-label="Save remote server declaration"
         >
-          {install.isPending ? "Registering…" : "Register extension"}
+          {install.isPending ? "Saving…" : "Save server declaration"}
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
