@@ -8,6 +8,17 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+/** A misconfigured legacy auth stack must show the unavailable notice, not crash the page. */
+function legacyEntryEnabled() {
+  try {
+    const config = readConsumerAuthConfig();
+    return config.enabled && config.entryEnabled;
+  } catch (error) {
+    console.error("Consumer sign-in config is invalid", error);
+    return false;
+  }
+}
+
 export default async function ConsumerSignInPage() {
   const requestHeaders = await headers();
   const host = requestHeaders.get("host") ?? "";
@@ -17,8 +28,7 @@ export default async function ConsumerSignInPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
-  const config = readConsumerAuthConfig();
-  const enabled = supabaseConfigured || (config.enabled && config.entryEnabled);
+  const enabled = supabaseConfigured || legacyEntryEnabled();
 
   return (
     <AuthFrame

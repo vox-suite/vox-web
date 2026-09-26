@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Button, Field, Notice, Stack, Text } from "@/components/ui";
-import { supabase } from "@/lib/consumer-auth/client";
+import { getSupabase } from "@/lib/consumer-auth/client";
 import { consumerBasePath } from "@/lib/consumer-routes";
 
 function accountHome() {
@@ -21,7 +21,7 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
     event?.preventDefault();
     setPending(true);
     setError(null);
-    const { error: otpError } = await supabase.auth.signInWithOtp({
+    const { error: otpError } = await getSupabase().auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${accountHome()}`,
@@ -42,7 +42,7 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
     event.preventDefault();
     setPending(true);
     setError(null);
-    const { error: verifyError } = await supabase.auth.verifyOtp({
+    const { error: verifyError } = await getSupabase().auth.verifyOtp({
       email,
       token: code,
       type: "email",
@@ -64,7 +64,7 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
         onClick={async () => {
           setPending(true);
           setError(null);
-          const { error: oauthError } = await supabase.auth.signInWithOAuth({
+          const { error: oauthError } = await getSupabase().auth.signInWithOAuth({
             provider: "google",
             options: {
               redirectTo: `${window.location.origin}/auth/callback?next=${accountHome()}`,
