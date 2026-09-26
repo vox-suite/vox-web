@@ -6,7 +6,6 @@ import {
   EmptyMessage,
   Labelled,
   ItemCard,
-  Panel,
   StatusBadge,
   Tag,
 } from "@/components/app";
@@ -15,37 +14,37 @@ import {
   formatAuthoritativeDateTime,
   formatAuthoritativeDistance,
 } from "@/lib/global-formatting";
-import { useReadTripHistory } from "../queries";
+import { useReadTripHistory } from "./queries";
 
-export function ConnectedRead({ connectionId }: { connectionId: string }) {
+export function TripHistory({ connectionId }: { connectionId: string }) {
   const read = useReadTripHistory();
   const history = read.data;
 
   return (
-    <Panel
-      title="Selected connected read: Uber trip history (L2)"
-      description="Demonstrates context minimization: rider credentials and precise coordinates are stripped at the Core boundary."
-      actions={
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-smoke">
+          Vox shows only the start city, time, distance, and status. Precise
+          locations and rider tokens are removed before they reach you.
+        </p>
         <Button
           size="sm"
           disabled={read.isPending}
-          aria-label="Retrieve trip history with context minimization"
           onClick={() => read.mutate({ connectionId })}
         >
           {read.isPending
-            ? "Reading authoritative trips…"
-            : "Retrieve trip history (L2)"}
+            ? "Loading trips…"
+            : history
+              ? "Refresh trips"
+              : "Load trip history"}
         </Button>
-      }
-    >
-      <Callout title="Data minimization guarantee">
-        <p>
-          Location coordinates and internal rider tokens are redacted. Vox only
-          displays start city, timestamp, distance, and status.
-        </p>
-      </Callout>
+      </div>
       {read.isError ? (
-        <Callout tone="danger" title="Journey notice" live="assertive">
+        <Callout
+          tone="danger"
+          title="Trips could not be loaded"
+          live="assertive"
+        >
           <p>{errorMessage(read.error, "Read failed")}</p>
         </Callout>
       ) : null}
@@ -56,9 +55,6 @@ export function ConnectedRead({ connectionId }: { connectionId: string }) {
               Total: {history.total_trips ?? history.trips.length}
             </Tag>
             <Tag>Freshness: {history.freshness_seconds ?? 300}s</Tag>
-            <span className="text-xs text-smoke">
-              Authoritative trip history retrieved with location minimization.
-            </span>
           </div>
           {history.trips.length === 0 ? (
             <EmptyMessage title="No trips returned" />
@@ -98,11 +94,7 @@ export function ConnectedRead({ connectionId }: { connectionId: string }) {
             </div>
           )}
         </>
-      ) : (
-        <EmptyMessage title="No trip history loaded">
-          Retrieve trip history to inspect authoritative read data.
-        </EmptyMessage>
-      )}
-    </Panel>
+      ) : null}
+    </div>
   );
 }

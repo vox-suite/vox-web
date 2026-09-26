@@ -9,7 +9,6 @@ import {
   Labelled,
   ListSkeleton,
   MetaList,
-  Panel,
   StatusBadge,
   Tag,
 } from "@/components/app";
@@ -17,8 +16,8 @@ import { useAccount } from "@/components/app-shell/account-context";
 import { errorMessage } from "@/lib/api/http";
 import type { LodgingProperty } from "@/lib/consumer-auth/core-host-client";
 import { formatAuthoritativeCurrency } from "@/lib/global-formatting";
-import type { LodgingSearch } from "../api";
-import { useBookLodging, useCancelLodging, useLodgingSearch } from "../queries";
+import type { LodgingSearch } from "./api";
+import { useBookLodging, useCancelLodging, useLodgingSearch } from "./queries";
 
 function Money({ minor, currency }: { minor: number; currency: string }) {
   const amount = formatAuthoritativeCurrency(minor, currency, true);
@@ -39,7 +38,14 @@ function getUpcomingDates() {
   };
 }
 
-export function LodgingWrite({ connectionId }: { connectionId: string }) {
+export function Lodging({
+  connectionId,
+  canBook,
+}: {
+  connectionId: string;
+  /** Booking is a separate grant from search; without it the flow stops at results. */
+  canBook: boolean;
+}) {
   const account = useAccount();
   const upcoming = getUpcomingDates();
   const [destination, setDestination] = useState("");
@@ -86,10 +92,7 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
   const failure = results.error ?? book.error ?? cancel.error;
 
   return (
-    <Panel
-      title="Selected consequential write: Expedia Rapid lodging (L3)"
-      description="End-to-end consequential execution: rate quote binding, payment authorization distinct from completion, and verified cancellation."
-    >
+    <div className="space-y-3">
       <form
         onSubmit={submitSearch}
         className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:items-end"
@@ -141,7 +144,7 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
         </div>
       </form>
       {failure ? (
-        <Callout tone="danger" title="Journey notice" live="assertive">
+        <Callout tone="danger" title="Something went wrong" live="assertive">
           <p>{errorMessage(failure)}</p>
         </Callout>
       ) : null}
@@ -212,7 +215,7 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
         </ItemCard>
       ) : selected ? (
         <ItemCard
-          title={`Step 2: payment escrow & proposal approval · ${selected.name}`}
+          title={`Review and confirm · ${selected.name}`}
           badges={<Tag tone="info">🔒 Payment held in escrow</Tag>}
           actions={
             <Button
@@ -221,9 +224,7 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
               aria-label={`Confirm consequential booking for ${selected.name}`}
               onClick={() => confirmBooking(selected)}
             >
-              {book.isPending
-                ? "Submitting to Expedia…"
-                : "Confirm consequential booking (L3)"}
+              {book.isPending ? "Submitting to Expedia…" : "Confirm booking"}
             </Button>
           }
         >
@@ -287,17 +288,19 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
                 title={property.name}
                 subtitle={`${property.location} · ${property.star_rating} stars`}
                 actions={
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    aria-label={`Authorize booking proposal for ${property.name}`}
-                    onClick={() => {
-                      book.reset();
-                      setSelected(property);
-                    }}
-                  >
-                    Authorize booking proposal
-                  </Button>
+                  canBook ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      aria-label={`Authorize booking proposal for ${property.name}`}
+                      onClick={() => {
+                        book.reset();
+                        setSelected(property);
+                      }}
+                    >
+                      Authorize booking proposal
+                    </Button>
+                  ) : null
                 }
                 footer={
                   <span>
@@ -314,6 +317,6 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
           </div>
         </div>
       ) : null}
-    </Panel>
+    </div>
   );
 }

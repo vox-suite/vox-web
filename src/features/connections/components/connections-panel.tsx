@@ -13,6 +13,7 @@ import {
 import { errorMessage } from "@/lib/api/http";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
 import { useConnections, useDisconnectConnection } from "../queries";
+import { ConnectionActions } from "./connection-actions";
 
 function ConnectionCard({ connection }: { connection: Connection }) {
   const disconnect = useDisconnectConnection();
@@ -67,6 +68,7 @@ function ConnectionCard({ connection }: { connection: Connection }) {
           },
         ]}
       />
+      <ConnectionActions connection={connection} />
       {disconnect.isError ? (
         <Callout tone="danger" live="assertive">
           <p>{errorMessage(disconnect.error, "Failed to disconnect")}</p>

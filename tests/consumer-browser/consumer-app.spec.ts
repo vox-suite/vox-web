@@ -3,7 +3,6 @@ import { playwrightCookies } from "../fixtures/consumer-app/supabase-auth.mjs";
 
 const AREAS = [
   "",
-  "/journeys",
   "/tasks",
   "/reminders",
   "/approvals",
@@ -122,4 +121,28 @@ test("consumer plugin marketplace enables 1-click install with brand assets and 
   await expect(
     page.getByRole("button", { name: /DoorDash active/i }),
   ).toBeVisible();
+});
+
+test("connected accounts offer only what each connection allows", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page
+    .getByText("Connected accounts and agent access", { exact: true })
+    .click();
+
+  const uber = page.getByTestId("connection-conn_uber_rides");
+  await uber.getByText("Trip history", { exact: true }).click();
+  await uber.getByRole("button", { name: "Load trip history" }).click();
+  await expect(uber.getByText(/^Trip #/).first()).toBeVisible();
+
+  // The Expedia connection has expired, so it offers no booking actions.
+  const expedia = page.getByTestId("connection-conn_expedia_travel");
+  await expect(expedia).toBeVisible();
+  await expect(expedia.getByText("Find a stay")).toHaveCount(0);
+
+  // Old bookmarks land on Apps & skills.
+  await page.goto("/app/journeys");
+  await expect(page).toHaveURL(/\/app\/apps$/);
 });

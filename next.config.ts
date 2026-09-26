@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const config: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    // Journeys was folded into connected accounts on Apps & skills.
+    return [
+      { source: "/app/journeys", destination: "/app/apps", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

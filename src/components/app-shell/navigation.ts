@@ -2,7 +2,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   BellRing,
   Blocks,
-  Compass,
   LayoutDashboard,
   ListChecks,
   LockKeyhole,
@@ -37,13 +36,6 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Overview",
         description: "Your account at a glance.",
         icon: LayoutDashboard,
-      },
-      {
-        path: "/journeys",
-        label: "Journeys",
-        description:
-          "Connected reads, approved writes, and labelled handoffs in one place.",
-        icon: Compass,
       },
       {
         path: "/tasks",

@@ -7,22 +7,21 @@ import {
 import {
   bookLodging,
   cancelLodging,
-  createHandoff,
   readTripHistory,
   searchLodging,
   type LodgingSearch,
 } from "./api";
 
-export const journeyKeys = {
-  all: ["journeys"] as const,
+export const actionKeys = {
+  all: ["connection-actions"] as const,
   lodgingSearch: (search: LodgingSearch) =>
-    [...journeyKeys.all, "lodging", search] as const,
+    [...actionKeys.all, "lodging", search] as const,
 };
 
 /** Runs only once the user submits a search; switching back to a previous destination is served from cache. */
 export function useLodgingSearch(search: LodgingSearch | null) {
   return useQuery({
-    queryKey: search ? journeyKeys.lodgingSearch(search) : journeyKeys.all,
+    queryKey: search ? actionKeys.lodgingSearch(search) : actionKeys.all,
     queryFn: search ? ({ signal }) => searchLodging(search, signal) : skipToken,
     placeholderData: keepPreviousData,
   });
@@ -39,8 +38,4 @@ export function useBookLodging() {
 
 export function useCancelLodging() {
   return useMutation({ mutationFn: cancelLodging });
-}
-
-export function useCreateHandoff() {
-  return useMutation({ mutationFn: createHandoff });
 }
