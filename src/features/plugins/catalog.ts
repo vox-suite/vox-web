@@ -9,6 +9,10 @@
  * - "configured": the provider needs an OAuth client created in its developer
  *   console. The app is listed only once Core has that client configured.
  *
+ * - "allowlisted": the provider only returns sign-ins to callback URLs it has
+ *   approved, so the app is listed only once it is in APPROVED_APPS (after
+ *   the provider whitelists https://app.voxagent.in/apps/oauth/callback).
+ *
  * `highlights` describe what the provider's MCP server offers. The exact tools
  * are shown after connecting, as reported by the server itself.
  */
@@ -22,7 +26,13 @@ export const PLUGIN_CATEGORIES: PluginCategory[] = [
   "Media & Design",
 ];
 
-export type PluginRegistration = "dynamic" | "configured";
+export type PluginRegistration = "dynamic" | "configured" | "allowlisted";
+
+/**
+ * Allowlisted apps whose provider has approved Vox's OAuth callback. Add an
+ * id here once its provider confirms, then deploy.
+ */
+export const APPROVED_APPS: readonly string[] = [];
 
 export type CatalogPluginOperator = {
   operatorId: string;
@@ -60,7 +70,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp-server.zomato.com/mcp",
     publisher: "Zomato Ltd.",
     operator: { operatorId: "zomato", operatorName: "Zomato Ltd." },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: [
       "Search restaurants and browse menus with prices",
       "Build a cart and place an order",
@@ -81,7 +91,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp.swiggy.com/food",
     publisher: "Swiggy Ltd.",
     operator: { operatorId: "swiggy", operatorName: "Swiggy Ltd." },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: [
       "Find restaurants and dishes",
       "Manage your cart",
@@ -102,7 +112,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp.swiggy.com/im",
     publisher: "Swiggy Ltd.",
     operator: { operatorId: "swiggy", operatorName: "Swiggy Ltd." },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: [
       "Search groceries and essentials",
       "Add items to your cart",
@@ -123,7 +133,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp.swiggy.com/dineout",
     publisher: "Swiggy Ltd.",
     operator: { operatorId: "swiggy", operatorName: "Swiggy Ltd." },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: [
       "Find restaurants for dining out",
       "Check table availability",
@@ -144,7 +154,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp.bigbasket.com/mcp",
     publisher: "Supermarket Grocery Supplies Pvt. Ltd.",
     operator: { operatorId: "bigbasket", operatorName: "BigBasket" },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: [
       "Search products and prices",
       "Manage your basket",
@@ -266,7 +276,7 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     endpointUrl: "https://mcp.canva.com/mcp",
     publisher: "Canva Pty Ltd",
     operator: { operatorId: "canva", operatorName: "Canva Pty Ltd" },
-    registration: "dynamic",
+    registration: "allowlisted",
     highlights: ["Find your designs", "Create designs", "Export designs"],
     protocol: "mcp",
   },
@@ -284,18 +294,26 @@ export function endpointHost(plugin: CatalogPlugin): string {
 }
 
 /**
- * Apps that can actually be connected: every dynamic-registration app, plus
- * configured-client apps whose endpoint host has a client in Core.
+ * Apps that can actually be connected: every dynamic-registration app,
+ * configured-client apps whose endpoint host has a client in Core, and
+ * allowlisted apps whose provider has approved Vox.
  */
 export function connectablePlugins(
   configuredHosts: readonly string[],
   catalog: readonly CatalogPlugin[] = PLUGIN_CATALOG,
+  approved: readonly string[] = APPROVED_APPS,
 ): CatalogPlugin[] {
   const hosts = new Set(configuredHosts.map((h) => h.toLowerCase()));
-  return catalog.filter(
-    (plugin) =>
-      plugin.registration === "dynamic" || hosts.has(endpointHost(plugin)),
-  );
+  return catalog.filter((plugin) => {
+    switch (plugin.registration) {
+      case "dynamic":
+        return true;
+      case "configured":
+        return hosts.has(endpointHost(plugin));
+      case "allowlisted":
+        return approved.includes(plugin.id);
+    }
+  });
 }
 
 export function getPluginsByCategory(

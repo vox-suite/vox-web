@@ -79,12 +79,12 @@ function extensionFixture(
   overrides: Partial<RemoteExtension> = {},
 ): RemoteExtension {
   return {
-    id: "ext-zomato",
-    external_key: "zomato",
-    display_name: "Zomato",
+    id: "ext-notion",
+    external_key: "notion",
+    display_name: "Notion",
     protocol: "mcp",
-    endpoint_url: "https://mcp-server.zomato.com/mcp",
-    operator: { operator_id: "zomato", operator_name: "Zomato Ltd." },
+    endpoint_url: "https://mcp.notion.com/mcp",
+    operator: { operator_id: "notion", operator_name: "Notion Labs, Inc." },
     current_version: 1,
     conformance_status: "pending",
     operator_enabled: false,
@@ -159,7 +159,7 @@ test("POST /api/account/plugins/connect validates the session, body, and plugin"
 
   setMockConsumerForTests(null);
   assert.equal(
-    (await connectRoute(connectRequest({ pluginId: "zomato" }))).status,
+    (await connectRoute(connectRequest({ pluginId: "notion" }))).status,
     401,
   );
 
@@ -169,9 +169,13 @@ test("POST /api/account/plugins/connect validates the session, body, and plugin"
     (await connectRoute(connectRequest({ pluginId: "uber" }))).status,
     404,
   );
+  // Providers that have not approved Vox's callback are refused up front.
+  const unapproved = await connectRoute(connectRequest({ pluginId: "zomato" }));
+  assert.equal(unapproved.status, 409);
+  assert.equal((await unapproved.json()).code, "provider_approval_required");
   setCoreHostClientForTests(null);
   assert.equal(
-    (await connectRoute(connectRequest({ pluginId: "zomato" }))).status,
+    (await connectRoute(connectRequest({ pluginId: "notion" }))).status,
     503,
   );
 
@@ -196,8 +200,8 @@ test("POST /api/account/plugins/connect installs the app and returns the provide
       return [...installed];
     },
     async installExtension(_: string, request: InstallExtensionRequest) {
-      assert.equal(request.external_key, "zomato");
-      assert.equal(request.endpoint_url, "https://mcp-server.zomato.com/mcp");
+      assert.equal(request.external_key, "notion");
+      assert.equal(request.endpoint_url, "https://mcp.notion.com/mcp");
       assert.equal(request.protocol, "mcp");
       const ext = extensionFixture();
       installed.push(ext);
@@ -213,30 +217,30 @@ test("POST /api/account/plugins/connect installs the app and returns the provide
     ) {
       authorizeCalls.push({ extensionId, redirectUri });
       return {
-        authorization_url: "https://mcp-server.zomato.com/authorize?state=s",
+        authorization_url: "https://mcp-server.notion.com/authorize?state=s",
         expires_at: new Date().toISOString(),
       };
     },
   } as unknown as VoxCoreHostClient);
 
-  const res = await connectRoute(connectRequest({ pluginId: "zomato" }));
+  const res = await connectRoute(connectRequest({ pluginId: "notion" }));
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.status, "authorize");
   assert.equal(
     body.authorizationUrl,
-    "https://mcp-server.zomato.com/authorize?state=s",
+    "https://mcp-server.notion.com/authorize?state=s",
   );
   // On the consumer host the callback has no /app prefix.
   assert.deepEqual(authorizeCalls, [
     {
-      extensionId: "ext-zomato",
+      extensionId: "ext-notion",
       redirectUri: "https://app.voxagent.in/apps/oauth/callback",
     },
   ]);
 
   // Elsewhere (previews, local) routes live under /app.
-  await connectRoute(connectRequest({ pluginId: "zomato" }, "localhost:3000"));
+  await connectRoute(connectRequest({ pluginId: "notion" }, "localhost:3000"));
   assert.equal(
     authorizeCalls[1].redirectUri,
     "https://localhost:3000/app/apps/oauth/callback",
@@ -246,10 +250,10 @@ test("POST /api/account/plugins/connect installs the app and returns the provide
   // Once connected, no new sign-in is started.
   status = {
     ...emptyStatus,
-    connected: [{ extension_id: "ext-zomato", connected_at: "", tools: [] }],
+    connected: [{ extension_id: "ext-notion", connected_at: "", tools: [] }],
   };
   const again = await (
-    await connectRoute(connectRequest({ pluginId: "zomato" }))
+    await connectRoute(connectRequest({ pluginId: "notion" }))
   ).json();
   assert.equal(again.status, "connected");
   assert.equal(authorizeCalls.length, 2);
@@ -288,8 +292,8 @@ test("POST /api/account/plugins/connect shares one attempt between overlapping c
   } as unknown as VoxCoreHostClient);
 
   const [a, b] = await Promise.all([
-    connectRoute(connectRequest({ pluginId: "zomato" })),
-    connectRoute(connectRequest({ pluginId: "zomato" })),
+    connectRoute(connectRequest({ pluginId: "notion" })),
+    connectRoute(connectRequest({ pluginId: "notion" })),
   ]);
   assert.equal(a.status, 200);
   assert.equal(b.status, 200);
@@ -324,7 +328,7 @@ test("POST /api/account/plugins/connect explains Core failures without leaking i
     },
   } as unknown as VoxCoreHostClient);
 
-  const res = await connectRoute(connectRequest({ pluginId: "zomato" }));
+  const res = await connectRoute(connectRequest({ pluginId: "notion" }));
   assert.equal(res.status, 502);
   const body = await res.json();
   assert.equal(body.code, "provider_error");
@@ -374,7 +378,7 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
   setMockConsumerForTests(mockSession);
   const ok = await callback("code=c1&state=s1");
   assert.equal(ok.pathname, "/apps");
-  assert.equal(ok.searchParams.get("connected"), "zomato");
+  assert.equal(ok.searchParams.get("connected"), "notion");
   assert.deepEqual(completions, [{ state: "s1", code: "c1" }]);
 
   const denied = await callback("error=access_denied&state=s");
@@ -410,7 +414,7 @@ test("GET /api/account/plugins/status returns the account's live connections", a
   setMockConsumerForTests(mockSession);
   const connected = [
     {
-      extension_id: "ext-zomato",
+      extension_id: "ext-notion",
       connected_at: "",
       tools: [{ name: "search", read_only: true }],
     },
@@ -436,7 +440,7 @@ test("DELETE /api/account/plugins/[id] removes the app by plugin or extension ID
   setMockConsumerForTests(mockSession);
 
   let removedId: string | null = null;
-  const extensions = [extensionFixture({ id: "uuid-ext-zomato" })];
+  const extensions = [extensionFixture({ id: "uuid-ext-notion" })];
   setCoreHostClientForTests({
     async listExtensions() {
       return extensions;
@@ -454,10 +458,10 @@ test("DELETE /api/account/plugins/[id] removes the app by plugin or extension ID
       }),
       { params: Promise.resolve({ id }) },
     );
-  for (const id of ["zomato", "uuid-ext-zomato"]) {
+  for (const id of ["notion", "uuid-ext-notion"]) {
     removedId = null;
     assert.equal((await remove(id)).status, 200);
-    assert.equal(removedId, "uuid-ext-zomato");
+    assert.equal(removedId, "uuid-ext-notion");
   }
   assert.equal((await remove("unknown")).status, 404);
 
@@ -487,21 +491,21 @@ test("client api functions call the plugin routes", async () => {
     globalThis.fetch = async (url, init) => {
       assert.ok(String(url).includes("/api/account/plugins/connect"));
       assert.equal(init?.method, "POST");
-      assert.equal(JSON.parse(String(init?.body)).pluginId, "zomato");
+      assert.equal(JSON.parse(String(init?.body)).pluginId, "notion");
       return Response.json({
         status: "authorize",
         authorizationUrl: "https://x",
         extension: {},
       });
     };
-    assert.equal((await connectPlugin("zomato")).status, "authorize");
+    assert.equal((await connectPlugin("notion")).status, "authorize");
 
     globalThis.fetch = async (url, init) => {
-      assert.ok(String(url).includes("/api/account/plugins/ext-zomato"));
+      assert.ok(String(url).includes("/api/account/plugins/ext-notion"));
       assert.equal(init?.method, "DELETE");
       return Response.json({ success: true });
     };
-    assert.equal((await uninstallPlugin("ext-zomato")).success, true);
+    assert.equal((await uninstallPlugin("ext-notion")).success, true);
   } finally {
     globalThis.fetch = originalFetch;
   }

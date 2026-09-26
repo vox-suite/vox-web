@@ -21,7 +21,9 @@ test("every catalog app is a provider's official HTTPS MCP server with complete 
     assert.ok(plugin.publisher && plugin.operator.operatorName);
     assert.ok(plugin.highlights.length > 0, `Highlights missing: ${plugin.id}`);
     assert.equal(plugin.protocol, "mcp");
-    assert.ok(["dynamic", "configured"].includes(plugin.registration));
+    assert.ok(
+      ["dynamic", "configured", "allowlisted"].includes(plugin.registration),
+    );
     const url = new URL(plugin.endpointUrl);
     assert.equal(
       url.protocol,
@@ -52,6 +54,27 @@ test("configured-client apps are only connectable once Core has their client", (
   const withSpotify = connectablePlugins([endpointHost(spotify).toUpperCase()]);
   assert.ok(withSpotify.some((p) => p.id === "spotify"));
   assert.ok(!withSpotify.some((p) => p.id === "google-calendar"));
+});
+
+test("allowlisted apps are only connectable once their provider approves Vox", () => {
+  const listed = connectablePlugins([]).map((p) => p.id);
+  for (const id of [
+    "zomato",
+    "swiggy-food",
+    "swiggy-instamart",
+    "swiggy-dineout",
+    "bigbasket",
+    "canva",
+  ]) {
+    assert.equal(getCatalogPlugin(id)?.registration, "allowlisted", id);
+    assert.ok(!listed.includes(id), `${id} must be hidden until approved`);
+  }
+  assert.ok(listed.includes("notion") && listed.includes("todoist"));
+  assert.ok(
+    connectablePlugins([], PLUGIN_CATALOG, ["swiggy-food"]).some(
+      (p) => p.id === "swiggy-food",
+    ),
+  );
 });
 
 test("categories group every app and popular apps also appear under Popular", () => {

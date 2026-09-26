@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 import {
+  APPROVED_APPS,
   getCatalogPlugin,
   type CatalogPlugin,
 } from "@/features/plugins/catalog";
@@ -111,6 +112,19 @@ export async function POST(request: NextRequest) {
   const plugin = getCatalogPlugin(body.pluginId);
   if (!plugin) {
     return NextResponse.json({ error: "Plugin not found" }, { status: 404 });
+  }
+  // The provider would reject Vox's callback after the user signs in.
+  if (
+    plugin.registration === "allowlisted" &&
+    !APPROVED_APPS.includes(plugin.id)
+  ) {
+    return NextResponse.json(
+      {
+        error: `${plugin.displayName} hasn't approved Vox as a client yet.`,
+        code: "provider_approval_required",
+      },
+      { status: 409 },
+    );
   }
 
   const core = getCoreHostClient();
