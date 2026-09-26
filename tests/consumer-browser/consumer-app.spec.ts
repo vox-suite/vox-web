@@ -1,0 +1,66 @@
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { playwrightCookies } from "../fixtures/consumer-app/supabase-auth.mjs";
+
+const AREAS = [
+  "",
+  "/journeys",
+  "/tasks",
+  "/reminders",
+  "/approvals",
+  "/apps",
+  "/privacy",
+  "/account",
+];
+
+/** A fresh synthetic user per test keeps mock Core state isolated between runs. */
+async function signIn(page: Page) {
+  const email = `user${Date.now()}${Math.floor(Math.random() * 1e6)}@example.test`;
+  const cookies = playwrightCookies({
+    email,
+    fullName: "Asha Raman",
+  }) as Parameters<BrowserContext["addCookies"]>[0];
+  await page.context().addCookies(cookies);
+  return email;
+}
+
+test("signed-out visitors are sent to sign-in", async ({ page }) => {
+  await page.goto("/app/reminders");
+  await expect(page).toHaveURL(/\/app\/sign-in/);
+});
+
+test("every area loads for a signed-in user", async ({ page }) => {
+  const email = await signIn(page);
+  await page.goto("/app");
+  await expect(page.getByRole("main").getByText(email)).toBeVisible();
+  for (const area of AREAS) {
+    await page.goto(`/app${area}`);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  }
+});
+
+test("create a reminder", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/app/reminders");
+  await page.getByLabel("Reminder title").fill("Stand-up");
+  await page
+    .getByLabel("Notification message")
+    .fill("Daily stand-up in 5 minutes");
+  await page.getByLabel(/^Destination/).fill("+15551234567");
+  await page.getByLabel("Schedule kind").selectOption("interval");
+  await page.getByRole("button", { name: "Schedule reminder" }).click();
+  await expect(page.getByText("Reminder successfully created")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Stand-up" })).toBeVisible();
+});
+
+test("start a durable task", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/app/tasks");
+  await page.getByLabel("Task title").fill("Plan the week");
+  await page
+    .getByLabel("Instruction")
+    .fill("Summarise my calendar for the week");
+  await page.getByRole("button", { name: "Submit durable task" }).click();
+  await expect(
+    page.getByRole("article", { name: "Plan the week" }),
+  ).toBeVisible();
+});

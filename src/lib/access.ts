@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+export { consumerDestination, consumerHref } from "./consumer-routes";
+
 export function isSuperuser(
   email: string | null | undefined,
   allowlist: string | undefined,
@@ -82,17 +84,6 @@ export function adminDestination(host: string, path: string) {
   return path === "/" ? "/admin" : `/admin${path}`;
 }
 
-export function consumerDestination(host: string, path: string) {
-  if (host.toLowerCase().split(":")[0] !== "app.voxagent.in") return null;
-  if (/^\/(app|admin|auth|api|_next)(\/|$)/.test(path) || path.includes("."))
-    return null;
-  return path === "/" ? "/app" : `/app${path}`;
-}
-
-export function consumerHref(host: string | null | undefined, path: string) {
-  const hostname = host?.toLowerCase().split(":")[0];
-  return hostname === "app.voxagent.in" ? path : `/app${path}`;
-}
 export function parseRedisQuery(params: URLSearchParams) {
   const cursor = params.get("cursor") ?? "0";
   const match = params.get("match") || "vox:*";

@@ -13,19 +13,7 @@ export { Card } from "./content-card";
 export { Input } from "./input";
 export { Label } from "./label";
 export { Textarea } from "./textarea";
-export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
-} from "./table";
-export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { Stack, Row, Grid } from "./stack";
 export { Page } from "./page";
 export { Section } from "./section";
@@ -41,6 +29,5 @@ export { ModuleCard } from "./module-card";
 export { Stat } from "./stat";
 export { DataTable } from "./data-table";
 export { CodeBlock } from "./code-block";
-export { ColorSwatches } from "./color-swatches";
 export { VoxLogo, VoxOrbSvg } from "./vox-logo";
 export type { VoxLogoProps, VoxOrbSvgProps } from "./vox-logo";
