@@ -251,7 +251,6 @@ export function ExtensionsPanel({ id }: { id?: string }) {
   const [advancedForm, setAdvancedForm] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [source, setSource] = useState<"personal" | "public">("personal");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -264,16 +263,11 @@ export function ExtensionsPanel({ id }: { id?: string }) {
           />
           <input
             type="search"
-            aria-label="Search plugins"
-            placeholder={
-              source === "public"
-                ? "Catalog unavailable"
-                : "Search saved extensions"
-            }
+            aria-label="Search saved extensions"
+            placeholder="Search saved extensions"
             value={search}
-            disabled={source === "public"}
             onChange={(event) => setSearch(event.target.value)}
-            className="h-10 w-full rounded-full border border-border-edge bg-obsidian pl-10 pr-4 text-sm text-pure-white outline-none placeholder:text-smoke focus-visible:border-mist disabled:opacity-50"
+            className="h-10 w-full rounded-full border border-border-edge bg-obsidian pl-10 pr-4 text-sm text-pure-white outline-none placeholder:text-smoke focus-visible:border-mist"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -295,7 +289,6 @@ export function ExtensionsPanel({ id }: { id?: string }) {
             aria-expanded={showForm}
             onClick={() => {
               setNotice(null);
-              setSource("personal");
               setShowForm((open) => !open);
             }}
           >
@@ -373,10 +366,10 @@ export function ExtensionsPanel({ id }: { id?: string }) {
           );
           return (
             <div className="space-y-8">
-              <section aria-label="Saved extensions" className="space-y-4">
-                <h2 className="text-base font-medium text-mist">Saved</h2>
-                <div className="border-t border-border-edge pt-4">
-                  {installed.length ? (
+              {installed.length ? (
+                <section aria-label="Saved extensions" className="space-y-4">
+                  <h2 className="text-base font-medium text-mist">Saved</h2>
+                  <div className="border-t border-border-edge pt-4">
                     <div className="flex flex-wrap gap-3">
                       {installed.map((extension) => (
                         <button
@@ -384,115 +377,73 @@ export function ExtensionsPanel({ id }: { id?: string }) {
                           type="button"
                           title={extension.display_name}
                           aria-label={`Show ${extension.display_name}`}
-                          onClick={() => {
-                            setSource("personal");
-                            setSelectedId(extension.id);
-                          }}
+                          onClick={() => setSelectedId(extension.id)}
                           className="flex size-12 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-lg font-semibold text-mist transition-colors hover:border-ash hover:bg-graphite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
                         >
                           {extension.display_name.slice(0, 1).toUpperCase()}
                         </button>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-sm text-smoke">
-                      No servers saved yet. Add an MCP server URL to start.
-                    </p>
-                  )}
-                </div>
-              </section>
-              <div
-                role="group"
-                aria-label="Plugin source"
-                className="flex gap-2"
-              >
-                <button
-                  type="button"
-                  aria-pressed={source === "personal"}
-                  onClick={() => setSource("personal")}
-                  className={`rounded-md px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-mist ${source === "personal" ? "bg-graphite text-mist" : "text-smoke hover:text-mist"}`}
-                >
-                  Personal
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={source === "public"}
-                  onClick={() => setSource("public")}
-                  className={`rounded-md px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-mist ${source === "public" ? "bg-graphite text-mist" : "text-smoke hover:text-mist"}`}
-                >
-                  Public
-                </button>
-              </div>
-              {source === "public" ? (
-                <div className="rounded-xl border border-border-edge bg-ink p-8">
-                  <h2 className="text-lg font-medium text-mist">
-                    Public plugin catalog
-                  </h2>
-                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-smoke">
-                    This deployment does not provide a public plugin catalog
-                    yet. You can add a remote server under Personal; it will
-                    remain unavailable to agents until account authorization and
-                    tool execution are supported.
-                  </p>
-                </div>
-              ) : (
-                <section aria-label="Personal plugins" className="space-y-4">
-                  <h2 className="text-base font-medium text-mist">
-                    Your saved extensions
-                  </h2>
-                  {matches.length ? (
-                    <div className="grid gap-x-10 lg:grid-cols-2">
-                      {matches.map((extension) => (
-                        <button
-                          key={extension.id}
-                          type="button"
-                          onClick={() =>
-                            setSelectedId(
-                              extension.id === selectedId ? null : extension.id,
-                            )
-                          }
-                          aria-expanded={extension.id === selectedId}
-                          className="group flex w-full items-center gap-4 border-b border-border-edge/60 px-2 py-4 text-left transition-colors hover:bg-ink focus-visible:outline-2 focus-visible:outline-mist"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-lg font-semibold text-mist"
-                          >
-                            {extension.display_name.slice(0, 1).toUpperCase()}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium text-mist">
-                              {extension.display_name}
-                            </span>
-                            <span className="block truncate text-xs text-smoke">
-                              {extension.protocol.toUpperCase()} ·{" "}
-                              {extension.operator.operator_name}
-                            </span>
-                          </span>
-                          <span className="text-sm text-smoke group-hover:text-mist">
-                            {extension.id === selectedId ? "−" : "+"}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-smoke">
-                      {search
-                        ? "No plugins match your search."
-                        : "No extensions saved yet. Add a server to start."}
-                    </p>
-                  )}
-                  {selected ? (
-                    <ExtensionCard
-                      extension={selected}
-                      onRemoved={() => {
-                        setSelectedId(null);
-                        setNotice("Extension removed from active state.");
-                      }}
-                    />
-                  ) : null}
+                  </div>
                 </section>
-              )}
+              ) : null}
+
+              <section aria-label="Personal plugins" className="space-y-4">
+                <h2 className="text-base font-medium text-mist">
+                  Your saved extensions
+                </h2>
+                {matches.length ? (
+                  <div className="grid gap-x-10 lg:grid-cols-2">
+                    {matches.map((extension) => (
+                      <button
+                        key={extension.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedId(
+                            extension.id === selectedId ? null : extension.id,
+                          )
+                        }
+                        aria-expanded={extension.id === selectedId}
+                        className="group flex w-full items-center gap-4 border-b border-border-edge/60 px-2 py-4 text-left transition-colors hover:bg-ink focus-visible:outline-2 focus-visible:outline-mist"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-edge bg-obsidian text-lg font-semibold text-mist"
+                        >
+                          {extension.display_name.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-mist">
+                            {extension.display_name}
+                          </span>
+                          <span className="block truncate text-xs text-smoke">
+                            {extension.protocol.toUpperCase()} ·{" "}
+                            {extension.operator.operator_name}
+                          </span>
+                        </span>
+                        <span className="text-sm text-smoke group-hover:text-mist">
+                          {extension.id === selectedId ? "−" : "+"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-smoke">
+                    {search
+                      ? "No plugins match your search."
+                      : "No extensions saved yet. Add a server to start."}
+                  </p>
+                )}
+                {selected ? (
+                  <ExtensionCard
+                    extension={selected}
+                    onRemoved={() => {
+                      setSelectedId(null);
+                      setNotice("Extension removed from active state.");
+                    }}
+                  />
+                ) : null}
+              </section>
             </div>
           );
         }}

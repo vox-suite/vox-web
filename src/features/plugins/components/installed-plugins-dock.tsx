@@ -89,7 +89,8 @@ export function InstalledPluginsDock({
           <div>
             <p className="font-medium text-mist">No plugins installed yet</p>
             <p className="text-[11px] text-smoke">
-              Install everyday apps below to grant tools and capabilities to your assistant.
+              Install everyday apps below to grant tools and capabilities to
+              your assistant.
             </p>
           </div>
         </div>
@@ -111,7 +112,8 @@ export function InstalledPluginsDock({
             Installed Apps
           </span>
           <span className="text-[11px] text-smoke">
-            {activeExtensions.length} active {activeExtensions.length === 1 ? "tool" : "tools"}
+            {activeExtensions.length} active{" "}
+            {activeExtensions.length === 1 ? "tool" : "tools"}
           </span>
         </div>
 
@@ -126,7 +128,7 @@ export function InstalledPluginsDock({
                 type="button"
                 onClick={() => handleInspect(plugin, ext)}
                 title={`${plugin.displayName} · ${isQuarantined ? "Quarantined" : "Active"}`}
-                aria-label={`Inspect ${plugin.displayName}`}
+                aria-label={`Inspect ${plugin.displayName} (${isQuarantined ? "quarantined" : "active"})`}
                 className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
               >
                 <PluginLogo

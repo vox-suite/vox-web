@@ -14,6 +14,8 @@ import {
   PluginInspectorModal,
   PluginCatalogGrid,
 } from "../src/features/plugins/components";
+import { AppsScreen } from "../src/features/apps/components/apps-screen";
+import { ExtensionsPanel } from "../src/features/extensions/components/extensions-panel";
 import type { RemoteExtension } from "../src/lib/consumer-auth/core-host-client";
 
 test("all marketplace UI components are exported as valid React components", () => {
@@ -38,7 +40,10 @@ test("all marketplace UI components are exported as valid React components", () 
 
 test("all 9 catalog plugins resolve valid logo paths and background colors", () => {
   for (const plugin of PLUGIN_CATALOG) {
-    assert.ok(plugin.logoFile.endsWith(".svg"), `Logo must be .svg: ${plugin.id}`);
+    assert.ok(
+      plugin.logoFile.endsWith(".svg"),
+      `Logo must be .svg: ${plugin.id}`,
+    );
     const expectedPath = `/plugins/logos/${plugin.logoFile}`;
     assert.ok(expectedPath.startsWith("/plugins/logos/"));
     assert.ok(plugin.displayName.length > 0);
@@ -96,7 +101,9 @@ test("installed plugins dock correctly identifies active vs removed extensions",
     },
   ];
 
-  const active = mockExtensions.filter((ext) => ext.lifecycle_state !== "removed");
+  const active = mockExtensions.filter(
+    (ext) => ext.lifecycle_state !== "removed",
+  );
   assert.equal(active.length, 2);
   assert.equal(active[0].external_key, "uber");
   assert.equal(active[1].external_key, "my-custom-mcp");
@@ -170,4 +177,13 @@ test("catalog grid search and category filter predicate logic", () => {
       `Category ${cat} must contain at least one plugin`,
     );
   }
+});
+
+test("apps screen and extensions panel are valid exported React components for apps route", () => {
+  assert.equal(typeof AppsScreen, "function", "AppsScreen must be exported");
+  assert.equal(
+    typeof ExtensionsPanel,
+    "function",
+    "ExtensionsPanel must be exported",
+  );
 });
