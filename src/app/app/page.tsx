@@ -3,15 +3,12 @@ import {
   RecoveryEnrollment,
   SessionControls,
 } from "@/components/consumer/account-controls";
-import { ConnectionsManager } from "@/components/consumer/connections-manager";
-import { ExtensionsManager } from "@/components/consumer/extensions-manager";
-import { GrantsManager } from "@/components/consumer/grants-manager";
 import { PrivacyControls } from "@/components/consumer/privacy-controls";
 import { ProposalsManager } from "@/components/consumer/proposals-manager";
 import { RemindersManager } from "@/components/consumer/reminders-manager";
 import { TasksView } from "@/components/consumer/tasks-view";
 import { UnifiedJourneys } from "@/components/consumer/unified-journeys";
-import { AuthFrame, Badge, Card, Stack, Text } from "@/components/ui";
+import { AuthFrame, Badge, Card, LinkButton, Stack, Text } from "@/components/ui";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { consumerHref } from "@/lib/access";
 import { headers } from "next/headers";
@@ -43,9 +40,9 @@ export default async function ConsumerHomePage() {
         <RemindersManager />
         <PrivacyControls />
         <ProposalsManager />
-        <ConnectionsManager />
-        <GrantsManager />
-        <ExtensionsManager />
+        <Card title="Apps and skills" description="Manage connected accounts, apps you add, agent access, and reusable guidance in one place." tone="soft">
+          <LinkButton href="/app/apps">Open apps and skills</LinkButton>
+        </Card>
         <Card
           title="Email recovery"
           description="Enable this explicitly before email codes may recover a Google account."

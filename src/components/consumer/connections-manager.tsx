@@ -5,10 +5,7 @@ import { Badge, Button, Card, Notice, Stack, Text, Row } from "@/components/ui";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
 import { getAccessibleStatusIndicator } from "@/lib/global-formatting";
 
-type DisconnectDisclosure = {
-  connectionId: string;
-  message: string;
-} | null;
+type DisconnectDisclosure = { message: string } | null;
 
 export function ConnectionsManager() {
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -48,7 +45,6 @@ export function ConnectionsManager() {
       if (!res.ok) throw new Error("Disconnect failed");
       const data = await res.json();
       setDisclosure({
-        connectionId,
         message: data.disclosure || "Connection revoked.",
       });
       await loadConnections();
@@ -62,8 +58,8 @@ export function ConnectionsManager() {
   return (
     <Stack gap="normal">
       <Card
-        title="Connected Accounts & Service Custody"
-        description="Connect third-party accounts for calendar, ride, and messaging providers. Credentials remain securely bounded."
+        title="Connected accounts"
+        description="Review account access and remove connections you no longer use."
         tone="soft"
       >
         <Stack gap="normal">
@@ -95,8 +91,8 @@ export function ConnectionsManager() {
 
           {!loading && connections.length === 0 && (
             <Text muted>
-              No connected accounts. Authorize an integration below to enable
-              external capabilities.
+              No connected accounts. Connection setup will appear here when a
+              provider-verified authorization flow is available.
             </Text>
           )}
 
@@ -140,8 +136,7 @@ export function ConnectionsManager() {
                       <p className="ui-text text-sm" data-muted="true">
                         Account:{" "}
                         <strong>
-                          {conn.account_display_id ||
-                            conn.external_account_reference}
+                          {conn.account_display_id || "Account identity unavailable"}
                         </strong>
                       </p>
                     </div>
@@ -165,8 +160,8 @@ export function ConnectionsManager() {
                       <span className="text-smoke">Custody Model:</span>{" "}
                       <strong>
                         {isPlatformHeld
-                          ? "Platform-held credentials"
-                          : "External operator authorization"}
+                          ? "Recorded as platform-held"
+                          : "Recorded as external operator"}
                       </strong>
                     </div>
                     <div>
@@ -186,68 +181,6 @@ export function ConnectionsManager() {
             })}
           </div>
 
-          <div className="pt-2">
-            <h4 className="text-sm font-medium text-mist mb-2">
-              Available Integrations
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                {
-                  key: "google-calendar",
-                  name: "Google Calendar",
-                  operator: "Google LLC",
-                  custody: "External operator authorization",
-                  scope: "calendar.read, calendar.write",
-                },
-                {
-                  key: "uber",
-                  name: "Uber Rides",
-                  operator: "Uber Technologies",
-                  custody: "External operator authorization",
-                  scope: "rides.estimate, rides.request",
-                },
-              ].map((provider) => (
-                <div
-                  key={provider.key}
-                  className="p-3 border border-border-edge rounded-lg space-y-2 bg-obsidian/50"
-                >
-                  <div className="font-medium text-mist">{provider.name}</div>
-                  <p className="ui-text text-xs" data-muted="true">
-                    Operator: {provider.operator}
-                  </p>
-                  <p className="ui-text text-xs" data-muted="true">
-                    Custody: {provider.custody}
-                  </p>
-                  <Button
-                    variant="primary"
-                    aria-label={`Connect ${provider.name}`}
-                    className="w-full text-xs"
-                    onClick={async () => {
-                      try {
-                        const res = await fetch("/api/account/connections", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            integration_external_key: provider.key,
-                            credential_custody: "external_operator",
-                            requested_capabilities: provider.scope.split(", "),
-                          }),
-                        });
-                        const init = await res.json();
-                        if (init.authorization_url) {
-                          window.location.href = init.authorization_url;
-                        }
-                      } catch {
-                        setError("Failed to initiate connection");
-                      }
-                    }}
-                  >
-                    Connect {provider.name}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
         </Stack>
       </Card>
     </Stack>

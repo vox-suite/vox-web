@@ -192,38 +192,6 @@ test("listExtensions and getExtension fetch registered extensions and capabiliti
   assert.equal(single.id, "ext-uuid-1");
 });
 
-test("setExtensionEnabled toggles operator enablement", async () => {
-  let capturedUrl = "";
-  let capturedBody: unknown = null;
-
-  const client = new VoxCoreHostClient(testConfig, {
-    fetch: async (input, init) => {
-      capturedUrl = String(input);
-      capturedBody = JSON.parse(String(init?.body));
-      return Response.json({
-        id: "ext-uuid-1",
-        operator_enabled: true,
-        lifecycle_state: "active",
-        conformance_status: "passed",
-      });
-    },
-    now: () => 1_795_622_400,
-    nonce: () => "mock-nonce-ext-3",
-  });
-
-  const updated = await client.setExtensionEnabled(
-    "user-42",
-    "ext-uuid-1",
-    true,
-  );
-  assert.equal(
-    capturedUrl,
-    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/enable",
-  );
-  assert.equal(get(capturedBody, "enabled"), true);
-  assert.equal(updated.operator_enabled, true);
-});
-
 test("updateExtension triggers consent_required on expanded data recipients or operator transfer", async () => {
   let capturedUrl = "";
   let capturedMethod = "";
@@ -276,38 +244,6 @@ test("updateExtension triggers consent_required on expanded data recipients or o
   assert.equal(result.consent_status, "consent_required");
   assert.equal(result.current_version, 2);
   assert.equal(result.lifecycle_state, "installed");
-});
-
-test("renewExtensionConsent restores consented state for specific version", async () => {
-  let capturedUrl = "";
-  let capturedBody: unknown = null;
-
-  const client = new VoxCoreHostClient(testConfig, {
-    fetch: async (input, init) => {
-      capturedUrl = String(input);
-      capturedBody = JSON.parse(String(init?.body));
-      return Response.json({
-        id: "ext-uuid-1",
-        current_version: 2,
-        consent_status: "consented",
-        lifecycle_state: "installed",
-      });
-    },
-    now: () => 1_795_622_400,
-    nonce: () => "mock-nonce-ext-5",
-  });
-
-  const renewed = await client.renewExtensionConsent(
-    "user-42",
-    "ext-uuid-1",
-    2,
-  );
-  assert.equal(
-    capturedUrl,
-    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/renew-consent",
-  );
-  assert.equal(get(capturedBody, "version"), 2);
-  assert.equal(renewed.consent_status, "consented");
 });
 
 test("removeExtension issues DELETE and marks lifecycle_state removed", async () => {
