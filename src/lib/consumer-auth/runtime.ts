@@ -6,7 +6,7 @@ import { Pool } from "pg";
 import { after } from "next/server";
 import { ConsumerAccountAuthority } from "./account-authority";
 import { buildConsumerAuthOptions } from "./auth-options";
-import { readConsumerAuthConfig } from "./config";
+import { readConsumerAuthConfig, readCoreHostConfig } from "./config";
 import { VoxCoreHostClient } from "./core-host-client";
 import { SmtpAuthEmailSender } from "./email";
 
@@ -76,12 +76,14 @@ export function getConsumerAuthRuntime(): Runtime | null {
   return runtime;
 }
 
+let coreHostClient: VoxCoreHostClient | null | undefined;
+
+/** The Core client used by every `/api/account` feature route. */
 export function getCoreHostClient(): VoxCoreHostClient | null {
-  const rt = getConsumerAuthRuntime();
-  if (rt) return rt.coreClient;
-  const config = readConsumerAuthConfig();
-  if (!config.enabled) return null;
-  return new VoxCoreHostClient(config.core);
+  if (coreHostClient !== undefined) return coreHostClient;
+  const config = readCoreHostConfig();
+  coreHostClient = config ? new VoxCoreHostClient(config) : null;
+  return coreHostClient;
 }
 
 export function resetConsumerAuthRuntimeForTests() {

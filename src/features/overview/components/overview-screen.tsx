@@ -35,6 +35,7 @@ export function OverviewScreen() {
               <li key={item.path} className="min-w-0">
                 <Link
                   href={href(item.path)}
+                  prefetch
                   onMouseEnter={warm}
                   onFocus={warm}
                   className="group flex h-full flex-col gap-3 rounded-xl border border-border-edge bg-ink p-5 no-underline shadow-subtle-3 transition-colors hover:border-slate hover:bg-obsidian"

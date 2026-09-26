@@ -56,3 +56,16 @@ test("the rollout switch blocks entry without destroying session configuration",
   if (!config.enabled) assert.fail("expected configured authentication");
   assert.equal(config.entryEnabled, false);
 });
+
+test("Core features need only the Core URL and the host credential", async () => {
+  const { readCoreHostConfig } = await import("../src/lib/consumer-auth/config");
+  assert.equal(readCoreHostConfig({}), null);
+  const config = readCoreHostConfig({
+    VOX_CORE_URL: "https://api.voxagent.in",
+    VOX_HOST_CREDENTIAL_ID: "11111111-2222-4333-8444-555555555555",
+    VOX_HOST_AUDIENCE: "vox-host:vox.production:vox-web",
+    VOX_HOST_SECRET: "s".repeat(32),
+  });
+  assert.equal(config?.baseUrl, "https://api.voxagent.in");
+  assert.equal(config?.identityCredential, undefined);
+});

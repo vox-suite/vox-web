@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog } from "radix-ui";
 import { LogOut, Menu, X } from "lucide-react";
@@ -12,10 +12,29 @@ import { cn } from "@/lib/utils";
 import { useAccount } from "./account-context";
 import { appSegment, useAppHref, useAppPaths } from "./app-paths";
 import { NAV_GROUPS, isActivePath } from "./navigation";
+import { PageSkeleton } from "./page-skeleton";
 
-function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
-  const segment = appSegment(pathname);
+/** A sidebar click that is still waiting for its route. */
+type PendingNav = { to: string };
+
+function isPlainLeftClick(event: MouseEvent) {
+  return (
+    event.button === 0 &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    !event.altKey
+  );
+}
+
+function SidebarNav({
+  current,
+  onNavigate,
+}: {
+  /** The path to highlight: the pending destination while a click is in flight. */
+  current: string;
+  onNavigate: (path: string, event: MouseEvent) => void;
+}) {
   const href = useAppHref();
   const queryClient = useQueryClient();
 
@@ -27,7 +46,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             {group.label}
           </p>
           {group.items.map((item) => {
-            const active = isActivePath(item.path, segment);
+            const active = isActivePath(item.path, current);
             const Icon = item.icon;
             const warm = item.prefetch
               ? () => item.prefetch?.(queryClient)
@@ -36,7 +55,8 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               <Link
                 key={item.path}
                 href={href(item.path)}
-                onClick={onNavigate}
+                prefetch
+                onClick={(event) => onNavigate(item.path, event)}
                 onMouseEnter={warm}
                 onFocus={warm}
                 aria-current={active ? "page" : undefined}
@@ -117,7 +137,22 @@ function AccountCard() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pending, setPending] = useState<PendingNav | null>(null);
   const href = useAppHref();
+  const segment = appSegment(usePathname());
+  // Any URL change (arrival, back/forward) ends the pending click. Adjusting
+  // state during render avoids an effect and a flash of the old page.
+  const [lastSegment, setLastSegment] = useState(segment);
+  if (segment !== lastSegment) {
+    setLastSegment(segment);
+    setPending(null);
+  }
+  const pendingTo = pending && pending.to !== segment ? pending.to : null;
+
+  function startNavigation(path: string, event: MouseEvent) {
+    setDrawerOpen(false);
+    if (isPlainLeftClick(event)) setPending({ to: path });
+  }
 
   return (
     <div className="min-h-dvh bg-void-black lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
@@ -126,7 +161,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Brand href={href("/")} />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <SidebarNav />
+          <SidebarNav
+            current={pendingTo ?? segment}
+            onNavigate={startNavigation}
+          />
         </div>
         <AccountCard />
       </aside>
@@ -165,7 +203,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Dialog.Close>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <SidebarNav onNavigate={() => setDrawerOpen(false)} />
+                <SidebarNav
+                  current={pendingTo ?? segment}
+                  onNavigate={startNavigation}
+                />
               </div>
               <AccountCard />
             </Dialog.Content>
@@ -177,7 +218,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           tabIndex={-1}
           className="flex-1 px-4 py-6 outline-none sm:px-6 lg:px-10 lg:py-10"
         >
-          <div className="mx-auto w-full max-w-[1200px]">{children}</div>
+          <div className="mx-auto w-full max-w-[1200px]">
+            {pendingTo ? <PageSkeleton /> : children}
+          </div>
         </main>
       </div>
     </div>

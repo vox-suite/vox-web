@@ -476,8 +476,9 @@ export type EffectiveSkill = { id: string };
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
-  identityCredential: FederatedIdentityCredential;
-  identityAdapterKey: string;
+  /** Only the legacy Better Auth account authority signs federated identity proofs. */
+  identityCredential?: FederatedIdentityCredential;
+  identityAdapterKey?: string;
 };
 
 type VoxCoreHostClientDependencies = {
@@ -583,6 +584,10 @@ export class VoxCoreHostClient {
       hostUserId,
       organizationExternalKey: null,
     };
+    const { identityCredential, identityAdapterKey } = this.config;
+    if (!identityCredential || !identityAdapterKey) {
+      throw new Error("Federated identity credential is not configured");
+    }
     const issuedAtSeconds = this.dependencies.now();
     const assertion = createHostAssertion(
       this.config.hostCredential,
@@ -590,7 +595,7 @@ export class VoxCoreHostClient {
       { issuedAtSeconds, nonce: this.dependencies.nonce() },
     );
     const proof = createFederatedProof(
-      this.config.identityCredential,
+      identityCredential,
       hostUserId,
       {
         issuedAtSeconds,
@@ -612,7 +617,7 @@ export class VoxCoreHostClient {
             organization_external_key: null,
           },
           authentication: {
-            adapter_external_key: this.config.identityAdapterKey,
+            adapter_external_key: identityAdapterKey,
             proof: { type: "federated", proof },
           },
         }),
