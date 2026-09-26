@@ -1,8 +1,5 @@
 export type PluginCategory =
-  | "Popular"
-  | "Food & Groceries"
-  | "Rides & Travel"
-  | "Lifestyle & Essentials";
+  "Popular" | "Food & Groceries" | "Rides & Travel" | "Lifestyle & Essentials";
 
 export const PLUGIN_CATEGORIES: PluginCategory[] = [
   "Popular",
@@ -75,19 +72,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "estimate_fare",
-        description: "Estimate ride fares and trip durations between pickup and dropoff",
+        description:
+          "Estimate ride fares and trip durations between pickup and dropoff",
         category: "read",
         effectKind: "read",
       },
       {
         name: "get_ride_status",
-        description: "Track active ride status, driver location, and arrival ETA",
+        description:
+          "Track active ride status, driver location, and arrival ETA",
         category: "read",
         effectKind: "read",
       },
       {
         name: "request_ride",
-        description: "Request an Uber ride with pickup, destination, and vehicle type",
+        description:
+          "Request an Uber ride with pickup, destination, and vehicle type",
         category: "write",
         effectKind: "consequential_write",
       },
@@ -124,25 +124,29 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_restaurants",
-        description: "Search nearby restaurants by cuisine, dietary options, and delivery time",
+        description:
+          "Search nearby restaurants by cuisine, dietary options, and delivery time",
         category: "search",
         effectKind: "read",
       },
       {
         name: "inspect_menu",
-        description: "Inspect restaurant menu items, pricing, options, and item descriptions",
+        description:
+          "Inspect restaurant menu items, pricing, options, and item descriptions",
         category: "read",
         effectKind: "read",
       },
       {
         name: "check_delivery_time",
-        description: "Check estimated delivery and preparation times for selected merchants",
+        description:
+          "Check estimated delivery and preparation times for selected merchants",
         category: "read",
         effectKind: "read",
       },
       {
         name: "create_order_handoff",
-        description: "Prepare food order cart and create handoff session for checkout confirmation",
+        description:
+          "Prepare food order cart and create handoff session for checkout confirmation",
         category: "write",
         effectKind: "consequential_write",
       },
@@ -173,25 +177,29 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_dining",
-        description: "Discover top cafes, restaurants, and nightlife spots with ratings",
+        description:
+          "Discover top cafes, restaurants, and nightlife spots with ratings",
         category: "search",
         effectKind: "read",
       },
       {
         name: "view_menu",
-        description: "View itemized food menus, price lists, and customer photos",
+        description:
+          "View itemized food menus, price lists, and customer photos",
         category: "read",
         effectKind: "read",
       },
       {
         name: "check_ratings",
-        description: "Check verified diner reviews, hygiene scores, and popular dishes",
+        description:
+          "Check verified diner reviews, hygiene scores, and popular dishes",
         category: "read",
         effectKind: "read",
       },
       {
         name: "reserve_table",
-        description: "Book table reservations with party size and guest preferences",
+        description:
+          "Book table reservations with party size and guest preferences",
         category: "write",
         effectKind: "consequential_write",
       },
@@ -222,19 +230,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_groceries",
-        description: "Search pantry items, dairy, fresh produce, and household brands",
+        description:
+          "Search pantry items, dairy, fresh produce, and household brands",
         category: "search",
         effectKind: "read",
       },
       {
         name: "check_store_inventory",
-        description: "Check real-time in-store stock availability and price discounts",
+        description:
+          "Check real-time in-store stock availability and price discounts",
         category: "read",
         effectKind: "read",
       },
       {
         name: "prepare_cart",
-        description: "Build grocery carts and assemble substitution rules for delivery",
+        description:
+          "Build grocery carts and assemble substitution rules for delivery",
         category: "write",
         effectKind: "consequential_write",
       },
@@ -265,19 +276,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_catalog",
-        description: "Search products across electronics, home, apparel, and daily essentials",
+        description:
+          "Search products across electronics, home, apparel, and daily essentials",
         category: "search",
         effectKind: "read",
       },
       {
         name: "compare_deals",
-        description: "Compare Prime deals, seller discounts, and buyer price trends",
+        description:
+          "Compare Prime deals, seller discounts, and buyer price trends",
         category: "read",
         effectKind: "read",
       },
       {
         name: "track_package_shipments",
-        description: "Check tracking numbers, carrier milestones, and estimated package arrival",
+        description:
+          "Check tracking numbers, carrier milestones, and estimated package arrival",
         category: "read",
         effectKind: "read",
       },
@@ -314,13 +328,15 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
       },
       {
         name: "get_current_track",
-        description: "Retrieve currently playing audio, progress, and device state",
+        description:
+          "Retrieve currently playing audio, progress, and device state",
         category: "read",
         effectKind: "read",
       },
       {
         name: "add_to_queue",
-        description: "Add songs or podcast episodes to your active playback queue",
+        description:
+          "Add songs or podcast episodes to your active playback queue",
         category: "write",
         effectKind: "read",
       },
@@ -351,19 +367,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_listings",
-        description: "Find stays and lodging filtered by dates, location, and guest count",
+        description:
+          "Find stays and lodging filtered by dates, location, and guest count",
         category: "search",
         effectKind: "read",
       },
       {
         name: "inspect_amenities",
-        description: "View detailed property amenities, house rules, and host ratings",
+        description:
+          "View detailed property amenities, house rules, and host ratings",
         category: "read",
         effectKind: "read",
       },
       {
         name: "check_dates",
-        description: "Check availability dates, minimum stay requirements, and total pricing",
+        description:
+          "Check availability dates, minimum stay requirements, and total pricing",
         category: "read",
         effectKind: "read",
       },
@@ -394,19 +413,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "search_lodging",
-        description: "Search hotels, resorts, and vacation packages with member discounts",
+        description:
+          "Search hotels, resorts, and vacation packages with member discounts",
         category: "search",
         effectKind: "read",
       },
       {
         name: "compare_rates",
-        description: "Compare flight fares, seat classes, and hotel room tier rates",
+        description:
+          "Compare flight fares, seat classes, and hotel room tier rates",
         category: "read",
         effectKind: "read",
       },
       {
         name: "get_itinerary",
-        description: "Retrieve confirmed travel itineraries and reservation details",
+        description:
+          "Retrieve confirmed travel itineraries and reservation details",
         category: "read",
         effectKind: "read",
       },
@@ -437,19 +459,22 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
     capabilities: [
       {
         name: "get_upcoming_events",
-        description: "List upcoming calendar events, meeting links, and attendee lists",
+        description:
+          "List upcoming calendar events, meeting links, and attendee lists",
         category: "read",
         effectKind: "read",
       },
       {
         name: "find_open_slots",
-        description: "Find available free time slots across multiple days and time zones",
+        description:
+          "Find available free time slots across multiple days and time zones",
         category: "read",
         effectKind: "read",
       },
       {
         name: "draft_event",
-        description: "Draft a new calendar invitation with summary, time, and participants",
+        description:
+          "Draft a new calendar invitation with summary, time, and participants",
         category: "write",
         effectKind: "consequential_write",
       },
@@ -459,12 +484,17 @@ export const PLUGIN_CATALOG: CatalogPlugin[] = [
 
 export function getCatalogPlugin(id: string): CatalogPlugin | undefined {
   const normalized = id.trim().toLowerCase();
-  return PLUGIN_CATALOG.find((plugin) => plugin.id.toLowerCase() === normalized);
+  return PLUGIN_CATALOG.find(
+    (plugin) => plugin.id.toLowerCase() === normalized,
+  );
 }
 
-export function getPluginsByCategory(): Record<PluginCategory, CatalogPlugin[]> {
+export function getPluginsByCategory(): Record<
+  PluginCategory,
+  CatalogPlugin[]
+> {
   const result: Record<PluginCategory, CatalogPlugin[]> = {
-    "Popular": [],
+    Popular: [],
     "Food & Groceries": [],
     "Rides & Travel": [],
     "Lifestyle & Essentials": [],

@@ -39,22 +39,16 @@ import type { ConsumerSession } from "../src/lib/consumer-auth/session";
 
 // Dynamically load route handlers and test hooks after server-only stub is installed
 async function loadModules() {
-  const { GET: getCatalog } = await import(
-    "../src/app/api/account/plugins/catalog/route"
-  );
-  const { POST: installRoute } = await import(
-    "../src/app/api/account/plugins/install/route"
-  );
-  const { DELETE: uninstallRoute } = await import(
-    "../src/app/api/account/plugins/[id]/route"
-  );
-  const { setMockConsumerForTests } = await import(
-    "../src/lib/consumer-auth/session"
-  );
-  const {
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await import("../src/lib/consumer-auth/runtime");
+  const { GET: getCatalog } =
+    await import("../src/app/api/account/plugins/catalog/route");
+  const { POST: installRoute } =
+    await import("../src/app/api/account/plugins/install/route");
+  const { DELETE: uninstallRoute } =
+    await import("../src/app/api/account/plugins/[id]/route");
+  const { setMockConsumerForTests } =
+    await import("../src/lib/consumer-auth/session");
+  const { setCoreHostClientForTests, resetConsumerAuthRuntimeForTests } =
+    await import("../src/lib/consumer-auth/runtime");
 
   return {
     getCatalog,
@@ -262,14 +256,11 @@ test("POST /api/account/plugins/install installs extension and grants capabiliti
 
   setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
 
-  const req = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "doordash" }),
-    },
-  );
+  const req = new NextRequest("http://localhost/api/account/plugins/install", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pluginId: "doordash" }),
+  });
 
   const res = await installRoute(req);
   assert.equal(res.status, 200);
@@ -284,14 +275,11 @@ test("POST /api/account/plugins/install installs extension and grants capabiliti
   }
 
   // Idempotent second install: should not re-install extension, reuses existing grants
-  const req2 = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "doordash" }),
-    },
-  );
+  const req2 = new NextRequest("http://localhost/api/account/plugins/install", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pluginId: "doordash" }),
+  });
   const res2 = await installRoute(req2);
   assert.equal(res2.status, 200);
   const body2 = await res2.json();
@@ -378,14 +366,11 @@ test("POST /api/account/plugins/install rolls back newly installed extension if 
 
   setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
 
-  const req = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "airbnb" }),
-    },
-  );
+  const req = new NextRequest("http://localhost/api/account/plugins/install", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pluginId: "airbnb" }),
+  });
 
   const res = await installRoute(req);
   assert.equal(res.status, 500);

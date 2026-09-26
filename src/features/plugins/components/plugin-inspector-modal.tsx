@@ -2,7 +2,15 @@
 
 import React from "react";
 import { Dialog } from "radix-ui";
-import { Check, Globe, Loader2, ShieldCheck, Trash2, X, Zap } from "lucide-react";
+import {
+  Check,
+  Globe,
+  Loader2,
+  ShieldCheck,
+  Trash2,
+  X,
+  Zap,
+} from "lucide-react";
 import { Badge, Button } from "@/components/ui";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
@@ -175,14 +183,10 @@ export function PluginInspectorModal({
                       <div className="flex shrink-0 items-center gap-1.5">
                         <Badge
                           variant={
-                            cap.category === "write"
-                              ? "default"
-                              : "secondary"
+                            cap.category === "write" ? "default" : "secondary"
                           }
                           tone={
-                            cap.category === "write"
-                              ? "warning"
-                              : "neutral"
+                            cap.category === "write" ? "warning" : "neutral"
                           }
                           className="capitalize text-[10px]"
                         >

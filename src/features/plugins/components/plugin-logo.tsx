@@ -60,12 +60,13 @@ export function PluginLogo({
     : null;
 
   const showImage = Boolean(src) && !hasError;
-  const fallbackInitials = alt
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase() || "P";
+  const fallbackInitials =
+    alt
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase() || "P";
 
   return (
     <div
@@ -84,7 +85,10 @@ export function PluginLogo({
           src={src!}
           alt={alt}
           onError={() => setHasError(true)}
-          className={cn("object-contain pointer-events-none select-none", config.image)}
+          className={cn(
+            "object-contain pointer-events-none select-none",
+            config.image,
+          )}
           loading="lazy"
         />
       ) : (

@@ -16,7 +16,10 @@ import { PluginCard } from "./plugin-card";
 import { PluginInspectorModal } from "./plugin-inspector-modal";
 
 export interface PluginCatalogGridProps {
-  onInspect?: (plugin: CatalogPlugin, extension?: RemoteExtension | null) => void;
+  onInspect?: (
+    plugin: CatalogPlugin,
+    extension?: RemoteExtension | null,
+  ) => void;
   className?: string;
 }
 
@@ -29,8 +32,11 @@ export function PluginCatalogGrid({
   className,
 }: PluginCatalogGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<FilterCategory>("All");
-  const [inspectedPlugin, setInspectedPlugin] = useState<CatalogPlugin | null>(null);
+  const [selectedCategory, setSelectedCategory] =
+    useState<FilterCategory>("All");
+  const [inspectedPlugin, setInspectedPlugin] = useState<CatalogPlugin | null>(
+    null,
+  );
 
   const { data: catalog = PLUGIN_CATALOG } = usePluginCatalog();
   const { data: extensions = [] } = useExtensions();
@@ -72,7 +78,8 @@ export function PluginCatalogGrid({
     setInspectedPlugin(plugin);
   };
 
-  const isFiltering = searchQuery.trim().length > 0 || selectedCategory !== "All";
+  const isFiltering =
+    searchQuery.trim().length > 0 || selectedCategory !== "All";
 
   // Filtered list when searching or filtering by a specific category
   const filteredPlugins = useMemo(() => {

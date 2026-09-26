@@ -69,9 +69,7 @@ export function useUninstallPlugin() {
       queryClient.setQueryData<RemoteExtension[]>(
         extensionKeys.list(),
         (current) =>
-          current?.filter(
-            (ext) => ext.id !== id && ext.external_key !== id,
-          ),
+          current?.filter((ext) => ext.id !== id && ext.external_key !== id),
       );
     },
     onSettled: () => {

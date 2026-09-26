@@ -17,7 +17,10 @@ const REQUIRED_LOGOS = [
 
 test("all required brand logos exist as valid non-empty SVG vectors", () => {
   const logosDir = path.resolve(process.cwd(), "public/plugins/logos");
-  assert.ok(fs.existsSync(logosDir), "public/plugins/logos directory must exist");
+  assert.ok(
+    fs.existsSync(logosDir),
+    "public/plugins/logos directory must exist",
+  );
 
   for (const file of REQUIRED_LOGOS) {
     const filePath = path.join(logosDir, file);
@@ -25,6 +28,9 @@ test("all required brand logos exist as valid non-empty SVG vectors", () => {
     const content = fs.readFileSync(filePath, "utf-8").trim();
     assert.ok(content.startsWith("<svg"), `${file} must start with <svg`);
     assert.ok(content.endsWith("</svg>"), `${file} must end with </svg>`);
-    assert.ok(content.length > 100, `${file} content is too small to be a valid logo`);
+    assert.ok(
+      content.length > 100,
+      `${file} content is too small to be a valid logo`,
+    );
   }
 });
