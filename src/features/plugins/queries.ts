@@ -41,7 +41,16 @@ export function useInstallPlugin() {
         queryClient.setQueryData<RemoteExtension[]>(
           extensionKeys.list(),
           (current) =>
-            current ? [...current, data.extension] : [data.extension],
+            current
+              ? [
+                  ...current.filter(
+                    (ext) =>
+                      ext.id !== data.extension.id &&
+                      ext.external_key !== data.extension.external_key,
+                  ),
+                  data.extension,
+                ]
+              : [data.extension],
         );
       }
     },
