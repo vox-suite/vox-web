@@ -1,5 +1,6 @@
 import { ConsumerSignInForm } from "@/features/account/components/sign-in-form";
-import { AuthFrame, Badge, Notice, Stack, Text } from "@/components/ui";
+import { SignInShell } from "@/features/account/components/sign-in-shell";
+import { Notice } from "@/components/ui";
 import { readConsumerAuthConfig } from "@/lib/consumer-auth/config";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { consumerHref } from "@/lib/access";
@@ -31,26 +32,17 @@ export default async function ConsumerSignInPage() {
   const enabled = supabaseConfigured || legacyEntryEnabled();
 
   return (
-    <AuthFrame
+    <SignInShell
       brandHref="https://voxagent.in"
-      footer="Vox account · Private by default"
-    >
-      <Stack gap="large">
-        <Stack>
-          <Badge tone="accent">Your Vox account</Badge>
-          <h1>Pick up where you left off.</h1>
-          <Text muted>
-            Sign in with Google or a single-use email code. Your connected
-            services and approvals remain under your control.
-          </Text>
-        </Stack>
-        {!enabled && (
+      notice={
+        enabled ? null : (
           <Notice title="Sign-in is temporarily unavailable">
             Existing sessions can still be signed out. Please try again later.
           </Notice>
-        )}
-        <ConsumerSignInForm enabled={enabled} />
-      </Stack>
-    </AuthFrame>
+        )
+      }
+    >
+      <ConsumerSignInForm enabled={enabled} />
+    </SignInShell>
   );
 }
