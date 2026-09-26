@@ -58,7 +58,8 @@ test("the rollout switch blocks entry without destroying session configuration",
 });
 
 test("Core features need only the Core URL and the host credential", async () => {
-  const { readCoreHostConfig } = await import("../src/lib/consumer-auth/config");
+  const { readCoreHostConfig } =
+    await import("../src/lib/consumer-auth/config");
   assert.equal(readCoreHostConfig({}), null);
   const config = readCoreHostConfig({
     VOX_CORE_URL: "https://api.voxagent.in",

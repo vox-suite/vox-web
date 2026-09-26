@@ -64,12 +64,13 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
         onClick={async () => {
           setPending(true);
           setError(null);
-          const { error: oauthError } = await getSupabase().auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: `${window.location.origin}/auth/callback?next=${accountHome()}`,
-            },
-          });
+          const { error: oauthError } =
+            await getSupabase().auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/auth/callback?next=${accountHome()}`,
+              },
+            });
           if (oauthError) {
             setPending(false);
             setError("Google sign-in could not be started. Please try again.");

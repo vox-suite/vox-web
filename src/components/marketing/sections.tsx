@@ -93,8 +93,7 @@ export function Hero() {
         </div>
 
         <h1 className="mt-6 max-w-[820px] text-balance font-display text-[clamp(2.75rem,6vw,4.75rem)] font-semibold leading-[1.03] tracking-[-0.035em] text-pure-white">
-          Your chief of staff,{" "}
-          <span className="text-ash">on speed dial.</span>
+          Your chief of staff, <span className="text-ash">on speed dial.</span>
         </h1>
 
         <p className="mt-5 max-w-[600px] text-balance text-[17px] leading-relaxed text-ash md:text-[18px]">
@@ -491,9 +490,9 @@ export function StorySection() {
             The work continues after you hang up.
           </h2>
           <p className="mt-4 text-[16px] leading-relaxed text-ash">
-            A useful assistant should not disappear when the conversation
-            ends. Vox keeps commitments durable, watches what is due, and
-            brings the next important update back to you.
+            A useful assistant should not disappear when the conversation ends.
+            Vox keeps commitments durable, watches what is due, and brings the
+            next important update back to you.
           </p>
           <p className="mt-3 text-[16px] leading-relaxed text-ash">
             That can mean a reminder, a WhatsApp update, or a scheduled call —
@@ -512,24 +511,34 @@ export function StorySection() {
             <span className="inline-flex items-center gap-2 rounded bg-obsidian px-2 py-1 font-mono text-[11px] uppercase tracking-wider text-success-green">
               Follow-up scheduled
             </span>
-            <span className="text-[12px] text-smoke">
-              Tomorrow · 8:30 AM
-            </span>
+            <span className="text-[12px] text-smoke">Tomorrow · 8:30 AM</span>
           </div>
           <h3 className="mt-4 text-[17px] font-semibold leading-snug text-pure-white">
             Prepare the project review briefing.
           </h3>
           <div className="mt-5 space-y-3">
             <div className="flex items-center gap-2.5 text-[13px] text-ash">
-              <Check size={15} className="text-success-green" aria-hidden="true" />
+              <Check
+                size={15}
+                className="text-success-green"
+                aria-hidden="true"
+              />
               Decision saved to the project
             </div>
             <div className="flex items-center gap-2.5 text-[13px] text-ash">
-              <Check size={15} className="text-success-green" aria-hidden="true" />
+              <Check
+                size={15}
+                className="text-success-green"
+                aria-hidden="true"
+              />
               Open items will be checked overnight
             </div>
             <div className="flex items-center gap-2.5 rounded-lg border border-[#2f3031] bg-[#111214] px-3 py-2.5 text-[13px] font-medium text-pure-white">
-              <PhoneCall size={15} className="text-coral-pulse" aria-hidden="true" />
+              <PhoneCall
+                size={15}
+                className="text-coral-pulse"
+                aria-hidden="true"
+              />
               Vox will call with the briefing
             </div>
           </div>
@@ -560,7 +569,10 @@ const principles = [
 
 export function PrinciplesSection() {
   return (
-    <section id="principles" className="relative border-b border-[#232427] py-20 md:py-28">
+    <section
+      id="principles"
+      className="relative border-b border-[#232427] py-20 md:py-28"
+    >
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-10">
         <CornerTicks />
         <SectionHeading title="Useful enough to act. Careful enough to trust." />
@@ -600,7 +612,10 @@ export function PrinciplesSection() {
 
 export function LatestSection() {
   return (
-    <Block id="recently-shipped" className="border-b border-[#232427] py-20 md:py-28">
+    <Block
+      id="recently-shipped"
+      className="border-b border-[#232427] py-20 md:py-28"
+    >
       <div className="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading
           title="Built in public, release by release."

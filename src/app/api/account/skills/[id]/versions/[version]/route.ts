@@ -7,18 +7,27 @@ export async function GET(
   context: { params: Promise<{ id: string; version: string }> },
 ) {
   const account = await currentConsumer(request.headers);
-  if (!account) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!account)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();
-  if (!core) return NextResponse.json({ error: "Core unavailable" }, { status: 503 });
+  if (!core)
+    return NextResponse.json({ error: "Core unavailable" }, { status: 503 });
   const { id, version } = await context.params;
   const versionNumber = Number(version);
   if (!Number.isSafeInteger(versionNumber) || versionNumber < 1) {
     return NextResponse.json({ error: "Invalid version" }, { status: 400 });
   }
   try {
-    const skill = await core.getSkillVersion(account.accountId, id, versionNumber);
+    const skill = await core.getSkillVersion(
+      account.accountId,
+      id,
+      versionNumber,
+    );
     return NextResponse.json({ skill });
   } catch {
-    return NextResponse.json({ error: "Skill version unavailable" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Skill version unavailable" },
+      { status: 404 },
+    );
   }
 }

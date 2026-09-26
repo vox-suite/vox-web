@@ -10,7 +10,10 @@ import {
   LatestSection,
   ClosingSection,
 } from "@/components/marketing/sections";
-import { BlueprintFrame, PageNoise } from "@/components/marketing/blueprint-frame";
+import {
+  BlueprintFrame,
+  PageNoise,
+} from "@/components/marketing/blueprint-frame";
 
 export default function HomePage() {
   return (

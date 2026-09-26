@@ -563,7 +563,10 @@ export function createFederatedProof(
 }
 
 export class CoreHostRequestError extends Error {
-  constructor(public readonly status: number, path: string) {
+  constructor(
+    public readonly status: number,
+    path: string,
+  ) {
     super(`Core request to ${path} failed (${status})`);
   }
 }
@@ -594,15 +597,11 @@ export class VoxCoreHostClient {
       hostContext,
       { issuedAtSeconds, nonce: this.dependencies.nonce() },
     );
-    const proof = createFederatedProof(
-      identityCredential,
-      hostUserId,
-      {
-        issuedAtSeconds,
-        expiresAtSeconds: issuedAtSeconds + 300,
-        nonce: this.dependencies.nonce(),
-      },
-    );
+    const proof = createFederatedProof(identityCredential, hostUserId, {
+      issuedAtSeconds,
+      expiresAtSeconds: issuedAtSeconds + 300,
+      nonce: this.dependencies.nonce(),
+    });
     const response = await this.dependencies.fetch(
       new URL("/v1/identity/authentications", this.config.baseUrl),
       {
@@ -734,7 +733,10 @@ export class VoxCoreHostClient {
     action: "install" | "disable",
     version?: number,
   ): Promise<void> {
-    if (action === "install" && (!Number.isInteger(version) || !version || version < 1)) {
+    if (
+      action === "install" &&
+      (!Number.isInteger(version) || !version || version < 1)
+    ) {
       throw new Error("Reviewed skill version is required");
     }
     return this.signedPost<void>(
@@ -750,27 +752,47 @@ export class VoxCoreHostClient {
     );
   }
 
-  async effectiveSkills(accountId: string, agentKey: string): Promise<EffectiveSkill[]> {
+  async effectiveSkills(
+    accountId: string,
+    agentKey: string,
+  ): Promise<EffectiveSkill[]> {
     return this.signedPost<EffectiveSkill[]>(
       `/v1/agents/${encodeURIComponent(agentKey)}/effective-skills`,
       accountId,
-      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null } },
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
     );
   }
 
   async selectedAgents(accountId: string): Promise<SelectedAgent[]> {
-    return this.signedPost<SelectedAgent[]>(
-      "/v1/agents/selected",
-      accountId,
-      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null } },
-    );
+    return this.signedPost<SelectedAgent[]>("/v1/agents/selected", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
   }
 
-  async setSkillAgentEnabled(accountId: string, agentKey: string, skillId: string, enabled: boolean): Promise<void> {
+  async setSkillAgentEnabled(
+    accountId: string,
+    agentKey: string,
+    skillId: string,
+    enabled: boolean,
+  ): Promise<void> {
     return this.signedPost<void>(
       `/v1/agents/${encodeURIComponent(agentKey)}/skills/${encodeURIComponent(skillId)}/enable`,
       accountId,
-      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null }, enabled },
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        enabled,
+      },
     );
   }
 

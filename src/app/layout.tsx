@@ -118,7 +118,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("dark", inter.variable, funnel.variable, geistMono.variable)}>
+    <html
+      lang="en"
+      className={cn(
+        "dark",
+        inter.variable,
+        funnel.variable,
+        geistMono.variable,
+      )}
+    >
       <head>
         <script
           type="application/ld+json"

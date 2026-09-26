@@ -188,9 +188,7 @@ export function WorkspaceRuntimeCard({
           <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
             Active Administrator
           </dt>
-          <dd className="mt-1 truncate font-mono text-sm text-mist">
-            {email}
-          </dd>
+          <dd className="mt-1 truncate font-mono text-sm text-mist">{email}</dd>
         </div>
         <div className="rounded-xl border border-border-edge/60 bg-obsidian/40 p-4 transition-colors hover:border-border-edge">
           <dt className="font-mono text-[11px] uppercase tracking-wider text-smoke">
