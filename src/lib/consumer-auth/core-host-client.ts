@@ -59,26 +59,39 @@ export type InitiateConnectionResponse = {
   expires_at: string;
 };
 
-export type VerifyConnectionCallbackRequest = {
-  session_id: string;
-  state_token: string;
-  authorization: {
-    integration_external_key: string;
-    external_account_reference: string;
-    account_display_id?: string | null;
-    credential_custody: "platform_held" | "external_operator";
-    authorization_state: "authorized" | "failed";
-    authorized_capabilities?: string[];
-    expires_at?: string | null;
-    failure_code?: string | null;
-  };
-};
-
 export type CapabilityGrant = {
   id: string;
   agent_external_key: string;
   connection_id: string;
   capability_external_key: string;
+};
+
+export type SkillListing = {
+  id: string;
+  external_key: string;
+  title: string;
+  summary: string;
+  curated: boolean;
+  latest_version: number;
+  installed_version: number | null;
+  enabled: boolean;
+  update_available: boolean;
+};
+
+export type PublishSkillRequest = {
+  external_key: string;
+  title: string;
+  summary: string;
+  instructions: string;
+  requested_capabilities: string[];
+  resources: Record<string, string>;
+};
+
+export type SkillVersion = {
+  version: number;
+  instructions: string;
+  requested_capabilities: string[];
+  resources: Record<string, string>;
 };
 
 export type CreateGrantRequest = {
@@ -559,6 +572,12 @@ export function createFederatedProof(
   };
 }
 
+export class CoreHostRequestError extends Error {
+  constructor(public readonly status: number, path: string) {
+    super(`Core request to ${path} failed (${status})`);
+  }
+}
+
 export class VoxCoreHostClient {
   constructor(
     private readonly config: VoxCoreHostClientConfig,
@@ -659,10 +678,7 @@ export class VoxCoreHostClient {
       },
     );
     if (!response.ok) {
-      const errText = await response.text().catch(() => "");
-      throw new Error(
-        `Core request to ${path} failed (${response.status}): ${errText}`,
-      );
+      throw new CoreHostRequestError(response.status, path);
     }
     if (response.status === 204) {
       return undefined as T;
@@ -677,6 +693,91 @@ export class VoxCoreHostClient {
         organization_external_key: null,
       },
     });
+  }
+
+  async listSkills(accountId: string): Promise<SkillListing[]> {
+    return this.signedPost<SkillListing[]>("/v1/skills/list", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
+  async publishPrivateSkill(
+    accountId: string,
+    skill: PublishSkillRequest,
+  ): Promise<SkillListing> {
+    return this.signedPost<SkillListing>("/v1/skills/private", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      skill,
+    });
+  }
+
+  async getSkillVersion(
+    accountId: string,
+    skillId: string,
+    version: number,
+  ): Promise<SkillVersion> {
+    return this.signedPost<SkillVersion>(
+      `/v1/skills/${encodeURIComponent(skillId)}/versions/${version}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async changeSkillInstallation(
+    accountId: string,
+    skillId: string,
+    action: "install" | "disable",
+    version?: number,
+  ): Promise<void> {
+    if (action === "install" && (!Number.isInteger(version) || !version || version < 1)) {
+      throw new Error("Reviewed skill version is required");
+    }
+    return this.signedPost<void>(
+      `/v1/skills/${encodeURIComponent(skillId)}/${action}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        ...(action === "install" ? { version } : {}),
+      },
+    );
+  }
+
+  async effectiveSkills(accountId: string, agentKey: string): Promise<Array<{ id: string }>> {
+    return this.signedPost<Array<{ id: string }>>(
+      `/v1/agents/${encodeURIComponent(agentKey)}/effective-skills`,
+      accountId,
+      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null } },
+    );
+  }
+
+  async selectedAgents(accountId: string): Promise<Array<{ definition: { external_key: string; purpose: string } }>> {
+    return this.signedPost<Array<{ definition: { external_key: string; purpose: string } }>>(
+      "/v1/agents/selected",
+      accountId,
+      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null } },
+    );
+  }
+
+  async setSkillAgentEnabled(accountId: string, agentKey: string, skillId: string, enabled: boolean): Promise<void> {
+    return this.signedPost<void>(
+      `/v1/agents/${encodeURIComponent(agentKey)}/skills/${encodeURIComponent(skillId)}/enable`,
+      accountId,
+      { host_context: { host_user_id: `vox-account:${accountId}`, organization_external_key: null }, enabled },
+    );
   }
 
   async initiateConnection(
@@ -694,19 +795,6 @@ export class VoxCoreHostClient {
         initiation,
       },
     );
-  }
-
-  async verifyConnectionCallback(
-    accountId: string,
-    callback: VerifyConnectionCallbackRequest,
-  ): Promise<Connection> {
-    return this.signedPost<Connection>("/v1/connections/callback", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
-      },
-      callback,
-    });
   }
 
   async disconnectConnection(
@@ -906,42 +994,6 @@ export class VoxCoreHostClient {
         extension,
       },
       "PUT",
-    );
-  }
-
-  async setExtensionEnabled(
-    accountId: string,
-    extensionId: string,
-    enabled: boolean,
-  ): Promise<RemoteExtension> {
-    return this.signedPost<RemoteExtension>(
-      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/enable`,
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        enabled,
-      },
-    );
-  }
-
-  async renewExtensionConsent(
-    accountId: string,
-    extensionId: string,
-    version: number,
-  ): Promise<RemoteExtension> {
-    return this.signedPost<RemoteExtension>(
-      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/renew-consent`,
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        version,
-      },
     );
   }
 

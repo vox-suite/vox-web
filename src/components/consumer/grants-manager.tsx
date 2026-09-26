@@ -8,13 +8,15 @@ import type {
 } from "@/lib/consumer-auth/core-host-client";
 
 export function GrantsManager() {
-  const [agentKey, setAgentKey] = useState("saathi");
+  const [agentKey, setAgentKey] = useState("");
+  const [agents, setAgents] = useState<Array<{ external_key: string; purpose: string }>>([]);
   const [grants, setGrants] = useState<CapabilityGrant[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
+    if (!agentKey) { setLoading(false); return; }
     try {
       const [grantsRes, connRes] = await Promise.all([
         fetch(`/api/account/grants?agentKey=${encodeURIComponent(agentKey)}`),
@@ -36,6 +38,20 @@ export function GrantsManager() {
   useEffect(() => {
     void Promise.resolve().then(loadData);
   }, [loadData]);
+
+  useEffect(() => {
+    void fetch("/api/account/agents", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to load agents");
+        return response.json() as Promise<{ agents: Array<{ definition: { external_key: string; purpose: string } }> }>;
+      })
+      .then((body) => {
+        const selected = body.agents.map((agent) => agent.definition);
+        setAgents(selected);
+        setAgentKey(selected[0]?.external_key || "");
+      })
+      .catch((cause) => setError(cause instanceof Error ? cause.message : "Unable to load agents"));
+  }, []);
 
   async function handleGrant(connectionId: string, capability: string) {
     try {
@@ -98,16 +114,18 @@ export function GrantsManager() {
 
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-mist">Select Agent:</span>
-            {["saathi", "planner"].map((key) => (
+            {agents.map((agent) => (
               <Button
-                key={key}
-                variant={agentKey === key ? "primary" : "secondary"}
+                key={agent.external_key}
+                variant={agentKey === agent.external_key ? "primary" : "secondary"}
                 className="text-xs"
-                onClick={() => setAgentKey(key)}
+                onClick={() => setAgentKey(agent.external_key)}
+                title={agent.purpose}
               >
-                {key.toUpperCase()}
+                {agent.external_key}
               </Button>
             ))}
+            {agents.length === 0 && <Text muted>No agents selected for this deployment.</Text>}
           </div>
 
           {loading && <Text muted>Loading capability grants...</Text>}

@@ -12,65 +12,7 @@ import {
   Stack,
   Text,
 } from "@/components/ui";
-import type {
-  ExtensionCapability,
-  ExtensionEffect,
-  ExtensionProtocol,
-  RemoteExtension,
-} from "@/lib/consumer-auth/core-host-client";
-
-const SAMPLE_PRESETS = [
-  {
-    name: "Weather MCP Service (Read-only)",
-    external_key: "weather-mcp-service",
-    display_name: "Weather Updates MCP",
-    protocol: "mcp" as ExtensionProtocol,
-    endpoint_url: "https://mcp.weather.example.com/sse",
-    operator_id: "weather-inc",
-    operator_name: "Weather Analytics Inc.",
-    support_email: "support@weather.example.com",
-    terms_url: "https://weather.example.com/terms",
-    capabilities: [
-      {
-        external_key: "weather.get_forecast",
-        display_name: "Get Weather Forecast",
-        effect: "read" as ExtensionEffect,
-        consequential: false,
-        data_recipients: ["Weather Analytics Cloud"],
-        access_needs: ["location.coordinates"],
-      },
-    ],
-  },
-  {
-    name: "Travel Booking Partner (Consequential Write)",
-    external_key: "travel-booking-partner",
-    display_name: "Travel Booking Direct API",
-    protocol: "direct" as ExtensionProtocol,
-    endpoint_url: "https://api.travel.example.com/v1",
-    operator_id: "travel-global",
-    operator_name: "Global Travel Systems Corp.",
-    support_email: "api@travel.example.com",
-    terms_url: "https://travel.example.com/legal/terms",
-    capabilities: [
-      {
-        external_key: "travel.search_flights",
-        display_name: "Search Flights",
-        effect: "read" as ExtensionEffect,
-        consequential: false,
-        data_recipients: ["Global Travel Cloud"],
-        access_needs: ["travel.dates"],
-      },
-      {
-        external_key: "travel.book_flight",
-        display_name: "Book Flight Reservation",
-        effect: "write" as ExtensionEffect,
-        consequential: true,
-        data_recipients: ["Global Travel Cloud", "Airlines Clearinghouse Ltd"],
-        access_needs: ["travel.passenger_details", "payment.mandate"],
-      },
-    ],
-  },
-];
+import type { ExtensionEffect, ExtensionProtocol, RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 
 export function ExtensionsManager() {
   const [extensions, setExtensions] = useState<RemoteExtension[]>([]);
@@ -80,28 +22,17 @@ export function ExtensionsManager() {
 
   // Install Form State
   const [showInstallForm, setShowInstallForm] = useState(false);
-  const [externalKey, setExternalKey] = useState("weather-mcp-service");
-  const [displayName, setDisplayName] = useState("Weather Updates MCP");
+  const [externalKey, setExternalKey] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [protocol, setProtocol] = useState<ExtensionProtocol>("mcp");
-  const [endpointUrl, setEndpointUrl] = useState(
-    "https://mcp.weather.example.com/sse",
-  );
-  const [operatorId, setOperatorId] = useState("weather-inc");
-  const [operatorName, setOperatorName] = useState("Weather Analytics Inc.");
-  const [supportEmail, setSupportEmail] = useState(
-    "support@weather.example.com",
-  );
-  const [termsUrl, setTermsUrl] = useState("https://weather.example.com/terms");
-  const [capabilities, setCapabilities] = useState<ExtensionCapability[]>([
-    {
-      external_key: "weather.get_forecast",
-      display_name: "Get Weather Forecast",
-      effect: "read",
-      consequential: false,
-      data_recipients: ["Weather Analytics Cloud"],
-      access_needs: ["location.coordinates"],
-    },
-  ]);
+  const [endpointUrl, setEndpointUrl] = useState("");
+  const [operatorId, setOperatorId] = useState("");
+  const [operatorName, setOperatorName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [termsUrl, setTermsUrl] = useState("");
+  const [capabilityKey, setCapabilityKey] = useState("");
+  const [capabilityName, setCapabilityName] = useState("");
+  const [capabilityEffect, setCapabilityEffect] = useState<ExtensionEffect>("read");
 
   async function loadExtensions() {
     try {
@@ -122,20 +53,6 @@ export function ExtensionsManager() {
     void Promise.resolve().then(loadExtensions);
   }, []);
 
-  function applyPreset(presetIndex: number) {
-    const p = SAMPLE_PRESETS[presetIndex];
-    if (!p) return;
-    setExternalKey(p.external_key);
-    setDisplayName(p.display_name);
-    setProtocol(p.protocol);
-    setEndpointUrl(p.endpoint_url);
-    setOperatorId(p.operator_id);
-    setOperatorName(p.operator_name);
-    setSupportEmail(p.support_email);
-    setTermsUrl(p.terms_url);
-    setCapabilities(p.capabilities);
-  }
-
   async function handleInstall(e: React.FormEvent) {
     e.preventDefault();
     try {
@@ -155,7 +72,14 @@ export function ExtensionsManager() {
             support_email: supportEmail || null,
             terms_url: termsUrl || null,
           },
-          capabilities,
+          capabilities: [{
+            external_key: capabilityKey,
+            display_name: capabilityName,
+            effect: capabilityEffect,
+            consequential: capabilityEffect !== "read",
+            data_recipients: [operatorName],
+            access_needs: [],
+          }],
         }),
       });
 
@@ -172,97 +96,6 @@ export function ExtensionsManager() {
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to install extension",
-      );
-    }
-  }
-
-  async function handleToggleEnable(id: string, currentEnabled: boolean) {
-    try {
-      setError(null);
-      setActionSuccess(null);
-      const res = await fetch(
-        `/api/account/extensions/${encodeURIComponent(id)}/enable`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ enabled: !currentEnabled }),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to update enablement");
-      }
-      setActionSuccess(
-        `Operator enablement ${!currentEnabled ? "enabled" : "disabled"}.`,
-      );
-      await loadExtensions();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to toggle operator enablement",
-      );
-    }
-  }
-
-  async function handleRenewConsent(id: string, currentVersion: number) {
-    try {
-      setError(null);
-      setActionSuccess(null);
-      const res = await fetch(
-        `/api/account/extensions/${encodeURIComponent(id)}/renew-consent`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ version: currentVersion }),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to renew consent");
-      }
-      setActionSuccess(
-        "Consent renewed successfully. Suspended capabilities unpaused.",
-      );
-      await loadExtensions();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to renew consent");
-    }
-  }
-
-  async function handleSimulateMaterialUpdate(ext: RemoteExtension) {
-    try {
-      setError(null);
-      setActionSuccess(null);
-      // Simulate an update with expanded data recipients
-      const expandedCaps = (ext.capabilities || []).map((c) => ({
-        ...c,
-        data_recipients: [
-          ...(c.data_recipients || []),
-          "ThirdPartyAuditor.example.com",
-        ],
-      }));
-      const res = await fetch(
-        `/api/account/extensions/${encodeURIComponent(ext.id)}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            capabilities: expandedCaps,
-          }),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Update simulation failed");
-      }
-      setActionSuccess(
-        "Extension manifest updated with expanded data recipients. Renewed consent is now REQUIRED.",
-      );
-      await loadExtensions();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update extension",
       );
     }
   }
@@ -293,21 +126,19 @@ export function ExtensionsManager() {
   return (
     <Stack gap="normal">
       <Card
-        title="Remote Integrations & Extension Governance"
-        description="Inspect third-party remote extension operators, data recipients, and conformance without granting silent access."
+        title="Apps you added"
+        description="Inspect remote app operators, recipients, and status. Registration does not grant access."
         tone="soft"
       >
         <Stack gap="normal">
           {/* Default-Deny & Remote-Only Notice */}
           <div className="p-3 bg-obsidian border border-border-edge rounded-lg text-sm text-mist">
             <p className="font-semibold text-pure-white mb-1">
-              Zero-Authority Remote Lifecycle Guarantees:
+              Remote integration status:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-xs text-ash">
               <li>
-                <strong>Remote-Only Execution:</strong> Untrusted code is never
-                uploaded or executed inside Core. Extensions only communicate
-                via declared HTTPS/SSE remote endpoints.
+                <strong>Remote-Only Execution:</strong> Integration code runs at the remote operator endpoint, outside Core.
               </li>
               <li>
                 <strong>Default-Deny Authority:</strong> Installation grants{" "}
@@ -316,14 +147,14 @@ export function ExtensionsManager() {
               </li>
               <li>
                 <strong>Consequential Fail-Closed:</strong> Consequential
-                actions remain blocked until the extension passes conformance
-                verification <em>and</em> operator enablement is toggled on.
+                  actions also require conformance, operator enablement, a
+                  connected account, an agent grant, and exact approval.
               </li>
               <li>
                 <strong>Renewed Consent Requirement:</strong> Any material
                 change (operator transfer or expanded data recipients)
-                immediately suspends affected actions until you explicitly
-                review and renew consent.
+                suspends affected actions. Version changes need a reviewable
+                disclosure before consent can be renewed.
               </li>
             </ul>
           </div>
@@ -371,19 +202,7 @@ export function ExtensionsManager() {
                 <h3 className="text-sm font-semibold text-pure-white">
                   Register Remote Extension
                 </h3>
-                <div className="flex gap-2">
-                  <span className="text-xs text-ash self-center">Presets:</span>
-                  {SAMPLE_PRESETS.map((p, idx) => (
-                    <button
-                      key={p.external_key}
-                      type="button"
-                      className="text-xs px-2 py-1 bg-graphite hover:bg-slate text-mist rounded"
-                      onClick={() => applyPreset(idx)}
-                    >
-                      {p.name.split(" ")[0]}
-                    </button>
-                  ))}
-                </div>
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -410,7 +229,7 @@ export function ExtensionsManager() {
                   }
                 >
                   <option value="mcp">
-                    Model Context Protocol (MCP / SSE)
+                    Model Context Protocol (MCP)
                   </option>
                   <option value="direct">Direct HTTP / REST Service</option>
                 </Select>
@@ -419,7 +238,7 @@ export function ExtensionsManager() {
                   label="Remote Endpoint URL"
                   value={endpointUrl}
                   onChange={(e) => setEndpointUrl(e.target.value)}
-                  hint="Must be HTTPS (or localhost for development)"
+                  hint="Use a public HTTPS endpoint. Local addresses are reserved for isolated tests."
                   required
                 />
                 <Field
@@ -451,19 +270,36 @@ export function ExtensionsManager() {
                 />
               </div>
 
-              <div className="p-3 bg-obsidian border border-border-edge rounded text-xs text-ash">
-                <strong>Declared Capabilities:</strong>{" "}
-                {capabilities
-                  .map(
-                    (c) =>
-                      `${c.display_name} (${c.effect}${c.consequential ? ", consequential" : ""})`,
-                  )
-                  .join("; ")}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field
+                  id="capability-key"
+                  label="Tool key"
+                  value={capabilityKey}
+                  onChange={(event) => setCapabilityKey(event.target.value)}
+                  required
+                />
+                <Field
+                  id="capability-name"
+                  label="What the tool does"
+                  value={capabilityName}
+                  onChange={(event) => setCapabilityName(event.target.value)}
+                  required
+                />
+                <Select
+                  id="capability-effect"
+                  label="Effect"
+                  value={capabilityEffect}
+                  onChange={(event) => setCapabilityEffect(event.target.value as ExtensionEffect)}
+                >
+                  <option value="read">Reads information</option>
+                  <option value="write">Changes external state</option>
+                  <option value="mixed">Can read or change state</option>
+                </Select>
               </div>
 
               <div className="p-2 bg-ember-hush text-xs text-coral-pulse rounded border border-coral-pulse/30">
-                ⚠️ Installation only saves metadata and endpoint contracts. It
-                does NOT authorize any account tokens, context, or capabilities.
+                Registration stores a declaration only. This does not connect
+                an account or enable the server for agent use.
               </div>
 
               <Row>
@@ -583,16 +419,7 @@ export function ExtensionsManager() {
                         actions and executions are suspended until you
                         explicitly review and grant consent.
                       </p>
-                      <Button
-                        variant="danger"
-                        className="text-xs"
-                        onClick={() =>
-                          handleRenewConsent(ext.id, ext.current_version)
-                        }
-                        aria-label={`Renew consent for ${ext.display_name} version ${ext.current_version}`}
-                      >
-                        Review & Renew Consent (v{ext.current_version})
-                      </Button>
+                      <p className="text-xs text-mist">Ask the app operator for the version change details. Consent renewal is unavailable here until Vox can show exactly what changed.</p>
                     </div>
                   )}
 
@@ -684,8 +511,8 @@ export function ExtensionsManager() {
                                       }
                                     >
                                       {isReadyForConsequential
-                                        ? "Consequential Action Ready"
-                                        : "Consequential: Fails Closed"}
+                                        ? "Operator gate passed"
+                                        : "Operator gate pending"}
                                     </Badge>
                                   )}
                                 </div>
@@ -731,29 +558,6 @@ export function ExtensionsManager() {
                   {!isRemoved && (
                     <div className="flex items-center justify-between pt-2 border-t border-border-edge flex-wrap gap-2">
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant={
-                            ext.operator_enabled ? "secondary" : "primary"
-                          }
-                          className="text-xs"
-                          onClick={() =>
-                            handleToggleEnable(ext.id, ext.operator_enabled)
-                          }
-                          aria-label={`${ext.operator_enabled ? "Disable" : "Enable"} operator for ${ext.display_name}`}
-                        >
-                          {ext.operator_enabled
-                            ? "Disable Operator"
-                            : "Enable Operator"}
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          className="text-xs text-mist hover:text-white"
-                          onClick={() => handleSimulateMaterialUpdate(ext)}
-                          aria-label={`Simulate material update on ${ext.display_name}`}
-                        >
-                          Simulate Material Update (Add Recipient)
-                        </Button>
                       </div>
 
                       <Button
