@@ -83,6 +83,29 @@ function emailFrom(environment: Environment) {
   return value;
 }
 
+/**
+ * Everything the account features need to call Core: its URL and this host's
+ * credential, issued by `POST /v1/host-apps`. Returns null when Core is not
+ * configured, so routes answer 503 instead of failing.
+ */
+export function readCoreHostConfig(
+  environment: Environment = process.env,
+): VoxCoreHostClientConfig | null {
+  if (!environment.VOX_CORE_URL?.trim()) return null;
+  return {
+    baseUrl: origin(required(environment, "VOX_CORE_URL"), "VOX_CORE_URL"),
+    hostCredential: {
+      credentialId: required(environment, "VOX_HOST_CREDENTIAL_ID"),
+      audience: required(environment, "VOX_HOST_AUDIENCE"),
+      secret: secureSecret(environment, "VOX_HOST_SECRET"),
+    },
+  };
+}
+
+/**
+ * Configuration for the legacy Better Auth stack (`/api/account/auth/*` and
+ * email-recovery enrollment). Sign-in itself runs on Supabase.
+ */
 export function readConsumerAuthConfig(
   environment: Environment = process.env,
 ): ConsumerAuthConfig {

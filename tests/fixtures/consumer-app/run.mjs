@@ -102,7 +102,15 @@ async function main() {
   const nextBin = resolve(repoRoot, "node_modules/.bin/next");
   const child = spawn(
     nextBin,
-    ["dev", "--hostname", "127.0.0.1", "--port", String(appPort)],
+    // CONSUMER_FIXTURE_MODE=start serves a prior `npm run build` (production
+    // behaviour such as link prefetching); the default is `next dev`.
+    [
+      process.env.CONSUMER_FIXTURE_MODE === "start" ? "start" : "dev",
+      "--hostname",
+      "127.0.0.1",
+      "--port",
+      String(appPort),
+    ],
     { cwd: repoRoot, env, stdio: "inherit", detached: true },
   );
   children.add(child);
