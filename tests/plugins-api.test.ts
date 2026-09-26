@@ -19,46 +19,51 @@ try {
 
 import {
   PLUGIN_CATALOG,
-  getCatalogPlugin,
+  connectablePlugins,
 } from "../src/features/plugins/catalog";
 import {
+  connectPlugin,
+  getConnectedApps,
   getPluginCatalog,
-  installPlugin,
   uninstallPlugin,
 } from "../src/features/plugins/api";
 import { pluginKeys } from "../src/features/plugins/queries";
 import type {
-  RemoteExtension,
+  ConnectedAppsStatus,
   InstallExtensionRequest,
+  RemoteExtension,
   VoxCoreHostClient,
 } from "../src/lib/consumer-auth/core-host-client";
 import { CoreHostRequestError } from "../src/lib/consumer-auth/core-host-client";
 import type { ConsumerSession } from "../src/lib/consumer-auth/session";
 
-// Dynamically load route handlers and test hooks after server-only stub is installed
 async function loadModules() {
   const { GET: getCatalog } =
     await import("../src/app/api/account/plugins/catalog/route");
-  const { POST: installRoute } =
-    await import("../src/app/api/account/plugins/install/route");
+  const { POST: connectRoute } =
+    await import("../src/app/api/account/plugins/connect/route");
+  const { GET: statusRoute } =
+    await import("../src/app/api/account/plugins/status/route");
   const { DELETE: uninstallRoute } =
     await import("../src/app/api/account/plugins/[id]/route");
+  const { GET: callbackRoute } =
+    await import("../src/app/app/(workspace)/apps/oauth/callback/route");
   const { setMockConsumerForTests } =
     await import("../src/lib/consumer-auth/session");
   const { setCoreHostClientForTests, resetConsumerAuthRuntimeForTests } =
     await import("../src/lib/consumer-auth/runtime");
-
   return {
     getCatalog,
-    installRoute,
+    connectRoute,
+    statusRoute,
     uninstallRoute,
+    callbackRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   };
 }
 
-// Mock consumer session for authorized tests
 const mockSession: ConsumerSession = {
   accountId: "acc-user-123",
   coreUserContextId: "ctx-user-123",
@@ -70,196 +75,16 @@ const mockSession: ConsumerSession = {
   recoveryEnabled: true,
 };
 
-test("installPlugin compound request maps catalog plugin to Core extension", async () => {
-  const plugin = getCatalogPlugin("doordash");
-  assert.ok(plugin);
-  assert.equal(plugin.id, "doordash");
-  assert.ok(plugin.capabilities.length >= 3);
-  // Verify capabilities have valid structure
-  for (const cap of plugin.capabilities) {
-    assert.ok(cap.name.length > 0);
-    assert.ok(["read", "write", "search"].includes(cap.category));
-  }
-
-  // Verify all catalog plugins map cleanly to extension parameters
-  for (const p of PLUGIN_CATALOG) {
-    assert.ok(p.id.length > 0);
-    assert.ok(p.displayName.length > 0);
-    assert.ok(p.endpointUrl.startsWith("https://"));
-    assert.ok(p.capabilities.length > 0);
-    for (const c of p.capabilities) {
-      const effect = c.category === "write" ? "write" : "read";
-      const consequential = c.effectKind === "consequential_write";
-      assert.ok(["read", "write"].includes(effect));
-      assert.equal(typeof consequential, "boolean");
-    }
-  }
-});
-
-test("GET /api/account/plugins/catalog returns the full catalog", async () => {
-  const { getCatalog } = await loadModules();
-  const response = await getCatalog();
-  assert.equal(response.status, 200);
-  const data = await response.json();
-  const catalog = Array.isArray(data) ? data : data.plugins;
-  assert.ok(Array.isArray(catalog));
-  assert.equal(catalog.length, PLUGIN_CATALOG.length);
-  assert.ok(catalog.some((p: { id: string }) => p.id === "uber"));
-  assert.ok(catalog.some((p: { id: string }) => p.id === "doordash"));
-  assert.ok(catalog.some((p: { id: string }) => p.id === "spotify"));
-});
-
-test("POST /api/account/plugins/install enforces authentication, validation, and core availability", async () => {
-  const {
-    installRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-
-  // 1. Unauthorized when no consumer session
-  setMockConsumerForTests(null);
-  const unauthReq = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "uber" }),
-    },
-  );
-  const unauthRes = await installRoute(unauthReq);
-  assert.equal(unauthRes.status, 401);
-
-  // Set mock session for subsequent checks
-  setMockConsumerForTests(mockSession);
-
-  // 2. 400 when missing pluginId
-  const badReq = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    },
-  );
-  const badRes = await installRoute(badReq);
-  assert.equal(badRes.status, 400);
-
-  // 3. 404 when plugin not found in catalog
-  const notFoundReq = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "nonexistent-plugin" }),
-    },
-  );
-  const notFoundRes = await installRoute(notFoundReq);
-  assert.equal(notFoundRes.status, 404);
-
-  // 4. 503 when core host client is unavailable
-  setCoreHostClientForTests(null);
-  const coreUnavailReq = new NextRequest(
-    "http://localhost/api/account/plugins/install",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "uber" }),
-    },
-  );
-  const coreUnavailRes = await installRoute(coreUnavailReq);
-  assert.equal(coreUnavailRes.status, 503);
-
-  // Cleanup
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/install installs the extension without touching capability grants", async () => {
-  const {
-    installRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-
-  setMockConsumerForTests(mockSession);
-
-  const installedExtensions: RemoteExtension[] = [];
-  let installs = 0;
-  let grantCalls = 0;
-
-  const mockCore = {
-    async listExtensions(): Promise<RemoteExtension[]> {
-      return [...installedExtensions];
-    },
-    async installExtension(
-      _accountId: string,
-      req: InstallExtensionRequest,
-    ): Promise<RemoteExtension> {
-      void _accountId;
-      installs += 1;
-      const ext = extensionFixture({
-        id: `ext-${req.external_key}`,
-        external_key: req.external_key,
-        display_name: req.display_name,
-        protocol: req.protocol,
-        endpoint_url: req.endpoint_url,
-        operator: req.operator,
-        capabilities: req.capabilities,
-      });
-      installedExtensions.push(ext);
-      return ext;
-    },
-    // Core's /v1/capability-grants only accepts external connections and
-    // answers 403 for a remote extension id, so install must never call it.
-    async createGrant(): Promise<never> {
-      grantCalls += 1;
-      throw new CoreHostRequestError(403, "/v1/capability-grants");
-    },
-  };
-
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
-
-  const post = () =>
-    installRoute(
-      new NextRequest("http://localhost/api/account/plugins/install", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pluginId: "airbnb" }),
-      }),
-    );
-
-  const res = await post();
-  assert.equal(res.status, 200);
-  const body = await res.json();
-  assert.equal(body.success, true);
-  assert.equal(body.extension.external_key, "airbnb");
-  assert.equal(body.extension.protocol, "mcp");
-  assert.equal(grantCalls, 0);
-
-  // Idempotent second install reuses the existing extension.
-  const res2 = await post();
-  assert.equal(res2.status, 200);
-  const body2 = await res2.json();
-  assert.equal(body2.extension.id, body.extension.id);
-  assert.equal(installs, 1);
-  assert.equal(grantCalls, 0);
-
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
 function extensionFixture(
   overrides: Partial<RemoteExtension> = {},
 ): RemoteExtension {
   return {
-    id: "ext-uber",
-    external_key: "uber",
-    display_name: "Uber",
+    id: "ext-zomato",
+    external_key: "zomato",
+    display_name: "Zomato",
     protocol: "mcp",
-    endpoint_url: "https://mcp.uber.com/v1",
-    operator: { operator_id: "uber", operator_name: "Uber" },
+    endpoint_url: "https://mcp-server.zomato.com/mcp",
+    operator: { operator_id: "zomato", operator_name: "Zomato Ltd." },
     current_version: 1,
     conformance_status: "pending",
     operator_enabled: false,
@@ -271,9 +96,171 @@ function extensionFixture(
   };
 }
 
-test("POST /api/account/plugins/install shares one attempt between overlapping requests", async () => {
+const emptyStatus: ConnectedAppsStatus = {
+  configured_hosts: [],
+  connected: [],
+};
+
+function connectRequest(body: unknown, host = "app.voxagent.in") {
+  return new NextRequest(`https://${host}/api/account/plugins/connect`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", host },
+    body: JSON.stringify(body),
+  });
+}
+
+test("GET /api/account/plugins/catalog lists configured-client apps only when Core has them", async () => {
   const {
-    installRoute,
+    getCatalog,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+
+  setMockConsumerForTests(null);
+  const anonymous = await (
+    await getCatalog(
+      new NextRequest("http://localhost/api/account/plugins/catalog"),
+    )
+  ).json();
+  assert.deepEqual(
+    anonymous.map((p: { id: string }) => p.id),
+    connectablePlugins([]).map((p) => p.id),
+  );
+
+  setMockConsumerForTests(mockSession);
+  setCoreHostClientForTests({
+    async connectedAppsStatus() {
+      return {
+        ...emptyStatus,
+        configured_hosts: ["mcp-gateway-external-pilot.spotify.net"],
+      };
+    },
+  } as unknown as VoxCoreHostClient);
+  const signedIn = await (
+    await getCatalog(
+      new NextRequest("http://localhost/api/account/plugins/catalog"),
+    )
+  ).json();
+  assert.ok(signedIn.some((p: { id: string }) => p.id === "spotify"));
+  assert.ok(!signedIn.some((p: { id: string }) => p.id === "google-calendar"));
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("POST /api/account/plugins/connect validates the session, body, and plugin", async () => {
+  const {
+    connectRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+
+  setMockConsumerForTests(null);
+  assert.equal(
+    (await connectRoute(connectRequest({ pluginId: "zomato" }))).status,
+    401,
+  );
+
+  setMockConsumerForTests(mockSession);
+  assert.equal((await connectRoute(connectRequest({}))).status, 400);
+  assert.equal(
+    (await connectRoute(connectRequest({ pluginId: "uber" }))).status,
+    404,
+  );
+  setCoreHostClientForTests(null);
+  assert.equal(
+    (await connectRoute(connectRequest({ pluginId: "zomato" }))).status,
+    503,
+  );
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("POST /api/account/plugins/connect installs the app and returns the provider sign-in URL", async () => {
+  const {
+    connectRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+  setMockConsumerForTests(mockSession);
+
+  const installed: RemoteExtension[] = [];
+  const authorizeCalls: { extensionId: string; redirectUri: string }[] = [];
+  let status: ConnectedAppsStatus = emptyStatus;
+  setCoreHostClientForTests({
+    async listExtensions() {
+      return [...installed];
+    },
+    async installExtension(_: string, request: InstallExtensionRequest) {
+      assert.equal(request.external_key, "zomato");
+      assert.equal(request.endpoint_url, "https://mcp-server.zomato.com/mcp");
+      assert.equal(request.protocol, "mcp");
+      const ext = extensionFixture();
+      installed.push(ext);
+      return ext;
+    },
+    async connectedAppsStatus() {
+      return status;
+    },
+    async authorizeExtension(
+      _: string,
+      extensionId: string,
+      redirectUri: string,
+    ) {
+      authorizeCalls.push({ extensionId, redirectUri });
+      return {
+        authorization_url: "https://mcp-server.zomato.com/authorize?state=s",
+        expires_at: new Date().toISOString(),
+      };
+    },
+  } as unknown as VoxCoreHostClient);
+
+  const res = await connectRoute(connectRequest({ pluginId: "zomato" }));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.status, "authorize");
+  assert.equal(
+    body.authorizationUrl,
+    "https://mcp-server.zomato.com/authorize?state=s",
+  );
+  // On the consumer host the callback has no /app prefix.
+  assert.deepEqual(authorizeCalls, [
+    {
+      extensionId: "ext-zomato",
+      redirectUri: "https://app.voxagent.in/apps/oauth/callback",
+    },
+  ]);
+
+  // Elsewhere (previews, local) routes live under /app.
+  await connectRoute(connectRequest({ pluginId: "zomato" }, "localhost:3000"));
+  assert.equal(
+    authorizeCalls[1].redirectUri,
+    "https://localhost:3000/app/apps/oauth/callback",
+  );
+  assert.equal(installed.length, 1, "an existing install is reused");
+
+  // Once connected, no new sign-in is started.
+  status = {
+    ...emptyStatus,
+    connected: [{ extension_id: "ext-zomato", connected_at: "", tools: [] }],
+  };
+  const again = await (
+    await connectRoute(connectRequest({ pluginId: "zomato" }))
+  ).json();
+  assert.equal(again.status, "connected");
+  assert.equal(authorizeCalls.length, 2);
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("POST /api/account/plugins/connect shares one attempt between overlapping clicks and adopts a 409 winner", async () => {
+  const {
+    connectRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
@@ -281,217 +268,207 @@ test("POST /api/account/plugins/install shares one attempt between overlapping r
   setMockConsumerForTests(mockSession);
 
   let installs = 0;
-  const mockCore = {
-    async listExtensions(): Promise<RemoteExtension[]> {
-      return [];
+  let lists = 0;
+  setCoreHostClientForTests({
+    async listExtensions() {
+      lists += 1;
+      return lists === 1 ? [] : [extensionFixture()];
     },
-    async installExtension(): Promise<RemoteExtension> {
+    async installExtension() {
       installs += 1;
       await new Promise((resolve) => setTimeout(resolve, 20));
-      return extensionFixture();
+      throw new CoreHostRequestError(409, "/v1/remote-extensions");
     },
-  };
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
+    async connectedAppsStatus() {
+      return emptyStatus;
+    },
+    async authorizeExtension() {
+      return { authorization_url: "https://x.example/auth", expires_at: "" };
+    },
+  } as unknown as VoxCoreHostClient);
 
-  const post = () =>
-    installRoute(
-      new NextRequest("http://localhost/api/account/plugins/install", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pluginId: "uber" }),
-      }),
-    );
-  const [first, second] = await Promise.all([post(), post()]);
-
-  assert.equal(first.status, 200);
-  assert.equal(second.status, 200);
+  const [a, b] = await Promise.all([
+    connectRoute(connectRequest({ pluginId: "zomato" })),
+    connectRoute(connectRequest({ pluginId: "zomato" })),
+  ]);
+  assert.equal(a.status, 200);
+  assert.equal(b.status, 200);
   assert.equal(installs, 1);
+  assert.equal((await a.json()).status, "authorize");
 
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
 
-test("POST /api/account/plugins/install adopts the extension when Core reports it already installed (409)", async () => {
+test("POST /api/account/plugins/connect explains Core failures without leaking internals", async () => {
   const {
-    installRoute,
+    connectRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   } = await loadModules();
   setMockConsumerForTests(mockSession);
+  setCoreHostClientForTests({
+    async listExtensions() {
+      return [extensionFixture()];
+    },
+    async connectedAppsStatus() {
+      return emptyStatus;
+    },
+    async authorizeExtension() {
+      throw new CoreHostRequestError(
+        502,
+        "/v1/remote-extensions/x/authorize",
+        "provider_error",
+      );
+    },
+  } as unknown as VoxCoreHostClient);
 
-  let listCalls = 0;
-  let removed = false;
-  const mockCore = {
-    // Empty on the first check, then the install that won the race is visible.
-    async listExtensions(): Promise<RemoteExtension[]> {
-      listCalls += 1;
-      return listCalls === 1 ? [] : [extensionFixture()];
-    },
-    async installExtension(): Promise<RemoteExtension> {
-      throw new CoreHostRequestError(409, "/v1/remote-extensions");
-    },
-    async removeExtension(): Promise<RemoteExtension> {
-      removed = true;
-      return extensionFixture({ lifecycle_state: "removed" });
-    },
-  };
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
-
-  const res = await installRoute(
-    new NextRequest("http://localhost/api/account/plugins/install", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "uber" }),
-    }),
-  );
+  const res = await connectRoute(connectRequest({ pluginId: "zomato" }));
+  assert.equal(res.status, 502);
   const body = await res.json();
-
-  assert.equal(res.status, 200);
-  assert.equal(body.extension.id, "ext-uber");
-  assert.equal(removed, false);
+  assert.equal(body.code, "provider_error");
+  assert.match(body.error, /couldn't be reached/);
+  assert.doesNotMatch(body.error, /v1\//);
 
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
 
-test("POST /api/account/plugins/install still fails when a 409 has no matching extension", async () => {
+test("GET /apps/oauth/callback completes the connection and returns to the apps page", async () => {
   const {
-    installRoute,
+    callbackRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   } = await loadModules();
-  setMockConsumerForTests(mockSession);
-
-  const mockCore = {
-    async listExtensions(): Promise<RemoteExtension[]> {
-      return [];
+  const completions: { state: string; code: string }[] = [];
+  let failWith: string | null = null;
+  setCoreHostClientForTests({
+    async completeConnection(_: string, state: string, code: string) {
+      if (failWith) {
+        throw new CoreHostRequestError(
+          410,
+          "/v1/connected-apps/callback",
+          failWith,
+        );
+      }
+      completions.push({ state, code });
+      return extensionFixture({ lifecycle_state: "active" });
     },
-    async installExtension(): Promise<RemoteExtension> {
-      throw new CoreHostRequestError(409, "/v1/remote-extensions");
-    },
+  } as unknown as VoxCoreHostClient);
+  const callback = async (query: string) => {
+    const res = await callbackRoute(
+      new NextRequest(
+        `https://app.voxagent.in/app/apps/oauth/callback?${query}`,
+        { headers: { host: "app.voxagent.in" } },
+      ),
+    );
+    return new URL(res.headers.get("location")!);
   };
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
 
-  const res = await installRoute(
-    new NextRequest("http://localhost/api/account/plugins/install", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pluginId: "uber" }),
-    }),
+  setMockConsumerForTests(null);
+  assert.equal((await callback("code=c&state=s")).pathname, "/");
+  assert.equal(completions.length, 0);
+
+  setMockConsumerForTests(mockSession);
+  const ok = await callback("code=c1&state=s1");
+  assert.equal(ok.pathname, "/apps");
+  assert.equal(ok.searchParams.get("connected"), "zomato");
+  assert.deepEqual(completions, [{ state: "s1", code: "c1" }]);
+
+  const denied = await callback("error=access_denied&state=s");
+  assert.equal(denied.searchParams.get("connect_error"), "access_denied");
+
+  const missing = await callback("state=s");
+  assert.equal(missing.searchParams.get("connect_error"), "invalid_request");
+
+  failWith = "authorization_expired";
+  const expired = await callback("code=c&state=s");
+  assert.equal(
+    expired.searchParams.get("connect_error"),
+    "authorization_expired",
   );
-  assert.equal(res.status, 500);
-  assert.match((await res.json()).error, /409/);
 
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
 
-test("DELETE /api/account/plugins/[id] uninstalls extension by extension ID or plugin ID", async () => {
+test("GET /api/account/plugins/status returns the account's live connections", async () => {
+  const {
+    statusRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+  const request = () =>
+    new NextRequest("http://localhost/api/account/plugins/status");
+
+  setMockConsumerForTests(null);
+  assert.equal((await statusRoute(request())).status, 401);
+
+  setMockConsumerForTests(mockSession);
+  const connected = [
+    {
+      extension_id: "ext-zomato",
+      connected_at: "",
+      tools: [{ name: "search", read_only: true }],
+    },
+  ];
+  setCoreHostClientForTests({
+    async connectedAppsStatus() {
+      return { configured_hosts: ["some-host"], connected };
+    },
+  } as unknown as VoxCoreHostClient);
+  assert.deepEqual(await (await statusRoute(request())).json(), { connected });
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("DELETE /api/account/plugins/[id] removes the app by plugin or extension ID", async () => {
   const {
     uninstallRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   } = await loadModules();
-
   setMockConsumerForTests(mockSession);
 
   let removedId: string | null = null;
-  const mockExtensions: RemoteExtension[] = [
-    {
-      id: "uuid-ext-spotify-999",
-      external_key: "spotify",
-      display_name: "Spotify",
-      protocol: "mcp",
-      endpoint_url: "https://mcp.spotify.com/sse",
-      operator: { operator_id: "spotify", operator_name: "Spotify" },
-      current_version: 1,
-      conformance_status: "passed",
-      operator_enabled: true,
-      consent_status: "consented",
-      lifecycle_state: "installed",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+  const extensions = [extensionFixture({ id: "uuid-ext-zomato" })];
+  setCoreHostClientForTests({
+    async listExtensions() {
+      return extensions;
     },
-  ];
-
-  const mockCore = {
-    async listExtensions(): Promise<RemoteExtension[]> {
-      return mockExtensions;
-    },
-    async removeExtension(
-      _accountId: string,
-      extensionId: string,
-    ): Promise<RemoteExtension> {
-      void _accountId;
+    async removeExtension(_: string, extensionId: string) {
       removedId = extensionId;
-      const target = mockExtensions.find((e) => e.id === extensionId);
-      if (target) {
-        target.lifecycle_state = "removed";
-        return target;
-      }
-      throw new Error("Not found");
+      return { ...extensions[0], lifecycle_state: "removed" };
     },
-  };
+  } as unknown as VoxCoreHostClient);
 
-  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
+  const remove = (id: string) =>
+    uninstallRoute(
+      new NextRequest(`http://localhost/api/account/plugins/${id}`, {
+        method: "DELETE",
+      }),
+      { params: Promise.resolve({ id }) },
+    );
+  for (const id of ["zomato", "uuid-ext-zomato"]) {
+    removedId = null;
+    assert.equal((await remove(id)).status, 200);
+    assert.equal(removedId, "uuid-ext-zomato");
+  }
+  assert.equal((await remove("unknown")).status, 404);
 
-  // 1. Delete by external_key ("spotify")
-  const reqByPluginKey = new NextRequest(
-    "http://localhost/api/account/plugins/spotify",
-    {
-      method: "DELETE",
-    },
-  );
-  const res1 = await uninstallRoute(reqByPluginKey, {
-    params: Promise.resolve({ id: "spotify" }),
-  });
-  assert.equal(res1.status, 200);
-  const data1 = await res1.json();
-  assert.equal(data1.success, true);
-  assert.equal(removedId, "uuid-ext-spotify-999");
-
-  // Reset lifecycle state for second test
-  mockExtensions[0].lifecycle_state = "installed";
-  removedId = null;
-
-  // 2. Delete by exact extension ID ("uuid-ext-spotify-999")
-  const reqByExtId = new NextRequest(
-    "http://localhost/api/account/plugins/uuid-ext-spotify-999",
-    { method: "DELETE" },
-  );
-  const res2 = await uninstallRoute(reqByExtId, {
-    params: Promise.resolve({ id: "uuid-ext-spotify-999" }),
-  });
-  assert.equal(res2.status, 200);
-  const data2 = await res2.json();
-  assert.equal(data2.success, true);
-  assert.equal(removedId, "uuid-ext-spotify-999");
-
-  // 3. 404 when extension is not found
-  const reqNotFound = new NextRequest(
-    "http://localhost/api/account/plugins/unknown-plugin",
-    {
-      method: "DELETE",
-    },
-  );
-  const res3 = await uninstallRoute(reqNotFound, {
-    params: Promise.resolve({ id: "unknown-plugin" }),
-  });
-  assert.equal(res3.status, 404);
-
-  // Cleanup
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
 
-test("client api functions and pluginKeys query configuration", async () => {
-  assert.deepEqual(pluginKeys.all, ["plugins"]);
+test("client api functions call the plugin routes", async () => {
   assert.deepEqual(pluginKeys.catalog(), ["plugins", "catalog"]);
+  assert.deepEqual(pluginKeys.connected(), ["plugins", "connected"]);
 
-  // Test getPluginCatalog client api
   const originalFetch = globalThis.fetch;
   try {
     globalThis.fetch = async (url, init) => {
@@ -499,37 +476,32 @@ test("client api functions and pluginKeys query configuration", async () => {
       assert.equal(init?.method, "GET");
       return Response.json(PLUGIN_CATALOG);
     };
-    const catalog = await getPluginCatalog();
-    assert.equal(catalog.length, PLUGIN_CATALOG.length);
+    assert.equal((await getPluginCatalog()).length, PLUGIN_CATALOG.length);
 
-    // Test installPlugin client api
+    globalThis.fetch = async (url) => {
+      assert.ok(String(url).includes("/api/account/plugins/status"));
+      return Response.json({ connected: [] });
+    };
+    assert.deepEqual(await getConnectedApps(), []);
+
     globalThis.fetch = async (url, init) => {
-      assert.ok(String(url).includes("/api/account/plugins/install"));
+      assert.ok(String(url).includes("/api/account/plugins/connect"));
       assert.equal(init?.method, "POST");
-      const body = JSON.parse(String(init?.body));
-      assert.equal(body.pluginId, "uber");
+      assert.equal(JSON.parse(String(init?.body)).pluginId, "zomato");
       return Response.json({
-        success: true,
-        extension: { id: "ext-uber", external_key: "uber" },
-        grants: [],
+        status: "authorize",
+        authorizationUrl: "https://x",
+        extension: {},
       });
     };
-    const installResult = await installPlugin("uber");
-    assert.equal(installResult.success, true);
-    assert.equal(installResult.extension.external_key, "uber");
+    assert.equal((await connectPlugin("zomato")).status, "authorize");
 
-    // Also support object input { pluginId: "uber" }
-    const installResult2 = await installPlugin({ pluginId: "uber" });
-    assert.equal(installResult2.success, true);
-
-    // Test uninstallPlugin client api
     globalThis.fetch = async (url, init) => {
-      assert.ok(String(url).includes("/api/account/plugins/ext-uber"));
+      assert.ok(String(url).includes("/api/account/plugins/ext-zomato"));
       assert.equal(init?.method, "DELETE");
       return Response.json({ success: true });
     };
-    const uninstallResult = await uninstallPlugin("ext-uber");
-    assert.equal(uninstallResult.success, true);
+    assert.equal((await uninstallPlugin("ext-zomato")).success, true);
   } finally {
     globalThis.fetch = originalFetch;
   }

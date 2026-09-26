@@ -5,65 +5,51 @@ import { Dialog } from "radix-ui";
 import {
   Check,
   Globe,
+  KeyRound,
   Loader2,
+  Plug,
   ShieldCheck,
-  Trash2,
+  Unplug,
   X,
-  Zap,
 } from "lucide-react";
-import { Badge, Button } from "@/components/ui";
-import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
+import { Badge, Button, Notice } from "@/components/ui";
 import type { CatalogPlugin } from "../catalog";
+import type { PluginConnection } from "../connection-state";
 import {
-  useInstallPlugin,
-  useIsInstallingPlugin,
+  useConnectPlugin,
+  useIsConnectingPlugin,
   useUninstallPlugin,
 } from "../queries";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginInspectorModalProps {
   plugin: CatalogPlugin | null;
-  installedExtension?: RemoteExtension | null;
+  connection: PluginConnection;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function PluginInspectorModal({
   plugin,
-  installedExtension,
+  connection,
   isOpen,
   onClose,
 }: PluginInspectorModalProps) {
-  const installMutation = useInstallPlugin();
+  const connectMutation = useConnectPlugin();
   const uninstallMutation = useUninstallPlugin();
-  const isInstalling = useIsInstallingPlugin(plugin?.id ?? "");
+  const isConnecting = useIsConnectingPlugin(plugin?.id ?? "");
 
   if (!plugin) return null;
 
-  const isInstalled = Boolean(
-    installedExtension && installedExtension.lifecycle_state !== "removed",
-  );
-
-  const isUninstalling =
+  const { state, extension, connection: live } = connection;
+  const tools = live?.tools ?? [];
+  const isDisconnecting =
     uninstallMutation.isPending &&
-    (uninstallMutation.variables === installedExtension?.id ||
-      uninstallMutation.variables === plugin.id);
+    uninstallMutation.variables === extension?.id;
 
-  const handleUninstall = () => {
-    const targetId = installedExtension?.id || plugin.id;
-    uninstallMutation.mutate(targetId, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
-  };
-
-  const handleInstall = () => {
-    installMutation.mutate(plugin.id, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+  const handleDisconnect = () => {
+    if (!extension) return;
+    uninstallMutation.mutate(extension.id, { onSuccess: onClose });
   };
 
   return (
@@ -74,7 +60,6 @@ export function PluginInspectorModal({
           data-testid={`plugin-inspector-${plugin.id}`}
           className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border-edge bg-ink p-6 shadow-xl outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 max-h-[90vh] overflow-y-auto"
         >
-          {/* Header */}
           <div className="flex items-start justify-between gap-4 border-b border-border-edge pb-5">
             <div className="flex items-center gap-3.5 min-w-0">
               <PluginLogo
@@ -88,29 +73,23 @@ export function PluginInspectorModal({
                   <Dialog.Title className="truncate text-lg font-semibold text-pure-white">
                     {plugin.displayName}
                   </Dialog.Title>
-                  {isInstalled && (
+                  {state === "connected" && (
                     <span className="inline-flex items-center gap-1 rounded-md border border-success-green/20 bg-success-green/10 px-2 py-0.5 text-xs font-medium text-success-green">
                       <Check className="size-3 stroke-[2.5]" />
-                      Installed
-                    </span>
-                  )}
-                  {plugin.isPopular && (
-                    <span className="rounded bg-graphite/60 px-1.5 py-0.5 text-[10px] font-medium text-ash">
-                      Popular
+                      Connected
                     </span>
                   )}
                 </div>
                 <Dialog.Description className="mt-0.5 text-xs text-smoke">
-                  Published by {plugin.publisher} · {plugin.category}
+                  Official app by {plugin.publisher} · {plugin.category}
                 </Dialog.Description>
               </div>
             </div>
-
             <Dialog.Close asChild>
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Close inspector"
+                aria-label="Close"
                 className="text-smoke hover:text-mist"
               >
                 <X className="size-4" />
@@ -118,143 +97,147 @@ export function PluginInspectorModal({
             </Dialog.Close>
           </div>
 
-          {/* Body */}
           <div className="space-y-6 pt-5">
-            {/* Description & Overview */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-smoke">
-                About this plugin
-              </h4>
-              <p className="text-sm leading-relaxed text-mist">
-                {plugin.description}
-              </p>
-            </div>
+            <p className="text-sm leading-relaxed text-mist">
+              {plugin.description}
+            </p>
 
-            {/* Service Endpoint & Protocol */}
-            <div className="space-y-2 rounded-xl border border-border-edge bg-obsidian/70 p-3.5 text-xs">
-              <div className="flex items-center justify-between text-smoke">
-                <span className="flex items-center gap-1.5 font-medium text-mist">
-                  <Globe className="size-3.5 text-ash" />
-                  Service Endpoint
-                </span>
-                <span className="font-mono uppercase text-[11px] text-ash">
-                  {plugin.protocol ?? "mcp"} protocol
-                </span>
+            {state === "connected" ? (
+              <div className="space-y-3">
+                <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-smoke">
+                  <ShieldCheck className="size-3.5 text-ash" />
+                  What Vox can use ({tools.length})
+                </h4>
+                {tools.length > 0 ? (
+                  <div className="divide-y divide-border-edge rounded-xl border border-border-edge bg-obsidian/50">
+                    {tools.map((tool) => (
+                      <div
+                        key={tool.name}
+                        className="flex items-start justify-between gap-3 p-3 text-xs"
+                      >
+                        <div className="space-y-1 min-w-0">
+                          <span className="font-medium text-pure-white">
+                            {tool.title || tool.name}
+                          </span>
+                          {tool.description && (
+                            <p className="text-ash leading-relaxed line-clamp-3">
+                              {tool.description}
+                            </p>
+                          )}
+                        </div>
+                        <Badge
+                          tone={tool.read_only ? "neutral" : "accent"}
+                          className="shrink-0 text-[10px] whitespace-nowrap"
+                        >
+                          {tool.read_only ? "Read" : "Asks you first"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-smoke">
+                    {plugin.displayName} did not report any tools.
+                  </p>
+                )}
+                <p className="text-[11px] leading-relaxed text-smoke">
+                  This list comes from {plugin.displayName} itself. Vox asks you
+                  before running anything marked “Asks you first”.
+                </p>
               </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-smoke">
+                    What Vox can help with
+                  </h4>
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-mist">
+                    {plugin.highlights.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-2 rounded-xl border border-border-edge bg-obsidian/70 p-3.5 text-xs leading-relaxed text-ash">
+                  <p className="flex items-center gap-1.5 font-medium text-mist">
+                    <KeyRound className="size-3.5 text-ash" />
+                    How connecting works
+                  </p>
+                  <p>
+                    You sign in on {plugin.displayName}’s own page and choose
+                    what to allow. Vox never sees your password. The access it
+                    gets is stored encrypted, and Vox asks you before doing
+                    anything that changes your {plugin.displayName} account. You
+                    can disconnect at any time.
+                  </p>
+                </div>
+              </>
+            )}
+
+            <div className="space-y-1 rounded-xl border border-border-edge bg-obsidian/40 p-3 text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-mist">
+                <Globe className="size-3.5 text-ash" />
+                Official MCP server
+              </span>
               <p className="font-mono text-ash break-all select-all">
                 {plugin.endpointUrl}
               </p>
             </div>
 
-            {/* Capabilities Granted */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-smoke">
-                  <ShieldCheck className="size-3.5 text-ash" />
-                  Agent Capabilities ({plugin.capabilities.length})
-                </h4>
-                <span className="text-[11px] text-smoke">
-                  Granted upon install
-                </span>
-              </div>
-
-              <div className="divide-y divide-border-edge rounded-xl border border-border-edge bg-obsidian/50">
-                {plugin.capabilities.map((cap) => {
-                  const isConsequential =
-                    cap.effectKind === "consequential_write";
-
-                  return (
-                    <div
-                      key={cap.name}
-                      className="flex items-start justify-between gap-3 p-3 text-xs"
-                    >
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-medium text-pure-white">
-                            {cap.name}
-                          </span>
-                        </div>
-                        <p className="text-ash leading-relaxed">
-                          {cap.description}
-                        </p>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <Badge
-                          variant={
-                            cap.category === "write" ? "default" : "secondary"
-                          }
-                          tone={
-                            cap.category === "write" ? "warning" : "neutral"
-                          }
-                          className="capitalize text-[10px]"
-                        >
-                          {cap.category}
-                        </Badge>
-                        {isConsequential && (
-                          <Badge
-                            tone="accent"
-                            className="text-[10px] whitespace-nowrap"
-                          >
-                            Requires Approval
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {connectMutation.isError && (
+              <Notice title="Couldn't connect" tone="error">
+                {connectMutation.error.message}
+              </Notice>
+            )}
+            {uninstallMutation.isError && (
+              <Notice title="Couldn't disconnect" tone="error">
+                {uninstallMutation.error.message}
+              </Notice>
+            )}
           </div>
 
-          {/* Footer Actions */}
-          <div className="mt-8 flex items-center justify-between border-t border-border-edge pt-4">
-            <div>
-              {isInstalled ? (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={isUninstalling}
-                  onClick={handleUninstall}
-                  aria-label={`Uninstall ${plugin.displayName}`}
-                  className="gap-1.5"
-                >
-                  {isUninstalling ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" />
-                      <span>Uninstalling…</span>
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="size-3.5" />
-                      <span>Uninstall Plugin</span>
-                    </>
-                  )}
-                </Button>
-              ) : (
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-border-edge pt-4">
+            <div className="flex items-center gap-2">
+              {state !== "connected" && (
                 <Button
                   variant="primary"
                   size="sm"
-                  disabled={isInstalling}
-                  onClick={handleInstall}
-                  aria-label={`Install ${plugin.displayName}`}
+                  disabled={isConnecting}
+                  onClick={() => connectMutation.mutate(plugin.id)}
                   className="gap-1.5"
                 >
-                  {isInstalling ? (
+                  {isConnecting ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
-                      <span>Installing…</span>
+                      <span>Opening {plugin.displayName}…</span>
                     </>
                   ) : (
                     <>
-                      <Zap className="size-3.5" />
-                      <span>Install Plugin</span>
+                      <Plug className="size-3.5" />
+                      <span>
+                        {state === "incomplete"
+                          ? "Finish connecting"
+                          : `Connect ${plugin.displayName}`}
+                      </span>
                     </>
                   )}
                 </Button>
               )}
+              {extension && (
+                <Button
+                  variant={state === "connected" ? "destructive" : "ghost"}
+                  size="sm"
+                  disabled={isDisconnecting}
+                  onClick={handleDisconnect}
+                  className="gap-1.5"
+                >
+                  {isDisconnecting ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Unplug className="size-3.5" />
+                  )}
+                  <span>{state === "connected" ? "Disconnect" : "Remove"}</span>
+                </Button>
+              )}
             </div>
-
             <Button
               variant="secondary"
               size="sm"

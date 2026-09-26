@@ -3,23 +3,19 @@
 import React, { useMemo, useState } from "react";
 import { ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import {
-  PLUGIN_CATALOG,
   PLUGIN_CATEGORIES,
+  connectablePlugins,
   type CatalogPlugin,
   type PluginCategory,
 } from "../catalog";
+import { usePluginConnections } from "../connection-state";
 import { usePluginCatalog } from "../queries";
-import { useExtensions } from "@/features/extensions/queries";
 import { PluginCard } from "./plugin-card";
 import { PluginInspectorModal } from "./plugin-inspector-modal";
 
 export interface PluginCatalogGridProps {
-  onInspect?: (
-    plugin: CatalogPlugin,
-    extension?: RemoteExtension | null,
-  ) => void;
+  onInspect?: (plugin: CatalogPlugin) => void;
   className?: string;
 }
 
@@ -38,22 +34,8 @@ export function PluginCatalogGrid({
     null,
   );
 
-  const { data: catalog = PLUGIN_CATALOG } = usePluginCatalog();
-  const { data: extensions = [] } = useExtensions();
-
-  const activeExtensions = useMemo(
-    () => extensions.filter((ext) => ext.lifecycle_state !== "removed"),
-    [extensions],
-  );
-
-  const installedByPluginId = useMemo(() => {
-    const map = new Map<string, RemoteExtension>();
-    for (const ext of activeExtensions) {
-      if (ext.external_key) map.set(ext.external_key.toLowerCase(), ext);
-      if (ext.id) map.set(ext.id.toLowerCase(), ext);
-    }
-    return map;
-  }, [activeExtensions]);
+  const { data: catalog = connectablePlugins([]) } = usePluginCatalog();
+  const connectionOf = usePluginConnections();
 
   const matchesSearch = (plugin: CatalogPlugin, query: string) => {
     const q = query.toLowerCase().trim();
@@ -64,17 +46,12 @@ export function PluginCatalogGrid({
       plugin.description.toLowerCase().includes(q) ||
       plugin.publisher.toLowerCase().includes(q) ||
       plugin.category.toLowerCase().includes(q) ||
-      plugin.capabilities.some(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.description.toLowerCase().includes(q),
-      )
+      plugin.highlights.some((h) => h.toLowerCase().includes(q))
     );
   };
 
   const handleInspect = (plugin: CatalogPlugin) => {
-    const ext = installedByPluginId.get(plugin.id.toLowerCase());
-    onInspect?.(plugin, ext);
+    onInspect?.(plugin);
     setInspectedPlugin(plugin);
   };
 
@@ -85,17 +62,13 @@ export function PluginCatalogGrid({
   const filteredPlugins = useMemo(() => {
     return catalog.filter((plugin) => {
       if (selectedCategory === "Popular") {
-        if (!plugin.isPopular && plugin.category !== "Popular") return false;
+        if (!plugin.isPopular) return false;
       } else if (selectedCategory !== "All") {
         if (plugin.category !== selectedCategory) return false;
       }
       return matchesSearch(plugin, searchQuery);
     });
   }, [catalog, selectedCategory, searchQuery]);
-
-  const inspectedExtension = inspectedPlugin
-    ? installedByPluginId.get(inspectedPlugin.id.toLowerCase())
-    : null;
 
   return (
     <div
@@ -109,7 +82,7 @@ export function PluginCatalogGrid({
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-smoke" />
           <input
             type="search"
-            placeholder="Search plugins..."
+            placeholder="Search apps..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-border-edge bg-ink/90 py-2.5 pl-10 pr-9 text-sm text-pure-white placeholder-smoke transition-colors focus:border-ash focus:outline-none"
@@ -166,7 +139,7 @@ export function PluginCatalogGrid({
             </span>
             <span>
               {filteredPlugins.length}{" "}
-              {filteredPlugins.length === 1 ? "plugin" : "plugins"}
+              {filteredPlugins.length === 1 ? "app" : "apps"}
             </span>
           </div>
 
@@ -176,16 +149,14 @@ export function PluginCatalogGrid({
                 <PluginCard
                   key={plugin.id}
                   plugin={plugin}
-                  installedExtension={installedByPluginId.get(
-                    plugin.id.toLowerCase(),
-                  )}
+                  connection={connectionOf(plugin)}
                   onInspect={handleInspect}
                 />
               ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border-edge bg-ink/40 p-8 text-center text-sm text-smoke">
-              No plugins found matching your search.
+              No apps match your search.
             </div>
           )}
         </div>
@@ -195,7 +166,7 @@ export function PluginCatalogGrid({
           {PLUGIN_CATEGORIES.map((category) => {
             const sectionPlugins = catalog.filter((plugin) => {
               if (category === "Popular") {
-                return plugin.isPopular || plugin.category === "Popular";
+                return plugin.isPopular;
               }
               return plugin.category === category;
             });
@@ -220,9 +191,7 @@ export function PluginCatalogGrid({
                     <PluginCard
                       key={`${category}-${plugin.id}`}
                       plugin={plugin}
-                      installedExtension={installedByPluginId.get(
-                        plugin.id.toLowerCase(),
-                      )}
+                      connection={connectionOf(plugin)}
                       onInspect={handleInspect}
                     />
                   ))}
@@ -236,7 +205,9 @@ export function PluginCatalogGrid({
       {/* Inspector Modal */}
       <PluginInspectorModal
         plugin={inspectedPlugin}
-        installedExtension={inspectedExtension}
+        connection={
+          inspectedPlugin ? connectionOf(inspectedPlugin) : { state: "none" }
+        }
         isOpen={Boolean(inspectedPlugin)}
         onClose={() => setInspectedPlugin(null)}
       />

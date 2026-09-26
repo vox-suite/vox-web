@@ -7,19 +7,20 @@ import {
 } from "@tanstack/react-query";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import { extensionKeys } from "@/features/extensions/queries";
-import { grantKeys } from "@/features/grants/queries";
 import {
+  connectPlugin,
+  getConnectedApps,
   getPluginCatalog,
-  installPlugin,
   uninstallPlugin,
-  type InstallPluginResponse,
+  type ConnectPluginResponse,
   type UninstallPluginResponse,
 } from "./api";
 
 export const pluginKeys = {
   all: ["plugins"] as const,
   catalog: () => [...pluginKeys.all, "catalog"] as const,
-  install: () => [...pluginKeys.all, "install"] as const,
+  connected: () => [...pluginKeys.all, "connected"] as const,
+  connect: () => [...pluginKeys.all, "connect"] as const,
 };
 
 export const pluginQueries = {
@@ -28,58 +29,63 @@ export const pluginQueries = {
       queryKey: pluginKeys.catalog(),
       queryFn: ({ signal }) => getPluginCatalog(signal),
     }),
+  connected: () =>
+    queryOptions({
+      queryKey: pluginKeys.connected(),
+      queryFn: ({ signal }) => getConnectedApps(signal),
+    }),
 };
 
 export function usePluginCatalog() {
   return useQuery(pluginQueries.catalog());
 }
 
-export function useInstallPlugin() {
+export function useConnectedApps() {
+  return useQuery(pluginQueries.connected());
+}
+
+/**
+ * Start connecting an app. When the provider needs a sign-in, the browser
+ * leaves for the provider's login page and comes back to the OAuth callback.
+ */
+export function useConnectPlugin() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: pluginKeys.install(),
-    mutationFn: (input: string | { pluginId: string }) => installPlugin(input),
-    onSuccess: (data: InstallPluginResponse) => {
-      if (data?.extension) {
-        queryClient.setQueryData<RemoteExtension[]>(
-          extensionKeys.list(),
-          (current) =>
-            current
-              ? [
-                  ...current.filter(
-                    (ext) =>
-                      ext.id !== data.extension.id &&
-                      ext.external_key !== data.extension.external_key,
-                  ),
-                  data.extension,
-                ]
-              : [data.extension],
-        );
+    mutationKey: pluginKeys.connect(),
+    mutationFn: (pluginId: string) => connectPlugin(pluginId),
+    onSuccess: (data: ConnectPluginResponse) => {
+      if (data.status === "authorize") {
+        window.location.assign(data.authorizationUrl);
+        return;
       }
-    },
-    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: extensionKeys.all });
-      queryClient.invalidateQueries({ queryKey: grantKeys.all });
+      queryClient.invalidateQueries({ queryKey: pluginKeys.connected() });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: extensionKeys.all });
     },
   });
 }
 
 /**
- * True while any install of this plugin is running. A plugin can be listed in
- * several places (a card per category, the inspector), each with its own
- * mutation, so per-card pending state alone lets a second click overlap.
+ * True while any connect of this app is running (or the browser is leaving
+ * for its sign-in page). An app can be listed in several places, each with
+ * its own mutation, so per-card pending state alone lets a second click in.
  */
-export function useIsInstallingPlugin(pluginId: string) {
-  const pending = useMutationState({
-    filters: { mutationKey: pluginKeys.install(), status: "pending" },
-    select: (mutation) => mutation.state.variables as unknown,
+export function useIsConnectingPlugin(pluginId: string) {
+  const states = useMutationState({
+    filters: { mutationKey: pluginKeys.connect() },
+    select: (mutation) => ({
+      variables: mutation.state.variables as unknown,
+      status: mutation.state.status,
+      data: mutation.state.data as ConnectPluginResponse | undefined,
+    }),
   });
-  return pending.some(
-    (variables) =>
-      variables === pluginId ||
-      (typeof variables === "object" &&
-        variables !== null &&
-        (variables as { pluginId?: string }).pluginId === pluginId),
+  return states.some(
+    (s) =>
+      s.variables === pluginId &&
+      (s.status === "pending" ||
+        (s.status === "success" && s.data?.status === "authorize")),
   );
 }
 
@@ -96,7 +102,7 @@ export function useUninstallPlugin() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: extensionKeys.all });
-      queryClient.invalidateQueries({ queryKey: grantKeys.all });
+      queryClient.invalidateQueries({ queryKey: pluginKeys.connected() });
     },
   });
 }

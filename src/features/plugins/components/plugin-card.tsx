@@ -1,43 +1,35 @@
 "use client";
 
 import React from "react";
-import { Check, Loader2, MoreHorizontal, Plus } from "lucide-react";
+import { Check, Loader2, Plug, RotateCw } from "lucide-react";
 import { Button, Notice } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
-import { useInstallPlugin, useIsInstallingPlugin } from "../queries";
+import type { PluginConnection } from "../connection-state";
+import { useConnectPlugin, useIsConnectingPlugin } from "../queries";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginCardProps {
   plugin: CatalogPlugin;
-  installedExtension?: RemoteExtension | null;
+  connection: PluginConnection;
   onInspect?: (plugin: CatalogPlugin) => void;
   className?: string;
 }
 
 export function PluginCard({
   plugin,
-  installedExtension,
+  connection,
   onInspect,
   className,
 }: PluginCardProps) {
-  const installMutation = useInstallPlugin();
+  const connectMutation = useConnectPlugin();
+  const isConnecting = useIsConnectingPlugin(plugin.id);
+  const { state } = connection;
 
-  const isInstalled = Boolean(
-    installedExtension && installedExtension.lifecycle_state !== "removed",
-  );
-
-  const isInstalling = useIsInstallingPlugin(plugin.id);
-
-  const handleInstall = (e: React.MouseEvent) => {
+  const handleConnect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isInstalling || isInstalled) return;
-    installMutation.mutate(plugin.id);
-  };
-
-  const handleCardClick = () => {
-    onInspect?.(plugin);
+    if (isConnecting || state === "connected") return;
+    connectMutation.mutate(plugin.id);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,17 +45,16 @@ export function PluginCard({
       <div
         role="button"
         tabIndex={0}
-        onClick={handleCardClick}
+        onClick={() => onInspect?.(plugin)}
         onKeyDown={handleKeyDown}
         data-testid={`plugin-card-${plugin.id}`}
         aria-label={`View ${plugin.displayName} details`}
         className={cn(
           "group relative flex items-center justify-between gap-3.5 rounded-2xl border border-border-edge bg-ink/80 p-4 transition-all duration-150 hover:border-ash/40 hover:bg-ink hover:shadow-subtle-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50 cursor-pointer select-none",
-          isInstalled && "border-border-edge/60 bg-ink/60",
+          state === "connected" && "border-border-edge/60 bg-ink/60",
           className,
         )}
       >
-        {/* Left: Brand Logo */}
         <PluginLogo
           logoFile={plugin.logoFile}
           alt={plugin.displayName}
@@ -71,7 +62,6 @@ export function PluginCard({
           backgroundColor={plugin.backgroundColor}
         />
 
-        {/* Center: Title, Publisher/Category, Tagline */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-pure-white group-hover:text-mist transition-colors">
@@ -91,57 +81,52 @@ export function PluginCard({
           </p>
         </div>
 
-        {/* Right: 1-Click Install / Status Action */}
         <div
           className="shrink-0 flex items-center gap-1.5"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          {isInstalling ? (
+          {isConnecting ? (
             <div
               className="flex items-center gap-1.5 rounded-lg border border-border-edge bg-obsidian px-2.5 py-1.5 text-xs text-smoke"
               aria-live="polite"
             >
               <Loader2 className="size-3.5 animate-spin text-mist" />
-              <span className="hidden sm:inline">Installing…</span>
-            </div>
-          ) : isInstalled ? (
-            <div className="flex items-center gap-1">
-              <span
-                data-testid={`installed-badge-${plugin.id}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-success-green/20 bg-success-green/10 px-2 py-1 text-xs font-medium text-success-green"
-              >
-                <Check className="size-3.5 stroke-[2.5]" />
-                <span>Installed</span>
+              <span className="hidden sm:inline">
+                Opening {plugin.displayName}…
               </span>
-              {onInspect && (
-                <button
-                  type="button"
-                  onClick={() => onInspect(plugin)}
-                  aria-label={`Options for ${plugin.displayName}`}
-                  className="flex size-7 items-center justify-center rounded-md text-smoke hover:bg-obsidian hover:text-mist transition-colors focus-visible:outline-2 focus-visible:outline-mist"
-                >
-                  <MoreHorizontal className="size-4" />
-                </button>
-              )}
             </div>
+          ) : state === "connected" ? (
+            <span
+              data-testid={`connected-badge-${plugin.id}`}
+              className="inline-flex items-center gap-1 rounded-lg border border-success-green/20 bg-success-green/10 px-2 py-1 text-xs font-medium text-success-green"
+            >
+              <Check className="size-3.5 stroke-[2.5]" />
+              <span>Connected</span>
+            </span>
           ) : (
             <Button
               variant="secondary"
               size="sm"
-              onClick={handleInstall}
-              aria-label={`Install ${plugin.displayName}`}
+              onClick={handleConnect}
+              aria-label={`${state === "incomplete" ? "Finish connecting" : "Connect"} ${plugin.displayName}`}
               className="h-8 rounded-lg px-2.5 text-xs text-mist hover:text-pure-white hover:border-ash transition-colors"
             >
-              <Plus className="size-3.5 stroke-[2.5]" />
-              <span>Install</span>
+              {state === "incomplete" ? (
+                <RotateCw className="size-3.5 stroke-[2.5]" />
+              ) : (
+                <Plug className="size-3.5 stroke-[2.5]" />
+              )}
+              <span>
+                {state === "incomplete" ? "Finish connecting" : "Connect"}
+              </span>
             </Button>
           )}
         </div>
       </div>
-      {installMutation.isError && (
-        <Notice title={`Couldn't install ${plugin.displayName}`} tone="error">
-          {installMutation.error.message}
+      {connectMutation.isError && (
+        <Notice title={`Couldn't connect ${plugin.displayName}`} tone="error">
+          {connectMutation.error.message}
         </Notice>
       )}
     </div>

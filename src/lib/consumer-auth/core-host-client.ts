@@ -209,6 +209,27 @@ export type RemoteExtension = {
   capabilities?: ExtensionCapability[];
 };
 
+export type AuthorizationStart = {
+  authorization_url: string;
+  expires_at: string;
+};
+
+export type ConnectedAppTool = {
+  name: string;
+  title?: string | null;
+  description?: string | null;
+  read_only: boolean;
+};
+
+export type ConnectedAppsStatus = {
+  configured_hosts: string[];
+  connected: {
+    extension_id: string;
+    connected_at: string;
+    tools: ConnectedAppTool[];
+  }[];
+};
+
 export type InstallExtensionRequest = {
   external_key: string;
   display_name: string;
@@ -566,6 +587,8 @@ export class CoreHostRequestError extends Error {
   constructor(
     public readonly status: number,
     path: string,
+    /** Machine-readable reason from Core's JSON error body, when present. */
+    public readonly code?: string,
   ) {
     super(`Core request to ${path} failed (${status})`);
   }
@@ -671,7 +694,13 @@ export class VoxCoreHostClient {
       },
     );
     if (!response.ok) {
-      throw new CoreHostRequestError(response.status, path);
+      const code = await response
+        .json()
+        .then((body: { error?: unknown }) =>
+          typeof body?.error === "string" ? body.error : undefined,
+        )
+        .catch(() => undefined);
+      throw new CoreHostRequestError(response.status, path, code);
     }
     if (response.status === 204) {
       return undefined as T;
@@ -1027,6 +1056,58 @@ export class VoxCoreHostClient {
           organization_external_key: null,
         },
         version,
+      },
+    );
+  }
+
+  /** Start provider OAuth for an installed MCP app; returns the login URL. */
+  async authorizeExtension(
+    accountId: string,
+    extensionId: string,
+    redirectUri: string,
+  ): Promise<AuthorizationStart> {
+    return this.signedPost<AuthorizationStart>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/authorize`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        redirect_uri: redirectUri,
+      },
+    );
+  }
+
+  /** Finish provider OAuth with the callback's state and code. */
+  async completeConnection(
+    accountId: string,
+    state: string,
+    code: string,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      "/v1/connected-apps/callback",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        state,
+        code,
+      },
+    );
+  }
+
+  async connectedAppsStatus(accountId: string): Promise<ConnectedAppsStatus> {
+    return this.signedPost<ConnectedAppsStatus>(
+      "/v1/connected-apps/status",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
       },
     );
   }

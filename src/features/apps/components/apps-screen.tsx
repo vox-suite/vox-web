@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/app";
+import { Notice } from "@/components/ui";
+import { connectErrorMessage } from "@/lib/consumer-auth/connected-apps-messages";
+import { getCatalogPlugin } from "@/features/plugins/catalog";
+import { pluginKeys } from "@/features/plugins/queries";
+import { extensionKeys } from "@/features/extensions/queries";
 import { ConnectionsPanel } from "@/features/connections/components/connections-panel";
 import { ExtensionsPanel } from "@/features/extensions/components/extensions-panel";
 import { GrantsPanel } from "@/features/grants/components/grants-panel";
@@ -11,9 +17,46 @@ import {
   PluginCatalogGrid,
 } from "@/features/plugins/components";
 
+type ConnectResult =
+  { kind: "connected"; name: string } | { kind: "error"; message: string };
+
+/** Read and clear the result the OAuth callback left in the URL. */
+function useConnectResult() {
+  const queryClient = useQueryClient();
+  const [result, setResult] = useState<ConnectResult | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get("connected");
+    const error = params.get("connect_error");
+    if (!connected && !error) return;
+    // Reading the URL once on mount is the point of this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setResult(
+      connected
+        ? {
+            kind: "connected",
+            name: getCatalogPlugin(connected)?.displayName ?? connected,
+          }
+        : { kind: "error", message: connectErrorMessage(error ?? undefined) },
+    );
+    params.delete("connected");
+    params.delete("connect_error");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (query ? `?${query}` : ""),
+    );
+    queryClient.invalidateQueries({ queryKey: pluginKeys.connected() });
+    queryClient.invalidateQueries({ queryKey: extensionKeys.all });
+  }, [queryClient]);
+  return result;
+}
+
 export function AppsScreen() {
   const [view, setView] = useState<"plugins" | "skills">("plugins");
   const [source, setSource] = useState<"public" | "personal">("public");
+  const connectResult = useConnectResult();
 
   return (
     <div className="space-y-6">
@@ -45,10 +88,21 @@ export function AppsScreen() {
         title={view === "plugins" ? "Plugins" : "Skills"}
         description={
           view === "plugins"
-            ? "Save MCP servers and review account access. Agents can use a service after it is connected and granted."
+            ? "Connect apps with your own account. Vox signs in through each app’s official login and asks you before doing anything that changes your account."
             : "Install reusable guidance and choose which agent can load it."
         }
       />
+      {connectResult?.kind === "connected" && (
+        <Notice title={`${connectResult.name} is connected`} tone="success">
+          Vox can now use {connectResult.name} when you ask. You can see exactly
+          what it can do by opening the app below.
+        </Notice>
+      )}
+      {connectResult?.kind === "error" && (
+        <Notice title="The app wasn’t connected" tone="error">
+          {connectResult.message}
+        </Notice>
+      )}
       {view === "plugins" ? (
         <div className="space-y-8">
           <InstalledPluginsDock />
@@ -87,7 +141,7 @@ export function AppsScreen() {
               </div>
               <p className="text-xs text-smoke hidden sm:block">
                 {source === "public"
-                  ? "1-click install official consumer integrations"
+                  ? "Official apps you sign in to with your own account"
                   : "Register custom or internal Model Context Protocol servers"}
               </p>
             </div>
@@ -96,11 +150,10 @@ export function AppsScreen() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-base font-semibold text-pure-white">
-                    Public plugin catalog
+                    Apps
                   </h2>
                   <p className="text-xs text-smoke">
-                    Explore and install certified everyday tools for your
-                    assistant
+                    Each app is the provider’s own official MCP server
                   </p>
                 </div>
                 <PluginCatalogGrid />
