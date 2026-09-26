@@ -86,6 +86,13 @@ export function getCoreHostClient(): VoxCoreHostClient | null {
   return coreHostClient;
 }
 
+export function setCoreHostClientForTests(
+  client: VoxCoreHostClient | null | undefined,
+) {
+  coreHostClient = client;
+}
+
 export function resetConsumerAuthRuntimeForTests() {
   runtime = undefined;
+  coreHostClient = undefined;
 }

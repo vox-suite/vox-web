@@ -12,10 +12,21 @@ export type ConsumerSession = {
   recoveryEnabled: boolean;
 };
 
+let mockConsumerForTests: ConsumerSession | null | undefined;
+
+export function setMockConsumerForTests(
+  consumer: ConsumerSession | null | undefined,
+) {
+  mockConsumerForTests = consumer;
+}
+
 export async function currentConsumer(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reserved for future host/tenant-aware lookups; Supabase reads the session from cookies today
   _requestHeaders?: Headers | globalThis.Headers,
 ): Promise<ConsumerSession | null> {
+  if (mockConsumerForTests !== undefined) {
+    return mockConsumerForTests;
+  }
   try {
     const supabase = await createClient();
     const {
