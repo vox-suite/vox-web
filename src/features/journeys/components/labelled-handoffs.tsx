@@ -10,14 +10,66 @@ import {
   Tag,
 } from "@/components/app";
 import { errorMessage } from "@/lib/api/http";
+import type { HandoffInput } from "../api";
 import { useCreateHandoff } from "../queries";
-import { HANDOFF_SAMPLES, type HandoffSample } from "../samples";
+
+export type HandoffTarget = HandoffInput & {
+  providerName: string;
+  title: string;
+  subject: string;
+  detail: string;
+};
+
+const PROVIDER_HANDOFFS: HandoffTarget[] = [
+  {
+    provider: "amazon",
+    providerName: "Amazon",
+    title: "Amazon Product & Cart Handoff (L0)",
+    subject: "Product cart and checkout transfer",
+    detail:
+      "Transfers item selection and affiliate attribution to Amazon cart.",
+    handoff: {
+      asin: "B08N5WRWNW",
+      locale: "US",
+      quantity: 1,
+      partner_tag: "vox-20",
+    },
+  },
+  {
+    provider: "zomato",
+    providerName: "Zomato",
+    title: "Zomato Restaurant & Table Handoff (L0)",
+    subject: "Restaurant menu inspection and table reservation",
+    detail: "Opens verified restaurant page in Zomato for consumer ordering.",
+    handoff: {
+      res_id: "18204",
+      order_id: null,
+      handoff_type: "ViewRestaurant",
+    },
+  },
+  {
+    provider: "uber",
+    providerName: "Uber",
+    title: "Uber Consumer Ride Request Handoff (L0)",
+    subject: "Pickup and destination dispatch transfer",
+    detail:
+      "Passes route waypoints to the Uber application for ride request and fare confirmation.",
+    handoff: {
+      pickup_latitude: 37.7749,
+      pickup_longitude: -122.4194,
+      dropoff_latitude: 37.7833,
+      dropoff_longitude: -122.4167,
+      product_id: "uberx",
+      fare_id: "fare_demo_456",
+    },
+  },
+];
 
 function HandoffCard({
-  sample,
+  target,
   connectionId,
 }: {
-  sample: HandoffSample;
+  target: HandoffTarget;
   connectionId: string;
 }) {
   const handoff = useCreateHandoff();
@@ -25,24 +77,24 @@ function HandoffCard({
 
   return (
     <ItemCard
-      title={sample.title}
+      title={target.title}
       subtitle={
         <>
-          <strong className="font-medium text-mist">{sample.subject}</strong>
+          <strong className="font-medium text-mist">{target.subject}</strong>
           <br />
-          {sample.detail}
+          {target.detail}
         </>
       }
       actions={
         <Button
           size="sm"
           disabled={handoff.isPending}
-          aria-label={`Generate ${sample.providerName} handoff link`}
-          onClick={() => handoff.mutate({ ...sample, connectionId })}
+          aria-label={`Generate ${target.providerName} handoff link`}
+          onClick={() => handoff.mutate({ ...target, connectionId })}
         >
           {handoff.isPending
             ? "Generating…"
-            : `Generate ${sample.providerName} handoff`}
+            : `Generate ${target.providerName} handoff`}
         </Button>
       }
     >
@@ -66,9 +118,9 @@ function HandoffCard({
             </span>
             <ExternalLinkButton
               href={result.handoff_url}
-              aria-label={`Continue to external ${sample.providerName} application`}
+              aria-label={`Continue to external ${target.providerName} application`}
             >
-              Continue in {sample.providerName}
+              Continue in {target.providerName}
             </ExternalLinkButton>
           </div>
           <p className="text-xs text-smoke">{result.disclaimer}</p>
@@ -91,10 +143,10 @@ export function LabelledHandoffs({ connectionId }: { connectionId: string }) {
         </p>
       </Callout>
       <div className="grid gap-3 2xl:grid-cols-3">
-        {HANDOFF_SAMPLES.map((sample) => (
+        {PROVIDER_HANDOFFS.map((target) => (
           <HandoffCard
-            key={sample.provider}
-            sample={sample}
+            key={target.provider}
+            target={target}
             connectionId={connectionId}
           />
         ))}

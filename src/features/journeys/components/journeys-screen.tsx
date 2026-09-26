@@ -10,14 +10,20 @@ import {
   TabsTrigger,
   Tag,
 } from "@/components/app";
-import { DEFAULT_CONNECTION_ID } from "../samples";
+import { useAuthorizedConnections } from "@/features/connections/queries";
 import { CompositeJourney } from "./composite-journey";
 import { ConnectedRead } from "./connected-read";
 import { LabelledHandoffs } from "./labelled-handoffs";
 import { LodgingWrite } from "./lodging-write";
 
 export function JourneysScreen() {
-  const [connectionId, setConnectionId] = useState(DEFAULT_CONNECTION_ID);
+  const connections = useAuthorizedConnections();
+  const [overrideConnectionId, setOverrideConnectionId] = useState<
+    string | null
+  >(null);
+
+  const connectionId =
+    overrideConnectionId ?? connections.data?.[0]?.id ?? "";
 
   return (
     <div className="space-y-6">
@@ -30,9 +36,10 @@ export function JourneysScreen() {
         id="journey-connection-id"
         label="Active provider connection ID"
         hint="Authority is tied strictly to user-authorized connections stored in Core."
+        placeholder="Enter or select an authorized connection ID"
         className="max-w-md"
         value={connectionId}
-        onChange={(event) => setConnectionId(event.target.value)}
+        onChange={(event) => setOverrideConnectionId(event.target.value)}
       />
       <Tabs defaultValue="composite">
         <TabsList aria-label="Journey types">

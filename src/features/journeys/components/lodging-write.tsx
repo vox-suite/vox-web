@@ -13,12 +13,12 @@ import {
   StatusBadge,
   Tag,
 } from "@/components/app";
+import { useAccount } from "@/components/app-shell/account-context";
 import { errorMessage } from "@/lib/api/http";
 import type { LodgingProperty } from "@/lib/consumer-auth/core-host-client";
 import { formatAuthoritativeCurrency } from "@/lib/global-formatting";
 import type { LodgingSearch } from "../api";
 import { useBookLodging, useCancelLodging, useLodgingSearch } from "../queries";
-import { SAMPLE_GUEST_NAME, SAMPLE_STAY } from "../samples";
 
 function Money({ minor, currency }: { minor: number; currency: string }) {
   const amount = formatAuthoritativeCurrency(minor, currency, true);
@@ -29,8 +29,24 @@ function Money({ minor, currency }: { minor: number; currency: string }) {
   );
 }
 
+function getUpcomingDates() {
+  const now = new Date();
+  const inDate = new Date(now.getTime() + 86400000 * 7);
+  const outDate = new Date(now.getTime() + 86400000 * 11);
+  return {
+    checkIn: inDate.toISOString().slice(0, 10),
+    checkOut: outDate.toISOString().slice(0, 10),
+  };
+}
+
 export function LodgingWrite({ connectionId }: { connectionId: string }) {
-  const [destination, setDestination] = useState("Seattle, WA");
+  const account = useAccount();
+  const upcoming = getUpcomingDates();
+  const [destination, setDestination] = useState("");
+  const [checkIn, setCheckIn] = useState(upcoming.checkIn);
+  const [checkOut, setCheckOut] = useState(upcoming.checkOut);
+  const [occupancy, setOccupancy] = useState(2);
+  const [guestName, setGuestName] = useState(account.name || "");
   const [search, setSearch] = useState<LodgingSearch | null>(null);
   const [selected, setSelected] = useState<LodgingProperty | null>(null);
   const results = useLodgingSearch(search);
@@ -48,7 +64,7 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
     setSelected(null);
     book.reset();
     cancel.reset();
-    setSearch({ connectionId, destination, ...SAMPLE_STAY });
+    setSearch({ connectionId, destination, checkIn, checkOut, occupancy });
   }
 
   function confirmBooking(property: LodgingProperty) {
@@ -58,9 +74,9 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
         property_id: property.property_id,
         rate_plan_id:
           property.available_rate_plans[0]?.rate_plan_id || "rate_standard",
-        guest_name: SAMPLE_GUEST_NAME,
-        check_in: SAMPLE_STAY.checkIn,
-        check_out: SAMPLE_STAY.checkOut,
+        guest_name: guestName.trim() || account.name || "Guest",
+        check_in: checkIn,
+        check_out: checkOut,
         total_amount_minor: property.price_amount_minor,
         currency: property.currency,
       },
@@ -76,19 +92,53 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
     >
       <form
         onSubmit={submitSearch}
-        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:items-end"
       >
         <Field
           id="lodging-destination"
           label="Destination"
-          className="min-w-0 flex-1"
+          placeholder="e.g. Seattle, WA"
+          className="min-w-0"
           value={destination}
           onChange={(event) => setDestination(event.target.value)}
           required
         />
-        <Button type="submit" disabled={results.isFetching}>
-          {results.isFetching ? "Searching…" : "Search properties (L1)"}
-        </Button>
+        <Field
+          id="lodging-check-in"
+          label="Check-in date"
+          type="date"
+          value={checkIn}
+          onChange={(event) => setCheckIn(event.target.value)}
+          required
+        />
+        <Field
+          id="lodging-check-out"
+          label="Check-out date"
+          type="date"
+          value={checkOut}
+          onChange={(event) => setCheckOut(event.target.value)}
+          required
+        />
+        <div className="flex items-end gap-2">
+          <Field
+            id="lodging-occupancy"
+            label="Guests"
+            type="number"
+            min={1}
+            max={8}
+            className="w-20"
+            value={occupancy}
+            onChange={(event) => setOccupancy(Number(event.target.value) || 1)}
+            required
+          />
+          <Button
+            type="submit"
+            disabled={results.isFetching}
+            className="flex-1"
+          >
+            {results.isFetching ? "Searching…" : "Search"}
+          </Button>
+        </div>
       </form>
       {failure ? (
         <Callout tone="danger" title="Journey notice" live="assertive">
@@ -187,6 +237,15 @@ export function LodgingWrite({ connectionId }: { connectionId: string }) {
               reference.
             </p>
           </Callout>
+          <div className="my-4 max-w-sm">
+            <Field
+              id="lodging-guest-name"
+              label="Guest name"
+              value={guestName}
+              onChange={(event) => setGuestName(event.target.value)}
+              placeholder="Account holder name"
+            />
+          </div>
           <MetaList
             items={[
               {
