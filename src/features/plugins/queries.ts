@@ -1,6 +1,7 @@
 import {
   queryOptions,
   useMutation,
+  useMutationState,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import {
 export const pluginKeys = {
   all: ["plugins"] as const,
   catalog: () => [...pluginKeys.all, "catalog"] as const,
+  install: () => [...pluginKeys.all, "install"] as const,
 };
 
 export const pluginQueries = {
@@ -35,6 +37,7 @@ export function usePluginCatalog() {
 export function useInstallPlugin() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: pluginKeys.install(),
     mutationFn: (input: string | { pluginId: string }) => installPlugin(input),
     onSuccess: (data: InstallPluginResponse) => {
       if (data?.extension) {
@@ -59,6 +62,25 @@ export function useInstallPlugin() {
       queryClient.invalidateQueries({ queryKey: grantKeys.all });
     },
   });
+}
+
+/**
+ * True while any install of this plugin is running. A plugin can be listed in
+ * several places (a card per category, the inspector), each with its own
+ * mutation, so per-card pending state alone lets a second click overlap.
+ */
+export function useIsInstallingPlugin(pluginId: string) {
+  const pending = useMutationState({
+    filters: { mutationKey: pluginKeys.install(), status: "pending" },
+    select: (mutation) => mutation.state.variables as unknown,
+  });
+  return pending.some(
+    (variables) =>
+      variables === pluginId ||
+      (typeof variables === "object" &&
+        variables !== null &&
+        (variables as { pluginId?: string }).pluginId === pluginId),
+  );
 }
 
 export function useUninstallPlugin() {

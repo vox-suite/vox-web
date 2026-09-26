@@ -35,6 +35,7 @@ import type {
   CreateGrantRequest,
   VoxCoreHostClient,
 } from "../src/lib/consumer-auth/core-host-client";
+import { CoreHostRequestError } from "../src/lib/consumer-auth/core-host-client";
 import type { ConsumerSession } from "../src/lib/consumer-auth/session";
 
 // Dynamically load route handlers and test hooks after server-only stub is installed
@@ -378,6 +379,170 @@ test("POST /api/account/plugins/install rolls back newly installed extension if 
   assert.equal(rolledBackId, installedExtensionId);
 
   // Cleanup
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+function extensionFixture(
+  overrides: Partial<RemoteExtension> = {},
+): RemoteExtension {
+  return {
+    id: "ext-uber",
+    external_key: "uber",
+    display_name: "Uber",
+    protocol: "mcp",
+    endpoint_url: "https://mcp.uber.com/v1",
+    operator: { operator_id: "uber", operator_name: "Uber" },
+    current_version: 1,
+    conformance_status: "pending",
+    operator_enabled: false,
+    consent_status: "consented",
+    lifecycle_state: "installed",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...overrides,
+  };
+}
+
+test("POST /api/account/plugins/install shares one attempt between overlapping requests", async () => {
+  const {
+    installRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+  setMockConsumerForTests(mockSession);
+
+  let installs = 0;
+  const mockCore = {
+    async listExtensions(): Promise<RemoteExtension[]> {
+      return [];
+    },
+    async installExtension(): Promise<RemoteExtension> {
+      installs += 1;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return extensionFixture();
+    },
+    async selectedAgents(): Promise<SelectedAgent[]> {
+      return [];
+    },
+    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
+      return [];
+    },
+    async createGrant(
+      _accountId: string,
+      req: CreateGrantRequest,
+    ): Promise<CapabilityGrant> {
+      void _accountId;
+      return { ...req } as unknown as CapabilityGrant;
+    },
+  };
+  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
+
+  const post = () =>
+    installRoute(
+      new NextRequest("http://localhost/api/account/plugins/install", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pluginId: "uber" }),
+      }),
+    );
+  const [first, second] = await Promise.all([post(), post()]);
+
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.equal(installs, 1);
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("POST /api/account/plugins/install adopts the extension when Core reports it already installed (409)", async () => {
+  const {
+    installRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+  setMockConsumerForTests(mockSession);
+
+  let listCalls = 0;
+  let removed = false;
+  const mockCore = {
+    // Empty on the first check, then the install that won the race is visible.
+    async listExtensions(): Promise<RemoteExtension[]> {
+      listCalls += 1;
+      return listCalls === 1 ? [] : [extensionFixture()];
+    },
+    async installExtension(): Promise<RemoteExtension> {
+      throw new CoreHostRequestError(409, "/v1/remote-extensions");
+    },
+    async selectedAgents(): Promise<SelectedAgent[]> {
+      return [];
+    },
+    async listEffectiveGrants(): Promise<CapabilityGrant[]> {
+      return [];
+    },
+    async createGrant(
+      _accountId: string,
+      req: CreateGrantRequest,
+    ): Promise<CapabilityGrant> {
+      void _accountId;
+      return { ...req } as unknown as CapabilityGrant;
+    },
+    async removeExtension(): Promise<RemoteExtension> {
+      removed = true;
+      return extensionFixture({ lifecycle_state: "removed" });
+    },
+  };
+  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
+
+  const res = await installRoute(
+    new NextRequest("http://localhost/api/account/plugins/install", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pluginId: "uber" }),
+    }),
+  );
+  const body = await res.json();
+
+  assert.equal(res.status, 200);
+  assert.equal(body.extension.id, "ext-uber");
+  assert.equal(removed, false);
+
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("POST /api/account/plugins/install still fails when a 409 has no matching extension", async () => {
+  const {
+    installRoute,
+    setMockConsumerForTests,
+    setCoreHostClientForTests,
+    resetConsumerAuthRuntimeForTests,
+  } = await loadModules();
+  setMockConsumerForTests(mockSession);
+
+  const mockCore = {
+    async listExtensions(): Promise<RemoteExtension[]> {
+      return [];
+    },
+    async installExtension(): Promise<RemoteExtension> {
+      throw new CoreHostRequestError(409, "/v1/remote-extensions");
+    },
+  };
+  setCoreHostClientForTests(mockCore as unknown as VoxCoreHostClient);
+
+  const res = await installRoute(
+    new NextRequest("http://localhost/api/account/plugins/install", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pluginId: "uber" }),
+    }),
+  );
+  assert.equal(res.status, 500);
+  assert.match((await res.json()).error, /409/);
+
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });

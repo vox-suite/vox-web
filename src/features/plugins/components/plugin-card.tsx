@@ -6,7 +6,7 @@ import { Button, Notice } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
-import { useInstallPlugin } from "../queries";
+import { useInstallPlugin, useIsInstallingPlugin } from "../queries";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginCardProps {
@@ -28,11 +28,7 @@ export function PluginCard({
     installedExtension && installedExtension.lifecycle_state !== "removed",
   );
 
-  const isInstalling =
-    installMutation.isPending &&
-    (installMutation.variables === plugin.id ||
-      (typeof installMutation.variables === "object" &&
-        installMutation.variables?.pluginId === plugin.id));
+  const isInstalling = useIsInstallingPlugin(plugin.id);
 
   const handleInstall = (e: React.MouseEvent) => {
     e.stopPropagation();

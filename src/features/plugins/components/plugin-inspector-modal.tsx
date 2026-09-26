@@ -14,7 +14,11 @@ import {
 import { Badge, Button } from "@/components/ui";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
-import { useInstallPlugin, useUninstallPlugin } from "../queries";
+import {
+  useInstallPlugin,
+  useIsInstallingPlugin,
+  useUninstallPlugin,
+} from "../queries";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginInspectorModalProps {
@@ -32,6 +36,7 @@ export function PluginInspectorModal({
 }: PluginInspectorModalProps) {
   const installMutation = useInstallPlugin();
   const uninstallMutation = useUninstallPlugin();
+  const isInstalling = useIsInstallingPlugin(plugin?.id ?? "");
 
   if (!plugin) return null;
 
@@ -43,12 +48,6 @@ export function PluginInspectorModal({
     uninstallMutation.isPending &&
     (uninstallMutation.variables === installedExtension?.id ||
       uninstallMutation.variables === plugin.id);
-
-  const isInstalling =
-    installMutation.isPending &&
-    (installMutation.variables === plugin.id ||
-      (typeof installMutation.variables === "object" &&
-        installMutation.variables?.pluginId === plugin.id));
 
   const handleUninstall = () => {
     const targetId = installedExtension?.id || plugin.id;
