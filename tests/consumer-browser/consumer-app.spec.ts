@@ -129,7 +129,7 @@ test("connected accounts offer only what each connection allows", async ({
   await signIn(page);
   await page.goto("/app/apps");
   await page
-    .getByText("Connected accounts and agent access", { exact: true })
+    .locator("summary", { hasText: "Connected accounts and agent access" })
     .click();
 
   const uber = page.getByTestId("connection-conn_uber_rides");
