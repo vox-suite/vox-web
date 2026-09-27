@@ -51,6 +51,17 @@ export type InitiateConnectionRequest = {
   redirect_uri?: string | null;
 };
 
+export type AuthorizeConnectionInput = {
+  integration_external_key: string;
+  external_account_reference: string;
+  account_display_id?: string | null;
+  credential_custody: "platform_held" | "external_operator";
+  authorization_state: "authorized" | "pending";
+  authorized_capabilities?: string[];
+  expires_at?: string | null;
+  failure_code?: string | null;
+};
+
 export type InitiateConnectionResponse = {
   session_id: string;
   integration_external_key: string;
@@ -841,6 +852,23 @@ export class VoxCoreHostClient {
           organization_external_key: null,
         },
         initiation,
+      },
+    );
+  }
+
+  async recordConnection(
+    accountId: string,
+    authorization: AuthorizeConnectionInput,
+  ): Promise<Connection> {
+    return this.signedPost<Connection>(
+      "/v1/connections/authorize",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        authorization,
       },
     );
   }

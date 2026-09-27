@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui";
 import {
   Callout,
@@ -14,6 +15,7 @@ import { errorMessage } from "@/lib/api/http";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
 import { useConnections, useDisconnectConnection } from "../queries";
 import { ConnectionActions } from "./connection-actions";
+import { PlayStationConnectDialog } from "./playstation-connect-dialog";
 
 function ConnectionCard({ connection }: { connection: Connection }) {
   const disconnect = useDisconnectConnection();
@@ -85,11 +87,22 @@ function ConnectionCard({ connection }: { connection: Connection }) {
 
 export function ConnectionsPanel({ id }: { id?: string }) {
   const connections = useConnections();
+  const [showPlayStation, setShowPlayStation] = useState(false);
+
   return (
     <Panel
       id={id}
       title="Connected accounts"
       description="Review account access and remove connections you no longer use."
+      actions={
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setShowPlayStation(true)}
+        >
+          Connect PlayStation
+        </Button>
+      }
     >
       <Callout title="Connecting is not permission">
         <p>
@@ -104,10 +117,18 @@ export function ConnectionsPanel({ id }: { id?: string }) {
         errorTitle="Connections could not be loaded"
         isEmpty={(data) => data.length === 0}
         empty={
-          <EmptyMessage title="No connected accounts">
-            Connection setup will appear here when a provider-verified
-            authorization flow is available.
-          </EmptyMessage>
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <EmptyMessage title="No connected accounts">
+              Connect an external service to extract activity and synchronize it to your timeline.
+            </EmptyMessage>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowPlayStation(true)}
+            >
+              Connect PlayStation 5
+            </Button>
+          </div>
         }
       >
         {(data) => (
@@ -118,6 +139,11 @@ export function ConnectionsPanel({ id }: { id?: string }) {
           </div>
         )}
       </QueryContent>
+
+      <PlayStationConnectDialog
+        isOpen={showPlayStation}
+        onClose={() => setShowPlayStation(false)}
+      />
     </Panel>
   );
 }
