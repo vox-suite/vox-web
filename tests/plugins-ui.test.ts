@@ -46,7 +46,7 @@ test("apps UI components are exported React components", () => {
   }
 });
 
-test("an app is connected only when Core holds a live connection for it", () => {
+test("account authorization and operator review remain distinct states", () => {
   const zomato = getCatalogPlugin("zomato")!;
   assert.equal(connectionFor(zomato, [], []).state, "none");
 
@@ -55,15 +55,18 @@ test("an app is connected only when Core holds a live connection for it", () => 
 
   const live = {
     extension_id: added.id,
+    connection_id: "connection-zomato",
     connected_at: new Date().toISOString(),
-    tools: [{ name: "search_restaurants", read_only: true }],
+    lifecycle_state: "active" as const,
+    tools: [{ name: "search_restaurants" }],
   };
+  assert.equal(connectionFor(zomato, [added], [live]).state, "awaiting_review");
   const connected = connectionFor(
     zomato,
     [extension({ lifecycle_state: "active" })],
     [live],
   );
-  assert.equal(connected.state, "connected");
+  assert.equal(connected.state, "reviewed");
   assert.equal(connected.connection?.tools[0].name, "search_restaurants");
 
   // Removed extensions never count, even with a stale connection record.

@@ -5,7 +5,7 @@ import type { ConnectedApp } from "./api";
 import type { CatalogPlugin } from "./catalog";
 import { useConnectedApps } from "./queries";
 
-export type PluginConnectionState = "connected" | "incomplete" | "none";
+export type PluginConnectionState = "reviewed" | "awaiting_review" | "unavailable" | "incomplete" | "none";
 
 export type PluginConnection = {
   state: PluginConnectionState;
@@ -14,8 +14,7 @@ export type PluginConnection = {
 };
 
 /**
- * "connected": the provider accepted the user's sign-in and Vox holds a live
- * token. "incomplete": the app was added but sign-in never finished.
+ * Provider authorization and operator enablement are distinct states.
  */
 export function connectionFor(
   plugin: CatalogPlugin,
@@ -28,9 +27,14 @@ export function connectionFor(
   );
   if (!extension) return { state: "none" };
   const connection = connected.find((c) => c.extension_id === extension.id);
-  return connection
-    ? { state: "connected", extension, connection }
-    : { state: "incomplete", extension };
+  if (!connection) return { state: "incomplete", extension };
+  if (extension.lifecycle_state === "active") {
+    return { state: "reviewed", extension, connection };
+  }
+  if (extension.lifecycle_state === "installed") {
+    return { state: "awaiting_review", extension, connection };
+  }
+  return { state: "unavailable", extension, connection };
 }
 
 export function usePluginConnections() {

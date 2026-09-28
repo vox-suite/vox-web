@@ -51,8 +51,9 @@ export async function GET(request: NextRequest) {
       account.accountId,
       state,
       code,
+      params.get("iss"),
     );
-    return back({ connected: extension.external_key });
+    return back({ authorization_complete: extension.external_key });
   } catch (error) {
     const reason =
       error instanceof CoreHostRequestError && error.code

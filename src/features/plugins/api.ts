@@ -6,7 +6,7 @@ import type {
 import type { CatalogPlugin } from "./catalog";
 
 export type ConnectPluginResponse =
-  | { status: "connected"; extension: RemoteExtension }
+  | { status: "authorized"; extension: RemoteExtension }
   | {
       status: "authorize";
       extension: RemoteExtension;

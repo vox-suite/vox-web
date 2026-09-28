@@ -17,7 +17,7 @@ import {
 } from "@/lib/consumer-auth/connected-apps";
 
 type ConnectResult =
-  | { status: "connected"; extension: RemoteExtension }
+  | { status: "authorized"; extension: RemoteExtension }
   | {
       status: "authorize";
       extension: RemoteExtension;
@@ -77,7 +77,7 @@ async function connect(
   const extension = await ensureInstalled(core, accountId, plugin);
   const status = await core.connectedAppsStatus(accountId);
   if (status.connected.some((c) => c.extension_id === extension.id)) {
-    return { status: "connected", extension };
+    return { status: "authorized", extension };
   }
   const start = await core.authorizeExtension(
     accountId,

@@ -5,7 +5,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
-import { installExtension, listExtensions, removeExtension } from "./api";
+import {
+  installExtension,
+  listExtensions,
+  removeExtension,
+  renewExtensionConsent,
+} from "./api";
 
 export const extensionKeys = {
   all: ["extensions"] as const,
@@ -48,6 +53,23 @@ export function useRemoveExtension() {
         extensionKeys.list(),
         (current) =>
           current?.map((ext) => (ext.id === removed.id ? removed : ext)),
+      );
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: extensionKeys.list() }),
+  });
+}
+
+export function useRenewExtensionConsent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, version }: { id: string; version: number }) =>
+      renewExtensionConsent(id, version),
+    onSuccess: (renewed) => {
+      queryClient.setQueryData<RemoteExtension[]>(
+        extensionKeys.list(),
+        (current) =>
+          current?.map((ext) => (ext.id === renewed.id ? renewed : ext)),
       );
     },
     onSettled: () =>

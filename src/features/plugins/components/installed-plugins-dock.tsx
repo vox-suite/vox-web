@@ -13,7 +13,7 @@ export interface InstalledPluginsDockProps {
   className?: string;
 }
 
-/** The apps the user has connected, with a shortcut to each one's details. */
+/** Linked accounts, including ones still awaiting operator review. */
 export function InstalledPluginsDock({
   onInspect,
   className,
@@ -21,8 +21,8 @@ export function InstalledPluginsDock({
   const [inspected, setInspected] = useState<CatalogPlugin | null>(null);
   const connectionOf = usePluginConnections();
 
-  const connected = PLUGIN_CATALOG.filter(
-    (plugin) => connectionOf(plugin).state === "connected",
+  const linked = PLUGIN_CATALOG.filter(
+    (plugin) => Boolean(connectionOf(plugin).connection),
   );
 
   const handleInspect = (plugin: CatalogPlugin) => {
@@ -30,7 +30,7 @@ export function InstalledPluginsDock({
     setInspected(plugin);
   };
 
-  if (connected.length === 0) {
+  if (linked.length === 0) {
     return (
       <div
         data-testid="installed-plugins-dock-empty"
@@ -44,10 +44,10 @@ export function InstalledPluginsDock({
             <Sparkles className="size-3.5" />
           </div>
           <div>
-            <p className="font-medium text-mist">No apps connected yet</p>
+            <p className="font-medium text-mist">No accounts linked yet</p>
             <p className="text-[11px] text-smoke">
-              Connect an app below with your own account and Vox can use it when
-              you ask.
+              Link an account below. Operator review and agent access are
+              separate steps.
             </p>
           </div>
         </div>
@@ -55,7 +55,7 @@ export function InstalledPluginsDock({
     );
   }
 
-  const toolCount = connected.reduce(
+  const toolCount = linked.reduce(
     (sum, plugin) => sum + (connectionOf(plugin).connection?.tools.length ?? 0),
     0,
   );
@@ -71,22 +71,22 @@ export function InstalledPluginsDock({
       >
         <div className="flex flex-col shrink-0 pr-3 border-r border-border-edge">
           <span className="text-xs font-semibold text-pure-white">
-            Connected apps
+            Linked accounts
           </span>
           <span className="text-[11px] text-smoke">
-            {connected.length} {connected.length === 1 ? "app" : "apps"} ·{" "}
-            {toolCount} {toolCount === 1 ? "tool" : "tools"}
+            {linked.length} {linked.length === 1 ? "account" : "accounts"} ·{" "}
+            {toolCount} reported {toolCount === 1 ? "tool" : "tools"}
           </span>
         </div>
 
         <div className="flex items-center gap-2.5 overflow-x-auto py-0.5">
-          {connected.map((plugin) => (
+          {linked.map((plugin) => (
             <button
               key={plugin.id}
               type="button"
               onClick={() => handleInspect(plugin)}
-              title={`${plugin.displayName} · Connected`}
-              aria-label={`${plugin.displayName} connected`}
+              title={`${plugin.displayName} · Account linked`}
+              aria-label={`${plugin.displayName} account linked`}
               className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
             >
               <PluginLogo
