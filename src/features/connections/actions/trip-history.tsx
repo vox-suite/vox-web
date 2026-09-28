@@ -16,7 +16,13 @@ import {
 } from "@/lib/global-formatting";
 import { useReadTripHistory } from "./queries";
 
-export function TripHistory({ connectionId }: { connectionId: string }) {
+export function TripHistory({
+  connectionId,
+  includeCity,
+}: {
+  connectionId: string;
+  includeCity: boolean;
+}) {
   const read = useReadTripHistory();
   const history = read.data;
 
@@ -24,13 +30,14 @@ export function TripHistory({ connectionId }: { connectionId: string }) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-smoke">
-          Vox shows only the start city, time, distance, and status. Precise
-          locations and rider tokens are removed before they reach you.
+          Vox shows trip time, distance, and status
+          {includeCity ? ", plus the start city" : " without city details"}.
+          Precise locations and rider tokens are removed before they reach you.
         </p>
         <Button
           size="sm"
           disabled={read.isPending}
-          onClick={() => read.mutate({ connectionId })}
+          onClick={() => read.mutate({ connectionId, includeCity })}
         >
           {read.isPending
             ? "Loading trips…"

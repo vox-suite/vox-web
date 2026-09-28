@@ -21,10 +21,15 @@ function actionsFor(connection: Connection): ConnectionAction[] {
   const actions: ConnectionAction[] = [];
 
   if (connection.integration_external_key === "uber") {
-    if (granted.has("uber.trips.read")) {
+    if (granted.has("uber.history") || granted.has("uber.history_lite")) {
       actions.push({
         label: "Trip history",
-        render: (c) => <TripHistory connectionId={c.id} />,
+        render: (c) => (
+          <TripHistory
+            connectionId={c.id}
+            includeCity={granted.has("uber.history")}
+          />
+        ),
       });
     }
   }
