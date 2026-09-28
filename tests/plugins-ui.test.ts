@@ -53,6 +53,12 @@ test("account authorization and operator review remain distinct states", () => {
   const added = extension({});
   assert.equal(connectionFor(zomato, [added], []).state, "incomplete");
 
+  for (const lifecycle_state of ["disabled", "quarantined"] as const) {
+    assert.equal(
+      connectionFor(zomato, [extension({ lifecycle_state })], []).state,
+      "unavailable",
+    );
+  }
   const live = {
     extension_id: added.id,
     connection_id: "connection-zomato",
