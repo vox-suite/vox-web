@@ -112,95 +112,6 @@ const AGENTS = [
   },
 ];
 
-const LODGING_PROPERTIES = [
-  {
-    property_id: "prop_goa_tamarind",
-    name: "Tamarind Courtyard Stay",
-    location: "Assagao, Goa",
-    star_rating: 4,
-    price_amount_minor: 820000,
-    currency: "INR",
-    available_rate_plans: [
-      {
-        rate_plan_id: "rp_goa_tamarind_flex",
-        room_name: "Garden Room, Queen Bed",
-        refundable: true,
-        cancellation_deadline: "2026-09-29T12:00:00.000Z",
-      },
-      {
-        rate_plan_id: "rp_goa_tamarind_saver",
-        room_name: "Garden Room, Queen Bed (Non-refundable)",
-        refundable: false,
-        cancellation_deadline: null,
-      },
-    ],
-  },
-  {
-    property_id: "prop_goa_palolem",
-    name: "Palolem Shoreline Cottages",
-    location: "Palolem, Goa",
-    star_rating: 3,
-    price_amount_minor: 540000,
-    currency: "INR",
-    available_rate_plans: [
-      {
-        rate_plan_id: "rp_goa_palolem_flex",
-        room_name: "Sea-view Cottage",
-        refundable: true,
-        cancellation_deadline: "2026-09-28T12:00:00.000Z",
-      },
-    ],
-  },
-  {
-    property_id: "prop_jaipur_haveli",
-    name: "Chandpol Haveli",
-    location: "Jaipur, Rajasthan",
-    star_rating: 4,
-    price_amount_minor: 690000,
-    currency: "INR",
-    available_rate_plans: [
-      {
-        rate_plan_id: "rp_jaipur_haveli_flex",
-        room_name: "Heritage Room",
-        refundable: true,
-        cancellation_deadline: "2026-09-30T12:00:00.000Z",
-      },
-    ],
-  },
-  {
-    property_id: "prop_blr_indiranagar",
-    name: "Indiranagar Residency",
-    location: "Indiranagar, Bengaluru",
-    star_rating: 3,
-    price_amount_minor: 450000,
-    currency: "INR",
-    available_rate_plans: [
-      {
-        rate_plan_id: "rp_blr_indiranagar_saver",
-        room_name: "Studio (Non-refundable)",
-        refundable: false,
-        cancellation_deadline: null,
-      },
-    ],
-  },
-  {
-    property_id: "prop_mumbai_bandra",
-    name: "Bandstand Suites",
-    location: "Bandra West, Mumbai",
-    star_rating: 5,
-    price_amount_minor: 1450000,
-    currency: "INR",
-    available_rate_plans: [
-      {
-        rate_plan_id: "rp_mumbai_bandra_flex",
-        room_name: "Deluxe King, Sea View",
-        refundable: true,
-        cancellation_deadline: "2026-09-30T18:00:00.000Z",
-      },
-    ],
-  },
-];
-
 // ---------------------------------------------------------------------------
 // Per-user seed
 
@@ -724,23 +635,6 @@ function seedUser(hostUserId) {
     dropoff_longitude: to[1],
   }));
 
-  const lodgingBookings = [
-    {
-      booking_id: "bk_seed_jaipur",
-      expedia_booking_ref: "EXP-7Q2K9D",
-      property_id: "prop_jaipur_haveli",
-      status: "confirmed",
-      check_in: "2026-11-14",
-      check_out: "2026-11-16",
-      total_amount_minor: 1380000,
-      currency: "INR",
-      cancellation_policy:
-        "Free cancellation until 2026-11-12 12:00 IST; after that the first night is charged.",
-      created_at: t(-8 * DAY),
-      rate_plan_id: "rp_jaipur_haveli_flex",
-      refundable: true,
-    },
-  ];
 
   return {
     hostUserId,
@@ -756,7 +650,6 @@ function seedUser(hostUserId) {
     tasks,
     proposals,
     uberTrips,
-    lodgingBookings,
     exports: [],
     conversations: 7,
   };
@@ -792,13 +685,6 @@ const publicProposal = (p) => ({
   state: p.state,
   details: p.details,
 });
-
-const publicBooking = (b) => {
-  const copy = { ...b };
-  delete copy.rate_plan_id;
-  delete copy.refundable;
-  return copy;
-};
 
 // Tasks advance with wall-clock time unless pinned by seed or fixture control.
 function advanceTask(task) {
@@ -1066,8 +952,8 @@ export function createCoreFixture() {
       },
     ],
     [
-      "DELETE",
-      /^\/v1\/capability-grants$/,
+      "POST",
+      /^\/v1\/capability-grants\/revoke$/,
       (user, _m, body) => {
         const grant = body.grant ?? {};
         const before = user.grants.length;
@@ -1402,8 +1288,8 @@ export function createCoreFixture() {
         ),
     ],
     [
-      "PUT",
-      /^\/v1\/remote-extensions\/([^/]+)$/,
+      "POST",
+      /^\/v1\/remote-extensions\/([^/]+)\/update$/,
       (user, [, id], body) => {
         const ext = find(
           user.extensions,
@@ -1433,8 +1319,8 @@ export function createCoreFixture() {
       },
     ],
     [
-      "DELETE",
-      /^\/v1\/remote-extensions\/([^/]+)$/,
+      "POST",
+      /^\/v1\/remote-extensions\/([^/]+)\/remove$/,
       (user, [, id]) => {
         const ext = find(
           user.extensions,
@@ -1615,109 +1501,6 @@ export function createCoreFixture() {
           total_trips: user.uberTrips.length,
           retrieved_at: iso(Date.now() - 42_000),
           freshness_seconds: 42,
-        };
-      },
-    ],
-
-    // Lodging
-    [
-      "POST",
-      /^\/v1\/lodging\/search$/,
-      (user, _m, body) => {
-        // Any authorized connection owned by the user is accepted (see README).
-        requireAuthorizedConnection(user, body.connection_id);
-        if (!body.destination)
-          fail(400, "invalid_request", "destination is required");
-        const needle = String(body.destination).toLowerCase().trim();
-        const properties = LODGING_PROPERTIES.filter(
-          (p) =>
-            p.location.toLowerCase().includes(needle) ||
-            p.name.toLowerCase().includes(needle),
-        );
-        return { properties, total_results: properties.length };
-      },
-    ],
-    [
-      "POST",
-      /^\/v1\/lodging\/bookings$/,
-      (user, _m, body) => {
-        requireAuthorizedConnection(user, body.connection_id);
-        const request = body.booking_request ?? {};
-        const property = find(
-          LODGING_PROPERTIES,
-          (p) => p.property_id === request.property_id,
-          "Property",
-        );
-        const plan = find(
-          property.available_rate_plans,
-          (r) => r.rate_plan_id === request.rate_plan_id,
-          "Rate plan",
-        );
-        if (!request.check_in || !request.check_out || !request.guest_name)
-          fail(
-            400,
-            "invalid_request",
-            "guest_name, check_in and check_out are required",
-          );
-        const nights = Math.round(
-          (Date.parse(request.check_out) - Date.parse(request.check_in)) / DAY,
-        );
-        if (!(nights > 0))
-          fail(400, "invalid_dates", "check_out must be after check_in");
-        const expected = property.price_amount_minor * nights;
-        if (
-          request.total_amount_minor !== expected ||
-          request.currency !== property.currency
-        ) {
-          fail(
-            409,
-            "price_changed",
-            `Price is now ${expected} ${property.currency} minor units for ${nights} night(s); review again`,
-          );
-        }
-        const booking = {
-          booking_id: `bk_${randomUUID().slice(0, 10)}`,
-          expedia_booking_ref: `EXP-${randomUUID().slice(0, 6).toUpperCase()}`,
-          property_id: property.property_id,
-          status: "confirmed",
-          check_in: request.check_in,
-          check_out: request.check_out,
-          total_amount_minor: expected,
-          currency: property.currency,
-          cancellation_policy: plan.refundable
-            ? `Free cancellation until ${plan.cancellation_deadline}.`
-            : "Non-refundable: cancelling will not return any payment.",
-          created_at: iso(Date.now()),
-          rate_plan_id: plan.rate_plan_id,
-          refundable: plan.refundable,
-        };
-        user.lodgingBookings.push(booking);
-        return publicBooking(booking);
-      },
-    ],
-    [
-      "POST",
-      /^\/v1\/lodging\/bookings\/([^/]+)\/cancel$/,
-      (user, [, id], body) => {
-        requireAuthorizedConnection(user, body.connection_id);
-        const booking = find(
-          user.lodgingBookings,
-          (b) => b.booking_id === id,
-          "Booking",
-        );
-        if (booking.status === "cancelled")
-          fail(409, "already_cancelled", "Booking is already cancelled");
-        booking.status = "cancelled";
-        return {
-          booking_id: booking.booking_id,
-          expedia_booking_ref: booking.expedia_booking_ref,
-          property_id: booking.property_id,
-          status: "cancelled",
-          refund_amount_minor: booking.refundable
-            ? booking.total_amount_minor
-            : 0,
-          currency: booking.currency,
-          cancelled_at: iso(Date.now()),
         };
       },
     ],
@@ -1925,8 +1708,8 @@ export function createCoreFixture() {
       },
     ],
     [
-      "DELETE",
-      /^\/v1\/preferences\/([^/]+)$/,
+      "POST",
+      /^\/v1\/preferences\/([^/]+)\/delete$/,
       (user, [, key]) => {
         const decoded = decodeURIComponent(key);
         const before = user.preferences.length;

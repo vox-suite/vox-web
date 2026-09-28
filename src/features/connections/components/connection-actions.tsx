@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
-import { Lodging } from "../actions/lodging";
 import { TripHistory } from "../actions/trip-history";
 
 type ConnectionAction = {
@@ -29,17 +28,6 @@ function actionsFor(connection: Connection): ConnectionAction[] {
             connectionId={c.id}
             includeCity={granted.has("uber.history")}
           />
-        ),
-      });
-    }
-  }
-
-  if (connection.integration_external_key === "expedia") {
-    if (granted.has("lodging.search")) {
-      actions.push({
-        label: "Find a stay",
-        render: (c) => (
-          <Lodging connectionId={c.id} canBook={granted.has("lodging.book")} />
         ),
       });
     }
