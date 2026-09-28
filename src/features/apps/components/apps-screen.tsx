@@ -5,8 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/app";
 import { Notice } from "@/components/ui";
 import { connectErrorMessage } from "@/lib/consumer-auth/connected-apps-messages";
-import { getCatalogPlugin } from "@/features/plugins/catalog";
-import { pluginKeys } from "@/features/plugins/queries";
+import { pluginKeys, usePluginCatalog } from "@/features/plugins/queries";
 import { extensionKeys } from "@/features/extensions/queries";
 import { ConnectionsPanel } from "@/features/connections/components/connections-panel";
 import { ExtensionsPanel } from "@/features/extensions/components/extensions-panel";
@@ -35,7 +34,7 @@ function useConnectResult() {
       connected
         ? {
             kind: "authorized",
-            name: getCatalogPlugin(connected)?.displayName ?? connected,
+            name: connected,
           }
         : { kind: "error", message: connectErrorMessage(error ?? undefined) },
     );
@@ -57,6 +56,12 @@ export function AppsScreen() {
   const [view, setView] = useState<"plugins" | "skills">("plugins");
   const [source, setSource] = useState<"public" | "personal">("public");
   const connectResult = useConnectResult();
+  const { data: catalog = [] } = usePluginCatalog();
+  const connectedName =
+    connectResult?.kind === "authorized"
+      ? (catalog.find((p) => p.id === connectResult.name)?.displayName ??
+        connectResult.name)
+      : "";
 
   return (
     <div className="space-y-6">
@@ -93,9 +98,9 @@ export function AppsScreen() {
         }
       />
       {connectResult?.kind === "authorized" && (
-        <Notice title={`${connectResult.name} account linked`} tone="success">
-          Authorization succeeded. The app still needs review and an explicit
-          agent grant before an agent can use it.
+        <Notice title={`${connectedName} account linked`} tone="success">
+          Authorization succeeded. Select an agent and grant the reviewed
+          capabilities under Agent access before using this account.
         </Notice>
       )}
       {connectResult?.kind === "error" && (
@@ -141,7 +146,7 @@ export function AppsScreen() {
               </div>
               <p className="text-xs text-smoke hidden sm:block">
                 {source === "public"
-                  ? "Official apps you sign in to with your own account"
+                  ? "Reviewed connectors you sign in to with your own account"
                   : "Register custom or internal Model Context Protocol servers"}
               </p>
             </div>
@@ -153,7 +158,7 @@ export function AppsScreen() {
                     Apps
                   </h2>
                   <p className="text-xs text-smoke">
-                    Each app is the provider’s own official MCP server
+                    Connector versions reviewed by your platform operator
                   </p>
                 </div>
                 <PluginCatalogGrid />

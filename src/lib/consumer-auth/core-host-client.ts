@@ -151,6 +151,11 @@ export type CreateProposalRequest = {
 };
 
 export type ExtensionProtocol = "mcp" | "direct";
+export type ConnectorPackage = {
+  version: number;
+  digest: string;
+  manifest: InstallExtensionRequest;
+};
 export type ExtensionEffect = "read" | "write" | "mixed";
 export type ConformanceStatus = "pending" | "passed" | "failed";
 export type ConsentStatus = "consented" | "consent_required";
@@ -1095,6 +1100,40 @@ export class VoxCoreHostClient {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,
         },
+      },
+    );
+  }
+
+  async listConnectorPackages(accountId: string): Promise<ConnectorPackage[]> {
+    return this.signedPost<ConnectorPackage[]>(
+      "/v1/connector-packages/list",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async installConnectorPackage(
+    accountId: string,
+    externalKey: string,
+    version: number,
+    digest: string,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      "/v1/connector-packages/install",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        external_key: externalKey,
+        version,
+        digest,
       },
     );
   }

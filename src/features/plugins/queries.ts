@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
+import type { CatalogPlugin } from "./catalog";
 import { extensionKeys } from "@/features/extensions/queries";
 import {
   connectPlugin,
@@ -52,7 +53,18 @@ export function useConnectPlugin() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: pluginKeys.connect(),
-    mutationFn: (pluginId: string) => connectPlugin(pluginId),
+    mutationFn: async (plugin: CatalogPlugin) => {
+      if (plugin.packageVersion === undefined || !plugin.packageDigest) {
+        throw new Error(
+          "Select a reviewed connector version from the catalog.",
+        );
+      }
+      return connectPlugin(
+        plugin.id,
+        plugin.packageVersion,
+        plugin.packageDigest,
+      );
+    },
     onSuccess: (data: ConnectPluginResponse) => {
       if (data.status === "authorize") {
         window.location.assign(data.authorizationUrl);
@@ -83,7 +95,7 @@ export function useIsConnectingPlugin(pluginId: string) {
   });
   return states.some(
     (s) =>
-      s.variables === pluginId &&
+      (s.variables as CatalogPlugin | undefined)?.id === pluginId &&
       (s.status === "pending" ||
         (s.status === "success" && s.data?.status === "authorize")),
   );

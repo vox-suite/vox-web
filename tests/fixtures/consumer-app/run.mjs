@@ -59,6 +59,7 @@ export const fixtureEnv = {
   VOX_AUTH_SMTP_URL: "smtp://127.0.0.1:1",
   VOX_AUTH_EMAIL_FROM: "Vox <hello@example.test>",
   VOX_CORE_URL: coreUrl,
+  VOX_CONNECTED_APPS_REDIRECT_URI: `${appOrigin}/app/apps/oauth/callback`,
   VOX_HOST_CREDENTIAL_ID: "consumer-fixture-host-credential",
   VOX_HOST_AUDIENCE: "vox-host:fixture:vox-web",
   VOX_HOST_SECRET: "consumer-fixture-host-secret-0123456789abcdef",
@@ -78,8 +79,7 @@ function shutdown(code = 0) {
   shuttingDown = true;
   for (const child of children) {
     try {
-      // next dev spawns worker processes; kill the whole process group.
-      process.kill(-child.pid, "SIGTERM");
+      child.kill("SIGTERM");
     } catch {
       child.kill("SIGTERM");
     }
@@ -111,7 +111,7 @@ async function main() {
       "--port",
       String(appPort),
     ],
-    { cwd: repoRoot, env, stdio: "inherit", detached: true },
+    { cwd: repoRoot, env, stdio: "inherit" },
   );
   children.add(child);
   child.on("exit", (code, signal) => {

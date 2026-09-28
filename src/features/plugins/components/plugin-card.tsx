@@ -29,7 +29,7 @@ export function PluginCard({
   const handleConnect = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isConnecting || !["none", "incomplete"].includes(state)) return;
-    connectMutation.mutate(plugin.id);
+    connectMutation.mutate(plugin);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

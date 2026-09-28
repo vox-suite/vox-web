@@ -80,14 +80,18 @@ export function PluginInspectorModal({
                     </span>
                   )}
                   {state === "awaiting_review" && (
-                    <span className="text-xs font-medium text-ash">Awaiting review</span>
+                    <span className="text-xs font-medium text-ash">
+                      Awaiting review
+                    </span>
                   )}
                   {state === "unavailable" && (
-                    <span className="text-xs font-medium text-ash">Unavailable</span>
+                    <span className="text-xs font-medium text-ash">
+                      Unavailable
+                    </span>
                   )}
                 </div>
                 <Dialog.Description className="mt-0.5 text-xs text-smoke">
-                  Official app by {plugin.publisher} · {plugin.category}
+                  Published by {plugin.publisher} · {plugin.category}
                 </Dialog.Description>
               </div>
             </div>
@@ -131,7 +135,10 @@ export function PluginInspectorModal({
                             </p>
                           )}
                         </div>
-                        <Badge tone="neutral" className="shrink-0 text-[10px] whitespace-nowrap">
+                        <Badge
+                          tone="neutral"
+                          className="shrink-0 text-[10px] whitespace-nowrap"
+                        >
                           Reported tool
                         </Badge>
                       </div>
@@ -143,10 +150,9 @@ export function PluginInspectorModal({
                   </p>
                 )}
                 <p className="text-[11px] leading-relaxed text-smoke">
-                  This list comes from {plugin.displayName} itself. Agent use is
-                  unavailable until an explicit agent grant and verified action
-                  approval are supported. Labels are untrusted reports, not
-                  execution permissions.
+                  This list comes from {plugin.displayName} itself. Only
+                  reviewed, declared tools can be granted to an agent. External
+                  changes still require an exact action approval.
                 </p>
               </div>
             ) : (
@@ -188,7 +194,7 @@ export function PluginInspectorModal({
             <div className="space-y-1 rounded-xl border border-border-edge bg-obsidian/40 p-3 text-xs">
               <span className="flex items-center gap-1.5 font-medium text-mist">
                 <Globe className="size-3.5 text-ash" />
-                Official MCP server
+                MCP endpoint
               </span>
               <p className="font-mono text-ash break-all select-all">
                 {plugin.endpointUrl}
@@ -214,7 +220,7 @@ export function PluginInspectorModal({
                   variant="primary"
                   size="sm"
                   disabled={isConnecting}
-                  onClick={() => connectMutation.mutate(plugin.id)}
+                  onClick={() => connectMutation.mutate(plugin)}
                   className="gap-1.5"
                 >
                   {isConnecting ? (

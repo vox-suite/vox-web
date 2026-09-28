@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getCatalogPlugin } from "../src/features/plugins/catalog";
+import { presentConnector } from "../src/features/plugins/catalog";
 import { connectionFor } from "../src/features/plugins/connection-state";
 import {
   PluginLogo,
@@ -47,12 +47,18 @@ test("apps UI components are exported React components", () => {
 });
 
 test("account authorization and operator review remain distinct states", () => {
-  const zomato = getCatalogPlugin("zomato")!;
+  const zomato = presentConnector({ ...extension({}), capabilities: [] });
   assert.equal(connectionFor(zomato, [], []).state, "none");
 
   const added = extension({});
   assert.equal(connectionFor(zomato, [added], []).state, "incomplete");
 
+  for (const lifecycle_state of ["disabled", "quarantined"] as const) {
+    assert.equal(
+      connectionFor(zomato, [extension({ lifecycle_state })], []).state,
+      "unavailable",
+    );
+  }
   const live = {
     extension_id: added.id,
     connection_id: "connection-zomato",

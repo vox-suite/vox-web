@@ -5,7 +5,8 @@ import type { ConnectedApp } from "./api";
 import type { CatalogPlugin } from "./catalog";
 import { useConnectedApps } from "./queries";
 
-export type PluginConnectionState = "reviewed" | "awaiting_review" | "unavailable" | "incomplete" | "none";
+export type PluginConnectionState =
+  "reviewed" | "awaiting_review" | "unavailable" | "incomplete" | "none";
 
 export type PluginConnection = {
   state: PluginConnectionState;
@@ -27,6 +28,9 @@ export function connectionFor(
   );
   if (!extension) return { state: "none" };
   const connection = connected.find((c) => c.extension_id === extension.id);
+  if (["disabled", "quarantined"].includes(extension.lifecycle_state)) {
+    return { state: "unavailable", extension, connection };
+  }
   if (!connection) return { state: "incomplete", extension };
   if (extension.lifecycle_state === "active") {
     return { state: "reviewed", extension, connection };

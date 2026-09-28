@@ -1,159 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
-import {
-  APPROVED_APPS,
-  getCatalogPlugin,
-  type CatalogPlugin,
-} from "@/features/plugins/catalog";
-import {
-  CoreHostRequestError,
-  type RemoteExtension,
-  type VoxCoreHostClient,
-} from "@/lib/consumer-auth/core-host-client";
+import { CoreHostRequestError } from "@/lib/consumer-auth/core-host-client";
 import {
   connectErrorMessage,
   connectedAppsRedirectUri,
 } from "@/lib/consumer-auth/connected-apps";
 
-type ConnectResult =
-  | { status: "authorized"; extension: RemoteExtension }
-  | {
-      status: "authorize";
-      extension: RemoteExtension;
-      authorizationUrl: string;
-    };
-
-/**
- * A second click or a second card for the same app easily overlaps the
- * first. Overlapping requests for one account and app share one attempt.
- */
-const inFlight = new Map<string, Promise<ConnectResult>>();
-
-function isCoreConflict(error: unknown) {
-  return error instanceof CoreHostRequestError && error.status === 409;
-}
-
-async function ensureInstalled(
-  core: VoxCoreHostClient,
-  accountId: string,
-  plugin: CatalogPlugin,
-): Promise<RemoteExtension> {
-  const findInstalled = async () =>
-    (await core.listExtensions(accountId)).find(
-      (ext) =>
-        ext.external_key === plugin.id && ext.lifecycle_state !== "removed",
-    );
-  const existing = await findInstalled();
-  if (existing) return existing;
-  try {
-    return await core.installExtension(accountId, {
-      external_key: plugin.id,
-      display_name: plugin.displayName,
-      protocol: "mcp",
-      endpoint_url: plugin.endpointUrl,
-      operator: {
-        operator_id: plugin.operator.operatorId,
-        operator_name: plugin.operator.operatorName,
-      },
-      // The app's real tools are recorded by Core once the user connects.
-      capabilities: [],
-    });
-  } catch (error) {
-    // Core answers 409 when another request installed it first.
-    if (!isCoreConflict(error)) throw error;
-    const winner = await findInstalled();
-    if (!winner) throw error;
-    return winner;
-  }
-}
-
-async function connect(
-  core: VoxCoreHostClient,
-  accountId: string,
-  plugin: CatalogPlugin,
-  redirectUri: string,
-): Promise<ConnectResult> {
-  const extension = await ensureInstalled(core, accountId, plugin);
-  const status = await core.connectedAppsStatus(accountId);
-  if (status.connected.some((c) => c.extension_id === extension.id)) {
-    return { status: "authorized", extension };
-  }
-  const start = await core.authorizeExtension(
-    accountId,
-    extension.id,
-    redirectUri,
-  );
-  return {
-    status: "authorize",
-    extension,
-    authorizationUrl: start.authorization_url,
-  };
-}
-
+/** Core serializes package installation across hosts; this route holds no process-local lock. */
 export async function POST(request: NextRequest) {
   const account = await currentConsumer(request.headers);
-  if (!account) {
+  if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  let body: { pluginId?: unknown };
+  let input: unknown;
   try {
-    body = await request.json();
+    input = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  if (typeof body.pluginId !== "string" || !body.pluginId) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
     return NextResponse.json(
-      { error: "Plugin ID is required" },
+      { error: "Invalid install request" },
       { status: 400 },
     );
   }
-  const plugin = getCatalogPlugin(body.pluginId);
-  if (!plugin) {
-    return NextResponse.json({ error: "Plugin not found" }, { status: 404 });
-  }
-  // The provider would reject Vox's callback after the user signs in.
+  const body = input as {
+    pluginId?: unknown;
+    version?: unknown;
+    digest?: unknown;
+  };
   if (
-    plugin.registration === "allowlisted" &&
-    !APPROVED_APPS.includes(plugin.id)
+    typeof body.pluginId !== "string" ||
+    !body.pluginId ||
+    body.pluginId.length > 255 ||
+    !Number.isSafeInteger(body.version) ||
+    (body.version as number) < 1 ||
+    typeof body.digest !== "string" ||
+    !/^[a-f0-9]{64}$/.test(body.digest)
   ) {
     return NextResponse.json(
-      {
-        error: `${plugin.displayName} hasn't approved Vox as a client yet.`,
-        code: "provider_approval_required",
-      },
-      { status: 409 },
+      { error: "Select a reviewed connector version" },
+      { status: 400 },
     );
   }
-
   const core = getCoreHostClient();
-  if (!core) {
+  if (!core)
     return NextResponse.json(
       { error: "Core service unavailable" },
       { status: 503 },
     );
-  }
-
-  const key = `${account.accountId}:${plugin.id}`;
-  let attempt = inFlight.get(key);
-  if (!attempt) {
-    attempt = connect(
-      core,
-      account.accountId,
-      plugin,
-      connectedAppsRedirectUri(request),
-    ).finally(() => inFlight.delete(key));
-    inFlight.set(key, attempt);
-  }
-
   try {
-    return NextResponse.json(await attempt);
+    const extension = await core.installConnectorPackage(
+      account.accountId,
+      body.pluginId,
+      body.version as number,
+      body.digest,
+    );
+    const status = await core.connectedAppsStatus(account.accountId);
+    if (status.connected.some((c) => c.extension_id === extension.id)) {
+      return NextResponse.json({ status: "authorized", extension });
+    }
+    const start = await core.authorizeExtension(
+      account.accountId,
+      extension.id,
+      connectedAppsRedirectUri(request),
+    );
+    return NextResponse.json({
+      status: "authorize",
+      extension,
+      authorizationUrl: start.authorization_url,
+    });
   } catch (error) {
     const code = error instanceof CoreHostRequestError ? error.code : undefined;
+    const status =
+      error instanceof CoreHostRequestError && [404, 409].includes(error.status)
+        ? error.status
+        : 502;
     return NextResponse.json(
       { error: connectErrorMessage(code), code },
-      { status: 502 },
+      { status },
     );
   }
 }

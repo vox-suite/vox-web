@@ -3,9 +3,9 @@
 import React, { useMemo, useState } from "react";
 import { ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Notice } from "@/components/ui";
 import {
   PLUGIN_CATEGORIES,
-  connectablePlugins,
   type CatalogPlugin,
   type PluginCategory,
 } from "../catalog";
@@ -34,7 +34,7 @@ export function PluginCatalogGrid({
     null,
   );
 
-  const { data: catalog = connectablePlugins([]) } = usePluginCatalog();
+  const { data: catalog = [], isPending, error } = usePluginCatalog();
   const connectionOf = usePluginConnections();
 
   const matchesSearch = (plugin: CatalogPlugin, query: string) => {
@@ -127,6 +127,21 @@ export function PluginCatalogGrid({
         </div>
       </div>
 
+      {isPending && (
+        <p role="status" className="text-sm text-smoke">
+          Loading reviewed connectors…
+        </p>
+      )}
+      {error && (
+        <Notice title="Connector catalog unavailable" tone="error">
+          {error.message}
+        </Notice>
+      )}
+      {!isPending && !error && catalog.length === 0 && (
+        <p className="text-sm text-smoke">
+          No reviewed connectors are available in this deployment.
+        </p>
+      )}
       {/* Grid Content */}
       {isFiltering ? (
         /* Filtered View */
