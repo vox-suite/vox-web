@@ -1156,7 +1156,7 @@ export class VoxCoreHostClient {
     request: UberReadRequest,
   ): Promise<UberHistoryResponse> {
     return this.signedPost<UberHistoryResponse>(
-      "/v1/connected-reads/uber",
+      "/v1/connected-reads",
       accountId,
       {
         host_context: {
@@ -1165,9 +1165,10 @@ export class VoxCoreHostClient {
         },
         agent_external_key: request.agent_external_key ?? "saathi",
         connection_id: request.connection_id,
+        capability_external_key:
+          (request.include_city ?? true) ? "uber.history" : "uber.history_lite",
         offset: request.offset ?? 0,
         limit: request.limit ?? 10,
-        include_city: request.include_city ?? true,
       },
     );
   }

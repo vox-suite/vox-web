@@ -54,7 +54,8 @@ test("readUberHistory posts signed host context and retrieves minimized trips", 
     include_city: true,
   });
 
-  assert.equal(capturedUrl, "https://core.vox.test/v1/connected-reads/uber");
+  assert.equal(capturedUrl, "https://core.vox.test/v1/connected-reads");
+  assert.equal(capturedBody.capability_external_key, "uber.history");
   assert.equal(
     (capturedBody.host_context as Record<string, string>).host_user_id,
     "vox-account:user-1",
