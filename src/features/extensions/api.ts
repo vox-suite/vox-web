@@ -31,3 +31,18 @@ export async function removeExtension(extensionId: string) {
   );
   return extension;
 }
+
+export async function renewExtensionConsent(
+  extensionId: string,
+  version: number,
+) {
+  const { extension } = await apiRequest<{ extension: RemoteExtension }>(
+    `/api/account/extensions/${encodeURIComponent(extensionId)}/renew-consent`,
+    {
+      method: "POST",
+      body: { version, confirmed: true },
+      fallbackError: "Consent renewal failed",
+    },
+  );
+  return extension;
+}

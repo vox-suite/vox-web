@@ -28,7 +28,7 @@ export function PluginCard({
 
   const handleConnect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isConnecting || state === "connected") return;
+    if (isConnecting || !["none", "incomplete"].includes(state)) return;
     connectMutation.mutate(plugin.id);
   };
 
@@ -51,7 +51,7 @@ export function PluginCard({
         aria-label={`View ${plugin.displayName} details`}
         className={cn(
           "group relative flex items-center justify-between gap-3.5 rounded-2xl border border-border-edge bg-ink/80 p-4 transition-all duration-150 hover:border-ash/40 hover:bg-ink hover:shadow-subtle-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50 cursor-pointer select-none",
-          state === "connected" && "border-border-edge/60 bg-ink/60",
+          state === "reviewed" && "border-border-edge/60 bg-ink/60",
           className,
         )}
       >
@@ -96,13 +96,17 @@ export function PluginCard({
                 Opening {plugin.displayName}…
               </span>
             </div>
-          ) : state === "connected" ? (
+          ) : state === "reviewed" ? (
             <span
               data-testid={`connected-badge-${plugin.id}`}
               className="inline-flex items-center gap-1 rounded-lg border border-success-green/20 bg-success-green/10 px-2 py-1 text-xs font-medium text-success-green"
             >
               <Check className="size-3.5 stroke-[2.5]" />
-              <span>Connected</span>
+              <span>Account linked</span>
+            </span>
+          ) : state === "awaiting_review" || state === "unavailable" ? (
+            <span className="inline-flex items-center rounded-lg border border-border-edge bg-obsidian px-2 py-1 text-xs font-medium text-ash">
+              {state === "awaiting_review" ? "Awaiting review" : "Unavailable"}
             </span>
           ) : (
             <Button

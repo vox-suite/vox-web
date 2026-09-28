@@ -69,8 +69,9 @@ export function QuickAddMcpForm({
       <div>
         <h2 className="text-lg font-medium text-mist">Add an MCP server</h2>
         <p className="mt-1 max-w-2xl text-sm text-smoke">
-          Enter the remote server URL. Vox will save it for your account; tool
-          discovery and account authorization are still being built.
+          Enter the remote server URL. Vox saves it as an unverified extension.
+          To use its tools, a developer must declare their effects, an operator
+          must review them, and you must connect and grant an agent access.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">

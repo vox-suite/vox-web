@@ -148,7 +148,7 @@ export function GrantsPanel({ id }: { id?: string }) {
                         <span className="min-w-0 break-words text-[13px] font-medium text-mist">
                           {connection.integration_external_key.toUpperCase()} (
                           {connection.account_display_id ||
-                            connection.external_account_reference}
+                            "Account linked; provider identity unavailable"}
                           )
                         </span>
                         <Tag tone="positive">Connected</Tag>

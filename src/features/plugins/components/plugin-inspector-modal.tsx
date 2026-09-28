@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { Badge, Button, Notice } from "@/components/ui";
-import type { ConnectedAppTool } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "../catalog";
 import type { PluginConnection } from "../connection-state";
 import {
@@ -28,22 +27,6 @@ export interface PluginInspectorModalProps {
   connection: PluginConnection;
   isOpen: boolean;
   onClose: () => void;
-}
-
-function toolBadge(tool: ConnectedAppTool): {
-  label: string;
-  tone: "neutral" | "accent" | "warning";
-} {
-  const policy =
-    tool.policy ??
-    (tool.read_only
-      ? "read"
-      : tool.asks_first === false
-        ? "change"
-        : "confirm");
-  if (policy === "read") return { label: "Read", tone: "neutral" };
-  if (policy === "change") return { label: "Makes changes", tone: "warning" };
-  return { label: "Asks you first", tone: "accent" };
 }
 
 export function PluginInspectorModal({
@@ -90,11 +73,17 @@ export function PluginInspectorModal({
                   <Dialog.Title className="truncate text-lg font-semibold text-pure-white">
                     {plugin.displayName}
                   </Dialog.Title>
-                  {state === "connected" && (
+                  {state === "reviewed" && (
                     <span className="inline-flex items-center gap-1 rounded-md border border-success-green/20 bg-success-green/10 px-2 py-0.5 text-xs font-medium text-success-green">
                       <Check className="size-3 stroke-[2.5]" />
-                      Connected
+                      Account linked
                     </span>
+                  )}
+                  {state === "awaiting_review" && (
+                    <span className="text-xs font-medium text-ash">Awaiting review</span>
+                  )}
+                  {state === "unavailable" && (
+                    <span className="text-xs font-medium text-ash">Unavailable</span>
                   )}
                 </div>
                 <Dialog.Description className="mt-0.5 text-xs text-smoke">
@@ -119,11 +108,11 @@ export function PluginInspectorModal({
               {plugin.description}
             </p>
 
-            {state === "connected" ? (
+            {state === "reviewed" ? (
               <div className="space-y-3">
                 <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-smoke">
                   <ShieldCheck className="size-3.5 text-ash" />
-                  What Vox can use ({tools.length})
+                  Tools reported by this app ({tools.length})
                 </h4>
                 {tools.length > 0 ? (
                   <div className="divide-y divide-border-edge rounded-xl border border-border-edge bg-obsidian/50">
@@ -142,11 +131,8 @@ export function PluginInspectorModal({
                             </p>
                           )}
                         </div>
-                        <Badge
-                          tone={toolBadge(tool).tone}
-                          className="shrink-0 text-[10px] whitespace-nowrap"
-                        >
-                          {toolBadge(tool).label}
+                        <Badge tone="neutral" className="shrink-0 text-[10px] whitespace-nowrap">
+                          Reported tool
                         </Badge>
                       </div>
                     ))}
@@ -157,8 +143,10 @@ export function PluginInspectorModal({
                   </p>
                 )}
                 <p className="text-[11px] leading-relaxed text-smoke">
-                  This list comes from {plugin.displayName} itself. Vox asks you
-                  before running anything marked “Asks you first”.
+                  This list comes from {plugin.displayName} itself. Agent use is
+                  unavailable until an explicit agent grant and verified action
+                  approval are supported. Labels are untrusted reports, not
+                  execution permissions.
                 </p>
               </div>
             ) : (
@@ -181,10 +169,18 @@ export function PluginInspectorModal({
                   <p>
                     You sign in on {plugin.displayName}’s own page and choose
                     what to allow. Vox never sees your password. The access it
-                    gets is stored encrypted, and Vox asks you before doing
-                    anything that changes your {plugin.displayName} account. You
-                    can disconnect at any time.
+                    gets is stored encrypted. Operator review and agent access
+                    are separate from sign-in. You can disconnect at any time.
                   </p>
+                  {state === "awaiting_review" && (
+                    <p>
+                      Your sign-in succeeded. This app is awaiting operator
+                      review before Vox can use its tools.
+                    </p>
+                  )}
+                  {state === "unavailable" && (
+                    <p>This app is currently unavailable for tool use.</p>
+                  )}
                 </div>
               </>
             )}
@@ -213,7 +209,7 @@ export function PluginInspectorModal({
 
           <div className="mt-8 flex items-center justify-between gap-3 border-t border-border-edge pt-4">
             <div className="flex items-center gap-2">
-              {state !== "connected" && (
+              {(state === "none" || state === "incomplete") && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -240,7 +236,7 @@ export function PluginInspectorModal({
               )}
               {extension && (
                 <Button
-                  variant={state === "connected" ? "destructive" : "ghost"}
+                  variant={live ? "destructive" : "ghost"}
                   size="sm"
                   disabled={isDisconnecting}
                   onClick={handleDisconnect}
@@ -251,7 +247,7 @@ export function PluginInspectorModal({
                   ) : (
                     <Unplug className="size-3.5" />
                   )}
-                  <span>{state === "connected" ? "Disconnect" : "Remove"}</span>
+                  <span>{live ? "Disconnect" : "Remove"}</span>
                 </Button>
               )}
             </div>

@@ -6,11 +6,7 @@ import {
 } from "@tanstack/react-query";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
 import { grantKeys } from "@/features/grants/queries";
-import {
-  connectPlayStation,
-  disconnectConnection,
-  listConnections,
-} from "./api";
+import { disconnectConnection, listConnections } from "./api";
 
 export const connectionKeys = {
   all: ["connections"] as const,
@@ -51,17 +47,5 @@ export function useDisconnectConnection() {
     },
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: connectionKeys.list() }),
-  });
-}
-
-export function useConnectPlayStation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: connectPlayStation,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: connectionKeys.all });
-      void queryClient.invalidateQueries({ queryKey: grantKeys.all });
-      void queryClient.invalidateQueries({ queryKey: ["spans"] });
-    },
   });
 }

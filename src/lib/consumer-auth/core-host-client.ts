@@ -32,7 +32,6 @@ type FederatedClock = AssertionClock & { expiresAtSeconds: number };
 export type Connection = {
   id: string;
   integration_external_key: string;
-  external_account_reference: string;
   account_display_id: string | null;
   credential_custody: "platform_held" | "external_operator";
   authorization_state:
@@ -40,34 +39,6 @@ export type Connection = {
   authorized_capabilities: string[];
   expires_at: string | null;
   failure_code: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type InitiateConnectionRequest = {
-  integration_external_key: string;
-  credential_custody: "platform_held" | "external_operator";
-  requested_capabilities?: string[];
-  redirect_uri?: string | null;
-};
-
-export type AuthorizeConnectionInput = {
-  integration_external_key: string;
-  external_account_reference: string;
-  account_display_id?: string | null;
-  credential_custody: "platform_held" | "external_operator";
-  authorization_state: "authorized" | "pending";
-  authorized_capabilities?: string[];
-  expires_at?: string | null;
-  failure_code?: string | null;
-};
-
-export type InitiateConnectionResponse = {
-  session_id: string;
-  integration_external_key: string;
-  state_token: string;
-  authorization_url: string;
-  expires_at: string;
 };
 
 export type CapabilityGrant = {
@@ -229,17 +200,15 @@ export type ConnectedAppTool = {
   name: string;
   title?: string | null;
   description?: string | null;
-  /** read: only reads; change: easy to undo; confirm: Vox asks first. */
-  policy?: "read" | "change" | "confirm";
-  read_only: boolean;
-  asks_first?: boolean;
 };
 
 export type ConnectedAppsStatus = {
   configured_hosts: string[];
   connected: {
     extension_id: string;
+    connection_id: string;
     connected_at: string;
+    lifecycle_state: "installed" | "active" | "disabled" | "quarantined";
     tools: ConnectedAppTool[];
   }[];
 };
@@ -839,40 +808,6 @@ export class VoxCoreHostClient {
     );
   }
 
-  async initiateConnection(
-    accountId: string,
-    initiation: InitiateConnectionRequest,
-  ): Promise<InitiateConnectionResponse> {
-    return this.signedPost<InitiateConnectionResponse>(
-      "/v1/connections/initiate",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        initiation,
-      },
-    );
-  }
-
-  async recordConnection(
-    accountId: string,
-    authorization: AuthorizeConnectionInput,
-  ): Promise<Connection> {
-    return this.signedPost<Connection>(
-      "/v1/connections/authorize",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        authorization,
-      },
-    );
-  }
-
   async disconnectConnection(
     accountId: string,
     connectionId: string,
@@ -1091,6 +1026,25 @@ export class VoxCoreHostClient {
     );
   }
 
+  async renewExtensionConsent(
+    accountId: string,
+    extensionId: string,
+    version: number,
+  ): Promise<RemoteExtension> {
+    return this.signedPost<RemoteExtension>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/renew-consent`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        version,
+        confirmed: true,
+      },
+    );
+  }
+
   /** Start provider OAuth for an installed MCP app; returns the login URL. */
   async authorizeExtension(
     accountId: string,
@@ -1115,6 +1069,7 @@ export class VoxCoreHostClient {
     accountId: string,
     state: string,
     code: string,
+    iss?: string | null,
   ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
       "/v1/connected-apps/callback",
@@ -1126,6 +1081,7 @@ export class VoxCoreHostClient {
         },
         state,
         code,
+        iss: iss ?? null,
       },
     );
   }

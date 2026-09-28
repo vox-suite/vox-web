@@ -74,43 +74,6 @@ test("listConnections posts signed host context and parses connection list", asy
   assert.equal(connections[0].credential_custody, "external_operator");
 });
 
-test("initiateConnection returns authorization challenge and url", async () => {
-  let capturedUrl = "";
-  let capturedBody: unknown = null;
-
-  const client = new VoxCoreHostClient(testConfig, {
-    fetch: async (input, init) => {
-      capturedUrl = String(input);
-      capturedBody = JSON.parse(String(init?.body));
-      return Response.json({
-        session_id: "sess-abc",
-        integration_external_key: "google-calendar",
-        state_token: "state-token-xyz",
-        authorization_url:
-          "https://accounts.google.com/o/oauth2/auth?state=state-token-xyz",
-        expires_at: "2026-09-23T01:00:00Z",
-      });
-    },
-    now: () => 1_795_622_400,
-    nonce: () => "mock-nonce-2",
-  });
-
-  const res = await client.initiateConnection("user-1", {
-    integration_external_key: "google-calendar",
-    credential_custody: "external_operator",
-    requested_capabilities: ["calendar.read"],
-    redirect_uri: "https://app.voxagent.in/api/account/connections/callback",
-  });
-
-  assert.equal(capturedUrl, "https://core.vox.test/v1/connections/initiate");
-  assert.equal(
-    get(capturedBody, "initiation.integration_external_key"),
-    "google-calendar",
-  );
-  assert.equal(res.session_id, "sess-abc");
-  assert.equal(res.state_token, "state-token-xyz");
-});
-
 test("disconnectConnection calls Core disconnect endpoint and revokes connection", async () => {
   let capturedUrl = "";
 
@@ -141,6 +104,35 @@ test("disconnectConnection calls Core disconnect endpoint and revokes connection
     "https://core.vox.test/v1/connections/conn-123/disconnect",
   );
   assert.equal(res.authorization_state, "revoked");
+});
+
+test("renewExtensionConsent binds the signed request to one reviewed version", async () => {
+  let capturedUrl = "";
+  let capturedBody: unknown;
+  const client = new VoxCoreHostClient(testConfig, {
+    fetch: async (input, init) => {
+      capturedUrl = String(input);
+      capturedBody = JSON.parse(String(init?.body));
+      return Response.json({
+        id: "ext-1",
+        current_version: 3,
+        consent_status: "consented",
+      });
+    },
+    now: () => 1_795_622_400,
+    nonce: () => "renew-consent-nonce",
+  });
+  await client.renewExtensionConsent("user-1", "ext-1", 3);
+  assert.equal(
+    capturedUrl,
+    "https://core.vox.test/v1/remote-extensions/ext-1/renew-consent",
+  );
+  assert.equal(
+    get(capturedBody, "host_context.host_user_id"),
+    "vox-account:user-1",
+  );
+  assert.equal(get(capturedBody, "version"), 3);
+  assert.equal(get(capturedBody, "confirmed"), true);
 });
 
 test("effective grants and grant management call Core endpoints", async () => {

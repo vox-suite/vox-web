@@ -247,15 +247,24 @@ test("POST /api/account/plugins/connect installs the app and returns the provide
   );
   assert.equal(installed.length, 1, "an existing install is reused");
 
-  // Once connected, no new sign-in is started.
+  // Once provider authorization succeeds, no new sign-in is started while
+  // the extension waits for operator review.
   status = {
     ...emptyStatus,
-    connected: [{ extension_id: "ext-notion", connected_at: "", tools: [] }],
+    connected: [
+      {
+        extension_id: "ext-notion",
+        connection_id: "connection-notion",
+        connected_at: "",
+        lifecycle_state: "installed",
+        tools: [],
+      },
+    ],
   };
   const again = await (
     await connectRoute(connectRequest({ pluginId: "notion" }))
   ).json();
-  assert.equal(again.status, "connected");
+  assert.equal(again.status, "authorized");
   assert.equal(authorizeCalls.length, 2);
 
   setMockConsumerForTests(undefined);
@@ -346,10 +355,19 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   } = await loadModules();
-  const completions: { state: string; code: string }[] = [];
+  const completions: {
+    state: string;
+    code: string;
+    issuer: string | null | undefined;
+  }[] = [];
   let failWith: string | null = null;
   setCoreHostClientForTests({
-    async completeConnection(_: string, state: string, code: string) {
+    async completeConnection(
+      _: string,
+      state: string,
+      code: string,
+      issuer?: string | null,
+    ) {
       if (failWith) {
         throw new CoreHostRequestError(
           410,
@@ -357,7 +375,7 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
           failWith,
         );
       }
-      completions.push({ state, code });
+      completions.push({ state, code, issuer });
       return extensionFixture({ lifecycle_state: "active" });
     },
   } as unknown as VoxCoreHostClient);
@@ -376,10 +394,14 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
   assert.equal(completions.length, 0);
 
   setMockConsumerForTests(mockSession);
-  const ok = await callback("code=c1&state=s1");
+  const ok = await callback(
+    "code=c1&state=s1&iss=https%3A%2F%2Fissuer.example",
+  );
   assert.equal(ok.pathname, "/apps");
-  assert.equal(ok.searchParams.get("connected"), "notion");
-  assert.deepEqual(completions, [{ state: "s1", code: "c1" }]);
+  assert.equal(ok.searchParams.get("authorization_complete"), "notion");
+  assert.deepEqual(completions, [
+    { state: "s1", code: "c1", issuer: "https://issuer.example" },
+  ]);
 
   const denied = await callback("error=access_denied&state=s");
   assert.equal(denied.searchParams.get("connect_error"), "access_denied");
@@ -394,6 +416,50 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
     "authorization_expired",
   );
 
+  setMockConsumerForTests(undefined);
+  resetConsumerAuthRuntimeForTests();
+});
+
+test("extension consent requires a signed-in user and an exact reviewed version", async () => {
+  const { POST: renew } =
+    await import("../src/app/api/account/extensions/[id]/renew-consent/route");
+  const { setMockConsumerForTests } =
+    await import("../src/lib/consumer-auth/session");
+  const { setCoreHostClientForTests, resetConsumerAuthRuntimeForTests } =
+    await import("../src/lib/consumer-auth/runtime");
+  const calls: number[] = [];
+  setCoreHostClientForTests({
+    async renewExtensionConsent(_: string, __: string, version: number) {
+      calls.push(version);
+      return extensionFixture({
+        current_version: version,
+        consent_status: "consented",
+      });
+    },
+  } as unknown as VoxCoreHostClient);
+  const send = (body: unknown) =>
+    renew(
+      new NextRequest(
+        "https://app.voxagent.in/api/account/extensions/ext-notion/renew-consent",
+        {
+          method: "POST",
+          headers: {
+            host: "app.voxagent.in",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      ),
+      { params: Promise.resolve({ id: "ext-notion" }) },
+    );
+  setMockConsumerForTests(null);
+  assert.equal((await send({ version: 2, confirmed: true })).status, 401);
+  setMockConsumerForTests(mockSession);
+  assert.equal((await send({ version: 2, confirmed: false })).status, 400);
+  assert.equal((await send({ version: "2", confirmed: true })).status, 400);
+  assert.equal(calls.length, 0);
+  assert.equal((await send({ version: 2, confirmed: true })).status, 200);
+  assert.deepEqual(calls, [2]);
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
@@ -416,7 +482,8 @@ test("GET /api/account/plugins/status returns the account's live connections", a
     {
       extension_id: "ext-notion",
       connected_at: "",
-      tools: [{ name: "search", read_only: true }],
+      lifecycle_state: "active",
+      tools: [{ name: "search" }],
     },
   ];
   setCoreHostClientForTests({

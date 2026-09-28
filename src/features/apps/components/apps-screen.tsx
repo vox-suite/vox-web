@@ -18,7 +18,7 @@ import {
 } from "@/features/plugins/components";
 
 type ConnectResult =
-  { kind: "connected"; name: string } | { kind: "error"; message: string };
+  { kind: "authorized"; name: string } | { kind: "error"; message: string };
 
 /** Read and clear the result the OAuth callback left in the URL. */
 function useConnectResult() {
@@ -26,7 +26,7 @@ function useConnectResult() {
   const [result, setResult] = useState<ConnectResult | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const connected = params.get("connected");
+    const connected = params.get("authorization_complete");
     const error = params.get("connect_error");
     if (!connected && !error) return;
     // Reading the URL once on mount is the point of this effect.
@@ -34,12 +34,12 @@ function useConnectResult() {
     setResult(
       connected
         ? {
-            kind: "connected",
+            kind: "authorized",
             name: getCatalogPlugin(connected)?.displayName ?? connected,
           }
         : { kind: "error", message: connectErrorMessage(error ?? undefined) },
     );
-    params.delete("connected");
+    params.delete("authorization_complete");
     params.delete("connect_error");
     const query = params.toString();
     window.history.replaceState(
@@ -88,14 +88,14 @@ export function AppsScreen() {
         title={view === "plugins" ? "Plugins" : "Skills"}
         description={
           view === "plugins"
-            ? "Connect apps with your own account. Vox signs in through each app’s official login and asks you before doing anything that changes your account."
+            ? "Link an account through its provider. Operator review and an agent access grant are separate steps."
             : "Install reusable guidance and choose which agent can load it."
         }
       />
-      {connectResult?.kind === "connected" && (
-        <Notice title={`${connectResult.name} is connected`} tone="success">
-          Vox can now use {connectResult.name} when you ask. You can see exactly
-          what it can do by opening the app below.
+      {connectResult?.kind === "authorized" && (
+        <Notice title={`${connectResult.name} account linked`} tone="success">
+          Authorization succeeded. The app still needs review and an explicit
+          agent grant before an agent can use it.
         </Notice>
       )}
       {connectResult?.kind === "error" && (

@@ -15,23 +15,3 @@ export function disconnectConnection(connectionId: string) {
     { method: "POST", fallbackError: "Failed to disconnect" },
   );
 }
-
-export type ConnectPlayStationInput = {
-  accountDisplayId: string;
-  npssoToken?: string;
-};
-
-export function connectPlayStation(input: ConnectPlayStationInput) {
-  return apiRequest<{
-    connection: Connection;
-    synced_spans_count: number;
-    message: string;
-  }>("/api/account/connections/playstation", {
-    method: "POST",
-    body: JSON.stringify({
-      account_display_id: input.accountDisplayId,
-      npsso_token: input.npssoToken,
-    }),
-    fallbackError: "Failed to connect PlayStation account",
-  });
-}

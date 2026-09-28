@@ -13,7 +13,11 @@ import {
 } from "@/components/app";
 import { errorMessage } from "@/lib/api/http";
 import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
-import { useExtensions, useRemoveExtension } from "../queries";
+import {
+  useExtensions,
+  useRemoveExtension,
+  useRenewExtensionConsent,
+} from "../queries";
 import { InstallExtensionForm } from "./install-extension-form";
 import { QuickAddMcpForm } from "./quick-add-mcp-form";
 
@@ -31,6 +35,8 @@ function ExtensionCard({
   onRemoved: () => void;
 }) {
   const remove = useRemoveExtension();
+  const renewConsent = useRenewExtensionConsent();
+  const [reviewedVersion, setReviewedVersion] = useState<number | null>(null);
   const consentRequired = extension.consent_status === "consent_required";
   const conformant = extension.conformance_status === "passed";
   const readyForConsequential =
@@ -96,14 +102,14 @@ function ExtensionCard({
           title="Renewed consent required · actions suspended"
         >
           <p>
-            A material change occurred in version {extension.current_version}{" "}
-            (operator transfer or newly declared third-party data recipients).
-            Consequential actions are suspended until you review and grant
-            consent.
+            Version {extension.current_version} changed the extension&apos;s
+            endpoint, operator, or declared capabilities. Review the current
+            endpoint, operator, recipients, and access needs below before
+            continuing.
           </p>
           <p>
-            Ask the app operator for the version change details. Consent renewal
-            is unavailable here until Vox can show exactly what changed.
+            Account authorization and agent grants were revoked by the update.
+            After consent, reconnect the account and grant capabilities again.
           </p>
         </Callout>
       ) : null}
@@ -230,6 +236,49 @@ function ExtensionCard({
           </ul>
         )}
       </div>
+      {consentRequired && !removed ? (
+        <div className="space-y-3 rounded-md border border-border-edge p-3 text-sm">
+          <label className="flex items-start gap-2 text-mist">
+            <input
+              type="checkbox"
+              checked={reviewedVersion === extension.current_version}
+              onChange={(event) =>
+                setReviewedVersion(
+                  event.target.checked ? extension.current_version : null,
+                )
+              }
+            />
+            <span>
+              I reviewed the displayed details for version{" "}
+              {extension.current_version}.
+            </span>
+          </label>
+          <Button
+            size="sm"
+            disabled={
+              reviewedVersion !== extension.current_version ||
+              renewConsent.isPending
+            }
+            onClick={() =>
+              renewConsent.mutate({
+                id: extension.id,
+                version: extension.current_version,
+              })
+            }
+          >
+            {renewConsent.isPending
+              ? "Saving consent…"
+              : "Consent to this version"}
+          </Button>
+          {renewConsent.isError ? (
+            <Callout tone="danger" live="assertive">
+              <p>
+                {errorMessage(renewConsent.error, "Consent renewal failed")}
+              </p>
+            </Callout>
+          ) : null}
+        </div>
+      ) : null}
       {remove.isError ? (
         <Callout tone="danger" live="assertive">
           <p>{errorMessage(remove.error, "Failed to remove extension")}</p>
