@@ -121,6 +121,7 @@ test("catalog exposes only Core-reviewed packages and installation binds the rev
         {
           version: 2,
           digest,
+          metadata: {schema_version:1,protocol_version:"2025-11-25",auth_mode:"oauth",credential_custody:"platform_held",skills:[]},
           manifest: {
             external_key: "custom",
             display_name: "Custom connector",

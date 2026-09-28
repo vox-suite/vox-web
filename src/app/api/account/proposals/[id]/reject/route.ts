@@ -1,28 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
-
+import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const account = await currentConsumer(request.headers);
-  if (!account) {
+  if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id: proposalId } = await params;
-  if (!proposalId) {
+  const core = getCoreHostClient();
+  if (!core)
+    return NextResponse.json({ error: "Core unavailable" }, { status: 503 });
+  const { id } = await params;
+  if (!/^[a-f0-9-]{36}$/.test(id))
+    return NextResponse.json({ error: "Invalid proposal" }, { status: 400 });
+  try {
+    await core.rejectProposal(account.accountId, id);
+    return new NextResponse(null, { status: 204 });
+  } catch {
     return NextResponse.json(
-      { error: "Proposal ID is required" },
-      { status: 400 },
+      { error: "The proposal could not be rejected" },
+      { status: 409 },
     );
   }
-
-  // Rejecting proposal marks it explicitly rejected for the client session
-  return NextResponse.json({
-    status: "rejected",
-    proposal_id: proposalId,
-    message:
-      "Action proposal has been rejected by user. The agent will not execute this action.",
-  });
 }

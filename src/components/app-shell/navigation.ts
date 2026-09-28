@@ -66,7 +66,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         path: "/apps",
-        label: "Apps & skills",
+        label: "Library",
         description:
           "Connected accounts, apps you added, agent access, and skills.",
         icon: Blocks,

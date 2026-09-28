@@ -16,16 +16,20 @@ export async function POST(
   const { id } = await context.params;
   let action: "install" | "disable";
   let version: number | undefined;
+  let agentKey: string | undefined;
   try {
     const body = (await request.json()) as {
       action?: string;
       version?: number;
+      agentKey?: string;
     };
     if (body.action !== "install" && body.action !== "disable") {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
     action = body.action;
     version = body.version;
+    agentKey = body.agentKey;
+    if (agentKey !== undefined && (typeof agentKey !== "string" || !agentKey.trim() || agentKey.length > 255)) return NextResponse.json({error: "Choose an available agent"}, {status: 400});
     if (
       action === "install" &&
       (!Number.isInteger(version) || !version || version < 1)
@@ -39,7 +43,7 @@ export async function POST(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   try {
-    await core.changeSkillInstallation(account.accountId, id, action, version);
+    await core.changeSkillInstallation(account.accountId, id, action, version, agentKey);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     if (error instanceof CoreHostRequestError && error.status === 409) {

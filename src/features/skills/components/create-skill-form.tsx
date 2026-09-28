@@ -17,14 +17,28 @@ const EMPTY = {
 export function CreateSkillForm({ onSaved }: { onSaved: () => void }) {
   const [form, setForm] = useState(EMPTY);
   const publish = usePublishSkill();
-  const set = (field: keyof typeof EMPTY) => (value: string) =>
+  const [preview, setPreview] = useState(false);
+  const set = (field: keyof typeof EMPTY) => (value: string) => {
+    setPreview(false);
     setForm((current) => ({ ...current, [field]: value }));
+  };
 
   function submit(event: FormEvent) {
     event.preventDefault();
+    if (!preview) {
+      setPreview(true);
+      return;
+    }
     publish.mutate(
       {
-        external_key: form.key.trim(),
+        external_key: (
+          form.key ||
+          form.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 64)
+        ).trim(),
         title: form.title.trim(),
         summary: form.summary.trim(),
         instructions: form.instructions.trim(),
@@ -52,13 +66,12 @@ export function CreateSkillForm({ onSaved }: { onSaved: () => void }) {
       <div className="grid gap-4 md:grid-cols-2">
         <Field
           id="skill-key"
-          label="Skill key"
-          hint="Lowercase letters, numbers and hyphens"
+          label="Skill key (optional)"
+          hint="Generated from the name when left blank"
           value={form.key}
           onChange={(e) => set("key")(e.target.value)}
           pattern="[a-z0-9-]+"
           maxLength={128}
-          required
         />
         <Field
           id="skill-title"
@@ -94,8 +107,25 @@ export function CreateSkillForm({ onSaved }: { onSaved: () => void }) {
         value={form.capabilities}
         onChange={(e) => set("capabilities")(e.target.value)}
       />
+      {preview ? (
+        <Callout title="Preview">
+          <p>{form.title}</p>
+          <p>{form.summary}</p>
+          <pre className="max-h-80 overflow-auto whitespace-pre-wrap text-xs">
+            {form.instructions}
+          </pre>
+          <p>
+            Requested tools: {form.capabilities || "None"}. Saving grants no
+            access.
+          </p>
+        </Callout>
+      ) : null}
       <Button type="submit" disabled={publish.isPending}>
-        {publish.isPending ? "Saving…" : "Save skill"}
+        {publish.isPending
+          ? "Saving…"
+          : preview
+            ? "Save skill"
+            : "Preview skill"}
       </Button>
       {publish.isError ? (
         <Callout tone="danger" live="assertive">

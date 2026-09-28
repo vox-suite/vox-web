@@ -54,6 +54,7 @@ export function toInstallRequest(form: FormState): InstallExtensionRequest {
       {
         external_key: form.capabilityKey,
         display_name: form.capabilityName,
+        input_schema: {type: "object"},
         effect: form.capabilityEffect,
         consequential: form.capabilityEffect !== "read",
         data_recipients: [form.operatorName],

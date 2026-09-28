@@ -70,7 +70,7 @@ test("plugin library keeps registration and skills reachable", async ({
   await signIn(page);
   await page.goto("/app/apps");
   await expect(
-    page.getByRole("heading", { name: "Plugins", level: 1 }),
+    page.getByRole("heading", { name: "Library", level: 1 }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Public" }).click();
   await expect(
@@ -89,7 +89,7 @@ test("plugin library keeps registration and skills reachable", async ({
   await expect(page.getByText("Server details not verified")).toBeVisible();
   await page.getByRole("button", { name: "Skills", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Skills", level: 1 }),
+    page.getByRole("heading", { name: "Skills", level: 2 }),
   ).toBeVisible();
 });
 
@@ -111,12 +111,23 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
     page.getByText(/Select an agent and grant the reviewed/),
   ).toBeVisible();
   await expect(page.getByTestId("connected-badge-team-notes")).toBeVisible();
-  await page
-    .locator("summary", { hasText: "Connected accounts and agent access" })
-    .click();
   await expect(
     page.getByRole("heading", { name: "Agent access" }),
   ).toBeVisible();
+});
+
+test("a default skill installs for the selected agent and is available in conversation", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page.getByRole("button", { name: "Skills", exact: true }).click();
+  const skill = page.getByRole("article", { name: "Summarize and extract actions" });
+  await skill.getByRole("button", { name: "Review and install" }).click();
+  await expect(page.getByRole("heading", { name: "Review Summarize and extract actions v1" })).toBeVisible();
+  await page.getByRole("button", { name: "Install and enable v1" }).click();
+  await expect(page.getByText(/Summarize and extract actions is installed and available/)).toBeVisible();
+  await page.getByLabel(/^Ask /).fill("Summarize my notes");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("I can use Summarize and extract actions. Paste the text to summarize.")).toBeVisible();
 });
 
 test("connected accounts offer only what each connection allows", async ({

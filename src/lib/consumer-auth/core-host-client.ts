@@ -33,7 +33,7 @@ export type Connection = {
   id: string;
   integration_external_key: string;
   account_display_id: string | null;
-  credential_custody: "platform_held" | "external_operator";
+  credential_custody: "platform_held" | "external_operator" | "none";
   authorization_state:
     "pending" | "authorized" | "expired" | "revoked" | "cancelled" | "failed";
   authorized_capabilities: string[];
@@ -70,6 +70,9 @@ export type PublishSkillRequest = {
 };
 
 export type SkillVersion = {
+  title: string;
+  summary: string;
+  digest: string;
   version: number;
   instructions: string;
   requested_capabilities: string[];
@@ -151,7 +154,15 @@ export type CreateProposalRequest = {
 };
 
 export type ExtensionProtocol = "mcp" | "direct";
+export type PackageMetadata = {
+  schema_version: number;
+  protocol_version: string;
+  auth_mode: "oauth" | "none";
+  credential_custody: "platform_held" | "none";
+  skills: Array<{ external_key: string; version: number; digest: string }>;
+};
 export type ConnectorPackage = {
+  metadata: PackageMetadata;
   version: number;
   digest: string;
   manifest: InstallExtensionRequest;
@@ -170,6 +181,8 @@ export type ExtensionOperator = {
 };
 
 export type ExtensionCapability = {
+  input_schema: Record<string, unknown>;
+  supported_regions?: string[];
   external_key: string;
   display_name: string;
   effect: ExtensionEffect;
@@ -727,6 +740,56 @@ export class VoxCoreHostClient {
     });
   }
 
+  async importSkill(
+    accountId: string,
+    files: Record<string, string>,
+    preview: boolean,
+  ) {
+    return this.signedPost<
+      SkillListing | { skill: PublishSkillRequest; digest: string }
+    >("/v1/skills/import", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      files,
+      preview,
+    });
+  }
+
+  async connectPublicExtension(accountId: string, extensionId: string) {
+    return this.signedPost<void>(
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/connect-public`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async respondConversation(
+    accountId: string,
+    agentKey: string,
+    conversationId: string,
+    text: string,
+  ): Promise<{ conversation_id: string; text: string }> {
+    return this.signedPost("/v1/conversations/respond", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      agent_external_key: agentKey,
+      identity: { channel: "web", external_id: `vox-account:${accountId}` },
+      external_conversation_id: conversationId,
+      text,
+      turn_id: randomUUID(),
+      initiation_context: null,
+    });
+  }
+
   async getSkillVersion(
     accountId: string,
     skillId: string,
@@ -749,6 +812,7 @@ export class VoxCoreHostClient {
     skillId: string,
     action: "install" | "disable",
     version?: number,
+    agentKey?: string,
   ): Promise<void> {
     if (
       action === "install" &&
@@ -764,7 +828,9 @@ export class VoxCoreHostClient {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,
         },
-        ...(action === "install" ? { version } : {}),
+        ...(action === "install"
+          ? { version, agent_external_key: agentKey }
+          : {}),
       },
     );
   }
@@ -927,6 +993,47 @@ export class VoxCoreHostClient {
         organization_external_key: null,
       },
       proposal,
+    });
+  }
+
+  async listProposals(accountId: string): Promise<ActionProposal[]> {
+    return this.signedPost<ActionProposal[]>(
+      "/v1/action-proposals/list",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async rejectProposal(accountId: string, proposalId: string): Promise<void> {
+    return this.signedPost<void>(
+      `/v1/action-proposals/${encodeURIComponent(proposalId)}/reject`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async executeApprovedTool(
+    accountId: string,
+    approvalId: string,
+    idempotencyKey: string,
+  ): Promise<{ state: string; id: string }> {
+    return this.signedPost(`/v1/connected-apps/execute`, accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      approval_id: approvalId,
+      idempotency_key: idempotencyKey,
     });
   }
 

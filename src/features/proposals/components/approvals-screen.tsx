@@ -4,37 +4,31 @@ import { useState } from "react";
 import { Callout, EmptyMessage, PageHeader, Panel } from "@/components/app";
 import { useNow } from "@/hooks/use-now";
 import { errorMessage } from "@/lib/api/http";
-import type { ActionProposal } from "@/lib/consumer-auth/core-host-client";
 import { proposalStatus } from "../api";
-import { useApproveProposal, useRejectProposal } from "../queries";
+import {
+  useApproveProposal,
+  useRejectProposal,
+  useProposals,
+  useExecuteProposal,
+} from "../queries";
 import { ProposalCard } from "./proposal-card";
 
-/**
- * Core does not yet expose a proposal listing to hosts, so proposals arrive
- * through `initialProposals`. Decisions are always validated by Core.
- */
-export function ApprovalsScreen({
-  initialProposals = [],
-}: {
-  initialProposals?: ActionProposal[];
-}) {
-  const [proposals, setProposals] = useState(initialProposals);
+export function ApprovalsScreen() {
+  const listing = useProposals();
+  const proposals = listing.data ?? [];
+  const [attempts, setAttempts] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState<string | null>(null);
   const now = useNow();
   const approve = useApproveProposal();
   const reject = useRejectProposal();
+  const execute = useExecuteProposal();
   const submittingId = approve.isPending
     ? approve.variables?.id
     : reject.isPending
       ? reject.variables
       : undefined;
-  const failure = approve.error ?? reject.error;
-
-  function update(id: string, patch: Partial<ActionProposal>) {
-    setProposals((current) =>
-      current.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-    );
-  }
+  const failure =
+    approve.error ?? reject.error ?? execute.error ?? listing.error;
 
   return (
     <div className="space-y-6">
@@ -44,9 +38,9 @@ export function ApprovalsScreen({
       />
       <Callout title="Exact-match binding">
         <p>
-          Approvals require an exact, byte-for-byte match with the proposal hash
-          stored in Core. If details, pricing, recipients, or timing change,
-          existing proposals are invalidated and require a new decision.
+          Core checks the exact reviewed proposal details under your
+          authenticated session. If details, pricing, recipients, or timing
+          change, existing proposals are invalidated and require a new decision.
         </p>
       </Callout>
       {failure ? (
@@ -59,6 +53,7 @@ export function ApprovalsScreen({
         </Callout>
       ) : null}
       <Panel title="Pending decisions">
+        {listing.isPending ? <p role="status">Loading proposals…</p> : null}
         {proposals.length === 0 ? (
           <EmptyMessage title="Nothing needs your decision">
             No pending action proposals require your decision. When an agent
@@ -71,32 +66,53 @@ export function ApprovalsScreen({
               <ProposalCard
                 key={proposal.id}
                 proposal={proposal}
-                status={proposalStatus(proposal, now)}
+                status={
+                  proposal.approval_id
+                    ? "approved"
+                    : proposalStatus(proposal, now)
+                }
                 submitting={submittingId === proposal.id}
                 onApprove={() => {
                   setNotice(null);
                   reject.reset();
                   approve.mutate(proposal, {
-                    onSuccess: (approved) => {
-                      update(proposal.id, {
-                        state: "approved",
-                        approval_id: approved.approval_id,
-                      });
+                    onSuccess: async () => {
+                      await listing.refetch();
                       setNotice(
-                        `Proposal ${proposal.id} successfully approved and bound.`,
+                        "Approval recorded. The action has not executed yet.",
                       );
                     },
                   });
+                }}
+                onExecute={() => {
+                  if (!proposal.approval_id) return;
+                  const idempotencyKey =
+                    attempts[proposal.id] ?? crypto.randomUUID();
+                  setAttempts((current) => ({
+                    ...current,
+                    [proposal.id]: idempotencyKey,
+                  }));
+                  execute.mutate(
+                    { proposal, idempotencyKey },
+                    {
+                      onSuccess: async (result) => {
+                        await listing.refetch();
+                        setNotice(
+                          result.state === "confirmed"
+                            ? "Provider outcome confirmed."
+                            : "Action dispatched. Outcome needs independent confirmation or reconciliation.",
+                        );
+                      },
+                    },
+                  );
                 }}
                 onReject={() => {
                   setNotice(null);
                   approve.reset();
                   reject.mutate(proposal.id, {
-                    onSuccess: () => {
-                      update(proposal.id, { state: "superseded" });
-                      setNotice(
-                        `Proposal ${proposal.id} rejected. The agent will not execute this action.`,
-                      );
+                    onSuccess: async () => {
+                      await listing.refetch();
+                      setNotice("Proposal rejected in Core.");
                     },
                   });
                 }}

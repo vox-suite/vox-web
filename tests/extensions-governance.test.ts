@@ -66,7 +66,8 @@ test("installExtension posts signed host context and manifest to /v1/remote-exte
           {
             external_key: "weather.get_forecast",
             display_name: "Get Weather Forecast",
-            effect: "read",
+            input_schema: {type: "object"},
+        effect: "read",
             consequential: false,
             data_recipients: ["Weather Analytics Cloud"],
             access_needs: ["location.coordinates"],
@@ -93,6 +94,7 @@ test("installExtension posts signed host context and manifest to /v1/remote-exte
       {
         external_key: "weather.get_forecast",
         display_name: "Get Weather Forecast",
+        input_schema: {type: "object"},
         effect: "read",
         consequential: false,
         data_recipients: ["Weather Analytics Cloud"],
@@ -220,6 +222,7 @@ test("updateExtension triggers consent_required on expanded data recipients or o
       {
         external_key: "weather.get_forecast",
         display_name: "Get Weather Forecast",
+        input_schema: {type: "object"},
         effect: "read",
         data_recipients: [
           "Weather Analytics Cloud",
@@ -355,6 +358,7 @@ test("malicious metadata and XSS payloads in extension fields are handled safely
       {
         external_key: "exploit.run",
         display_name: "<b onmouseover=alert(1)>Exploit</b>",
+        input_schema: {type: "object"},
         effect: "write",
         consequential: true,
         data_recipients: ["<iframe src='attacker.com'></iframe>"],

@@ -13,9 +13,8 @@ import {
 } from "@/components/app";
 import {
   AgentPicker,
-  resolveAgentKey,
 } from "@/features/agents/components/agent-picker";
-import { useAgents } from "@/features/agents/queries";
+import { useSelectedAgent } from "@/features/agents/selection";
 import { errorMessage } from "@/lib/api/http";
 import type { SkillListing } from "@/lib/consumer-auth/core-host-client";
 import {
@@ -25,6 +24,7 @@ import {
   useSetAgentSkill,
   useSkills,
 } from "../queries";
+import { ImportSkillForm } from "./import-skill-form";
 import { CreateSkillForm } from "./create-skill-form";
 import { SkillReview, type SkillReviewState } from "./skill-review";
 
@@ -35,14 +35,13 @@ function skillStateLabel(skill: SkillListing) {
 
 export function SkillsPanel({ id }: { id?: string }) {
   const queryClient = useQueryClient();
-  const [picked, setPicked] = useState<string | null>(null);
-  const agents = useAgents();
-  const agentKey = resolveAgentKey(picked, agents.data);
+  const {agentKey, selectAgent} = useSelectedAgent();
   const skills = useSkills();
   const agentSkillIds = useAgentSkillIds(agentKey);
   const setAgentSkill = useSetAgentSkill();
   const changeSkill = useChangeSkill();
   const [showForm, setShowForm] = useState(false);
+  const [importing,setImporting]=useState(false);
   const [review, setReview] = useState<SkillReviewState | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewError, setReviewError] = useState<unknown>(null);
@@ -99,14 +98,14 @@ export function SkillsPanel({ id }: { id?: string }) {
   ) {
     clearFeedback();
     changeSkill.mutate(
-      { skillId: skill.id, action, version },
+      { skillId: skill.id, action, version, agentKey: action === "install" ? agentKey : undefined },
       {
         onSuccess: () => {
           setReview(null);
           setMessage(
             action === "disable"
               ? `${skill.title} is disabled.`
-              : `${skill.title} is installed.`,
+              : `${skill.title} is installed and available to ${agentKey}.`,
           );
         },
       },
@@ -144,7 +143,9 @@ export function SkillsPanel({ id }: { id?: string }) {
         </Button>
       }
     >
-      <AgentPicker value={agentKey} onChange={setPicked} />
+      <Button size="sm" variant="secondary" onClick={()=>setImporting(!importing)}>{importing ? "Close import" : "Import SKILL.md"}</Button>
+      {importing ? <ImportSkillForm onSaved={()=>{setImporting(false);setMessage("Private skill imported. Enable it for an agent when ready.");}} /> : null}
+      <AgentPicker value={agentKey} onChange={selectAgent} />
       {failure ? (
         <Callout tone="danger" title="Skill error" live="assertive">
           <p>{errorMessage(failure, "Could not update this skill")}</p>

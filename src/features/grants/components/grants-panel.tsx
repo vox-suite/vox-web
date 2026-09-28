@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui";
 import {
   Callout,
@@ -11,9 +10,8 @@ import {
 } from "@/components/app";
 import {
   AgentPicker,
-  resolveAgentKey,
 } from "@/features/agents/components/agent-picker";
-import { useAgents } from "@/features/agents/queries";
+import { useSelectedAgent } from "@/features/agents/selection";
 import { useAuthorizedConnections } from "@/features/connections/queries";
 import { errorMessage } from "@/lib/api/http";
 import {
@@ -24,9 +22,7 @@ import {
 } from "../queries";
 
 export function GrantsPanel({ id }: { id?: string }) {
-  const [picked, setPicked] = useState<string | null>(null);
-  const agents = useAgents();
-  const agentKey = resolveAgentKey(picked, agents.data);
+  const {agentKey, selectAgent} = useSelectedAgent();
   const grants = useGrants(agentKey);
   const connections = useAuthorizedConnections();
   const createGrant = useCreateGrant();
@@ -46,7 +42,7 @@ export function GrantsPanel({ id }: { id?: string }) {
           capabilities per agent here.
         </p>
       </Callout>
-      <AgentPicker value={agentKey} onChange={setPicked} label="Select agent" />
+      <AgentPicker value={agentKey} onChange={selectAgent} label="Select agent" />
       {failure ? (
         <Callout tone="danger" live="assertive">
           <p>{errorMessage(failure, "The grant could not be changed")}</p>
