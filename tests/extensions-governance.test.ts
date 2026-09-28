@@ -232,9 +232,9 @@ test("updateExtension triggers consent_required on expanded data recipients or o
   const result = await client.updateExtension("user-42", "ext-uuid-1", update);
   assert.equal(
     capturedUrl,
-    "https://core.vox.test/v1/remote-extensions/ext-uuid-1",
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/update",
   );
-  assert.equal(capturedMethod, "PUT");
+  assert.equal(capturedMethod, "POST");
   assert.equal(
     get(capturedBody, "extension.capabilities.0.data_recipients.length"),
     2,
@@ -266,9 +266,9 @@ test("removeExtension issues DELETE and marks lifecycle_state removed", async ()
   const removed = await client.removeExtension("user-42", "ext-uuid-1");
   assert.equal(
     capturedUrl,
-    "https://core.vox.test/v1/remote-extensions/ext-uuid-1",
+    "https://core.vox.test/v1/remote-extensions/ext-uuid-1/remove",
   );
-  assert.equal(capturedMethod, "DELETE");
+  assert.equal(capturedMethod, "POST");
   assert.equal(removed.lifecycle_state, "removed");
 });
 

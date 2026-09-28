@@ -11,30 +11,9 @@ enabling new consumer sign-ins.
 
 No credentials or superuser identity are inferred. Missing configuration denies access. Complete these steps with the owner-selected Google account before production use.
 
-## 1. Deploy Core with Redis administration
+## 1. Deploy Core with admin telemetry
 
-Deploy the matching `vox-core` change containing `/v1/admin/redis`. Configure `VOX_ADMIN_TOKEN` in the backend's protected environment file with a new random credential. Keep it distinct from `VOX_AUTH_TOKEN`. Existing Compose `env_file` handling passes it to Core; no Redis port publication is necessary.
-
-Core needs its existing `REDIS_URL`. Redis 7+ is required; the existing Redis 8 deployment meets this requirement. Restart Core after changing its environment.
-
-Route only the exact admin endpoint to Core's loopback port 3001 through an HTTPS reverse proxy. For Nginx, place the following inside the appropriate existing HTTPS server block, preserving that server's current TLS configuration:
-
-```nginx
-location = /v1/admin/redis {
-    limit_except GET PUT DELETE { deny all; }
-    proxy_pass http://127.0.0.1:3001;
-    proxy_set_header Authorization $http_authorization;
-    proxy_set_header Host $host;
-    proxy_connect_timeout 2s;
-    proxy_read_timeout 7s;
-    proxy_no_cache 1;
-    proxy_cache_bypass 1;
-    add_header Cache-Control "no-store" always;
-    access_log off;
-}
-```
-
-The dedicated bearer token remains required by Core. Do not expose Redis or other Core routes. Disabling query-string access logging avoids recording searched keys; substitute an approved redacted log format if operational logging is required.
+Configure `VOX_ADMIN_TOKEN` in the backend's protected environment with a new random credential. Keep it distinct from `VOX_AUTH_TOKEN`. Core requires it for `/v1/admin/audit-events`. Restart Core after changing its environment.
 
 ## 2. Configure Supabase Auth for administration
 
@@ -77,10 +56,9 @@ The public sign-in link uses the canonical admin hostname in production. Local s
 
 1. The public homepage renders at `voxagent.in`.
 2. `admin.voxagent.in` shows the login screen when signed out.
-3. A signed-out request to `/api/admin/redis` returns 401 with no-store headers.
+3. A signed-out request to `/api/admin/health` returns 401 with no-store headers.
 4. An unauthorized Google account is denied; an approved, verified account can sign in.
-5. Redis explorer returns real data or an explicit empty state. Search, pagination, preview, edit and confirmed deletion work with a disposable verification key.
-6. Sign out and confirm data requests are denied again.
-7. Check the backend admin endpoint independently: requests without the dedicated token return 401, and unsupported methods are rejected.
+5. Sign out and confirm data requests are denied again.
+6. Check the backend admin endpoint independently: requests without the dedicated token return 401, and unsupported methods are rejected.
 
-Local tests validate the application, signed session handling and Redis protocol separately. Only a live Google sign-in and a disposable real Redis mutation validate the full production chain.
+Local tests validate the application and signed session handling. Only a live Google sign-in validates the full production chain.

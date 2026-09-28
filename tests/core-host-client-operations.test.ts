@@ -138,7 +138,7 @@ test("renewExtensionConsent binds the signed request to one reviewed version", a
 test("effective grants and grant management call Core endpoints", async () => {
   let capturedEffectiveUrl = "";
   let capturedGrantUrl = "";
-  let capturedRevokeMethod = "";
+  let capturedRevokeUrl = "";
 
   const client = new VoxCoreHostClient(testConfig, {
     fetch: async (input, init) => {
@@ -154,6 +154,13 @@ test("effective grants and grant management call Core endpoints", async () => {
           },
         ]);
       }
+      if (
+        init?.method === "POST" &&
+        url.endsWith("/v1/capability-grants/revoke")
+      ) {
+        capturedRevokeUrl = url;
+        return new Response(null, { status: 204 });
+      }
       if (init?.method === "POST" && url.includes("/v1/capability-grants")) {
         capturedGrantUrl = url;
         return Response.json({
@@ -162,10 +169,6 @@ test("effective grants and grant management call Core endpoints", async () => {
           connection_id: "conn-123",
           capability_external_key: "calendar.read",
         });
-      }
-      if (init?.method === "DELETE" && url.includes("/v1/capability-grants")) {
-        capturedRevokeMethod = "DELETE";
-        return new Response(null, { status: 204 });
       }
       return Response.json({});
     },
@@ -194,7 +197,10 @@ test("effective grants and grant management call Core endpoints", async () => {
     connection_id: "conn-123",
     capability_external_key: "calendar.read",
   });
-  assert.equal(capturedRevokeMethod, "DELETE");
+  assert.equal(
+    capturedRevokeUrl,
+    "https://core.vox.test/v1/capability-grants/revoke",
+  );
 });
 
 test("durable task start, get, and cancel call Core endpoints", async () => {

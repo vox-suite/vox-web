@@ -84,18 +84,6 @@ export function adminDestination(host: string, path: string) {
   return path === "/" ? "/admin" : `/admin${path}`;
 }
 
-export function parseRedisQuery(params: URLSearchParams) {
-  const cursor = params.get("cursor") ?? "0";
-  const match = params.get("match") || "vox:*";
-  if (!/^\d{1,20}$/.test(cursor) || BigInt(cursor) > 18446744073709551615n)
-    throw new Error("Invalid cursor. Restart the search.");
-  if (match.length > 256 || /[\x00-\x1f]/.test(match))
-    throw new Error(
-      "Search must be at most 256 characters without control characters.",
-    );
-  return { cursor, match };
-}
-
 export function canonicalAdminRedirect(
   host: string,
   path: string,

@@ -7,7 +7,6 @@ import {
   adminDestination,
   consumerDestination,
   consumerHref,
-  parseRedisQuery,
 } from "../src/lib/access";
 
 test("superuser access is exact, case-insensitive, and fails closed", () => {
@@ -66,12 +65,12 @@ test("callbacks cannot leave the application", () => {
     "https://admin.voxagent.in/",
   );
   assert.equal(
-    safeCallback("/admin/redis", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/redis",
+    safeCallback("/admin/health", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/health",
   );
   assert.equal(
-    safeCallback("/redis", "https://admin.voxagent.in"),
-    "https://admin.voxagent.in/redis",
+    safeCallback("/health", "https://admin.voxagent.in"),
+    "https://admin.voxagent.in/health",
   );
   assert.equal(
     safeCallback("/\\evil.test", "https://admin.voxagent.in"),
@@ -84,10 +83,10 @@ test("callbacks cannot leave the application", () => {
 });
 test("subdomain routing only rewrites the exact admin host", () => {
   assert.equal(adminDestination("admin.voxagent.in", "/"), "/admin");
-  assert.equal(adminDestination("admin.voxagent.in", "/redis"), "/admin/redis");
+  assert.equal(adminDestination("admin.voxagent.in", "/health"), "/admin/health");
   assert.equal(adminDestination("admin.voxagent.in", "/login"), "/admin/login");
   assert.equal(adminDestination("admin.voxagent.in", "/auth/callback"), null);
-  assert.equal(adminDestination("admin.voxagent.in", "/api/admin/redis"), null);
+  assert.equal(adminDestination("admin.voxagent.in", "/api/admin/health"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/admin"), null);
   assert.equal(adminDestination("admin.voxagent.in", "/admin/login"), null);
   assert.equal(adminDestination("admin.voxagent.in.evil.test", "/"), null);
@@ -115,22 +114,6 @@ test("consumer routing isolates app.voxagent.in and keeps local /app paths", () 
   assert.equal(consumerHref("app.voxagent.in", "/sign-in"), "/sign-in");
   assert.equal(consumerHref("localhost", "/sign-in"), "/app/sign-in");
 });
-test("Redis query validation preserves uint64 cursors without number rounding", () => {
-  assert.deepEqual(
-    parseRedisQuery(
-      new URLSearchParams("cursor=18446744073709551615&match=vox:*"),
-    ),
-    { cursor: "18446744073709551615", match: "vox:*" },
-  );
-  assert.throws(() => parseRedisQuery(new URLSearchParams("cursor=-1")));
-  assert.throws(() =>
-    parseRedisQuery(new URLSearchParams("cursor=18446744073709551616")),
-  );
-  assert.throws(() =>
-    parseRedisQuery(new URLSearchParams({ match: "x".repeat(257) })),
-  );
-});
-
 test("admin e2e session encoding rejects tampering", async () => {
   const { decodeAdminE2ESession, encodeAdminE2ESession, isSuperuser } =
     await import("../src/lib/access");

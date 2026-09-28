@@ -66,13 +66,7 @@ export function WorkspaceWelcome({
   );
 }
 
-export function OverviewStats({
-  health,
-  coreConfigured,
-}: {
-  health: SystemHealthData | null;
-  coreConfigured: boolean;
-}) {
+export function OverviewStats({ health }: { health: SystemHealthData | null }) {
   const cpuPercent =
     health?.host?.cpu?.usagePercent != null
       ? `${health.host.cpu.usagePercent}%`
@@ -90,21 +84,12 @@ export function OverviewStats({
     : "Host memory allocation";
 
   return (
-    <Grid columns={4}>
+    <Grid columns={3}>
       <Stat label="Host CPU Load" value={cpuPercent} description={cpuDesc} />
       <Stat
         label="Memory Utilization"
         value={memPercent}
         description={memDesc}
-      />
-      <Stat
-        label="Redis Explorer"
-        value={coreConfigured ? "Ready" : "Pending"}
-        description={
-          coreConfigured
-            ? "Connected to Core session cache"
-            : "Core admin endpoint unconfigured"
-        }
       />
       <Stat
         label="Pipeline Flow"
@@ -227,8 +212,7 @@ export function ConnectionNotice({ configured }: { configured: boolean }) {
     <Notice title="Standalone Console Mode" tone="info">
       Vox Web is running in standalone console mode. Configure{" "}
       <code>VOX_CORE_ADMIN_URL</code> and <code>VOX_ADMIN_TOKEN</code> in your
-      environment variables to enable direct Redis cache management and worker
-      telemetry.
+      environment variables to enable worker telemetry.
     </Notice>
   );
 }

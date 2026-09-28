@@ -24,12 +24,6 @@ export const adminModules: AdminModule[] = [
     description: "Inspect host metrics, RAM usage, and container resources.",
     icon: "health",
   },
-  {
-    slug: "redis",
-    title: "Redis explorer",
-    description: "Browse cached context, inspect entries, and check expiry.",
-    icon: "database",
-  },
 ];
 export function adminHref(slug: string, basePath = "/admin") {
   if (basePath === "") {

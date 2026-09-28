@@ -111,7 +111,7 @@ test("setPreference posts preference payload and enforces advisory authority", a
   assert.equal(created.id, "pref-2");
 });
 
-test("deletePreference executes DELETE on /v1/preferences/{key}", async () => {
+test("deletePreference posts to /v1/preferences/{key}/delete", async () => {
   let capturedUrl = "";
   let capturedMethod = "";
 
@@ -128,9 +128,9 @@ test("deletePreference executes DELETE on /v1/preferences/{key}", async () => {
   await client.deletePreference("user-1", "display_currency");
   assert.equal(
     capturedUrl,
-    "https://core.vox.test/v1/preferences/display_currency",
+    "https://core.vox.test/v1/preferences/display_currency/delete",
   );
-  assert.equal(capturedMethod, "DELETE");
+  assert.equal(capturedMethod, "POST");
 });
 
 test("deleteTaskHistory posts to /v1/privacy/delete-history and verifies disclosure", async () => {

@@ -60,7 +60,7 @@ test("unauthenticated management routes redirect and APIs deny access", async ({
   page,
   request,
 }) => {
-  await page.goto("/admin/redis");
+  await page.goto("/admin/health");
   await expect(page).toHaveURL(/\/admin\/login/);
   await expect(
     page.getByRole("button", { name: "Continue with Google" }),
@@ -69,26 +69,11 @@ test("unauthenticated management routes redirect and APIs deny access", async ({
   await page.goto("/admin/health");
   await expect(page).toHaveURL(/\/admin\/login/);
 
-  const response = await request.get("/api/admin/redis");
-  expect(response.status()).toBe(401);
-  expect(response.headers()["cache-control"]).toContain("no-store");
-  expect(response.headers()["x-ratelimit-limit"]).toBeTruthy();
-
   const healthRes = await request.get("/api/admin/health");
   expect(healthRes.status()).toBe(401);
   expect(healthRes.headers()["cache-control"]).toContain("no-store");
   expect(healthRes.headers()["x-ratelimit-limit"]).toBeTruthy();
 
-  expect(
-    (
-      await request.put("/api/admin/redis", {
-        data: { key: "vox:test", type: "string", value: "blocked" },
-      })
-    ).status(),
-  ).toBe(401);
-  expect((await request.delete("/api/admin/redis?key=vox:test")).status()).toBe(
-    401,
-  );
   await expect(
     page.getByRole("heading", { name: "A clearer view of your workspace." }),
   ).toBeVisible();
@@ -102,14 +87,12 @@ test("signed but unapproved or unverified sessions cannot access data", async ({
   page,
 }) => {
   await session(context, "other@example.test");
-  expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
   expect((await page.request.get("/api/admin/health")).status()).toBe(401);
   await context.clearCookies();
   await session(context, "admin@example.test", false);
-  expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
   expect((await page.request.get("/api/admin/health")).status()).toBe(401);
 });
-test("management navigation, Redis search, preview and recovery", async ({
+test("management navigation and sign out", async ({
   context,
   page,
 }, testInfo) => {
@@ -118,87 +101,11 @@ test("management navigation, Redis search, preview and recovery", async ({
   await expect(
     page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
-  await page.screenshot({
-    path: `artifacts/admin-${testInfo.project.name}.png`,
-    fullPage: true,
-  });
-  await page
-    .getByRole("navigation", { name: "Administration" })
-    .getByRole("link", { name: "Redis explorer" })
-    .click();
-  await page
-    .getByRole("button", { name: "vox:user-context:fixture-001", exact: true })
-    .click();
-  await expect(
-    page.getByText("Planning a quiet morning.", { exact: false }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Edit value" }).click();
-  await page
-    .getByLabel("Redis value")
-    .fill('{"name":"Fixture user","summary":"Updated from the console."}');
-  await page.getByRole("button", { name: "Save changes" }).click();
-  await expect(page.getByText("Redis entry updated.")).toBeVisible();
-  await expect(
-    page.getByText("Updated from the console.", { exact: false }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Close entry preview" }).click();
-  await page
-    .getByRole("button", { name: "vox:user-context:fixture-002", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Delete entry" }).click();
-  await page.getByRole("button", { name: "Confirm delete" }).click();
-  await expect(page.getByText("Redis entry deleted.")).toBeVisible();
-  await expect(
-    page.getByRole("button", {
-      name: "vox:user-context:fixture-002",
-      exact: true,
-    }),
-  ).toHaveCount(0);
-  await page.screenshot({
-    path: `artifacts/redis-${testInfo.project.name}.png`,
-    fullPage: true,
-  });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  expect(
-    (
-      await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-        .analyze()
-    ).violations,
-  ).toEqual([]);
-  await page.getByRole("button", { name: "Next batch" }).click();
-  await expect(page.getByRole("button", { name: "Next batch" })).toBeDisabled();
-  await page.getByRole("button", { name: "Previous", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Next batch" })).toBeEnabled();
-  await page.getByLabel("Search keys").fill("empty:*");
-  await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "No entries on this page" }),
-  ).toBeVisible();
-  await page.getByLabel("Search keys").fill("fail:*");
-  await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(
-    page.getByRole("alert").filter({ hasText: "Could not load entries" }),
-  ).toContainText("Redis is unavailable");
-  await page.getByLabel("Search keys").fill("vox:*");
-  await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(
-    page.getByRole("button", {
-      name: "vox:user-context:fixture-001",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await page
-    .getByRole("navigation", { name: "Administration" })
-    .getByRole("link", { name: "Overview" })
-    .click();
-  await expect(
-    page.getByRole("heading", { name: "Overview", exact: true }),
-  ).toBeVisible();
   expect(
     (
       await new AxeBuilder({ page })
@@ -212,9 +119,8 @@ test("management navigation, Redis search, preview and recovery", async ({
   });
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/admin\/login/);
-  expect((await page.request.get("/api/admin/redis")).status()).toBe(401);
+  expect((await page.request.get("/api/admin/health")).status()).toBe(401);
 });
-
 test("system health dashboard displays metrics, container resources and adheres to accessibility", async ({
   context,
   page,
@@ -394,7 +300,7 @@ test("consumer and administrator sessions grant no authority to one another", as
   await session(context);
   await page.goto("http://localhost:3100/app");
   await expect(page).toHaveURL(/\/app\/sign-in/);
-  expect((await page.request.get("/api/admin/redis")).status()).toBe(200);
+  expect((await page.request.get("/api/admin/health")).status()).toBe(200);
 });
 
 test("changelog page displays timeline milestones and is accessible", async ({

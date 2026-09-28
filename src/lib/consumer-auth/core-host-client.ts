@@ -656,7 +656,6 @@ export class VoxCoreHostClient {
     path: string,
     accountId: string,
     body: Record<string, unknown>,
-    method = "POST",
   ): Promise<T> {
     const hostUserId = `vox-account:${accountId}`;
     const hostContext: HostContext = {
@@ -672,7 +671,7 @@ export class VoxCoreHostClient {
     const response = await this.dependencies.fetch(
       new URL(path, this.config.baseUrl),
       {
-        method,
+        method: "POST",
         headers: {
           ...assertion.headers,
           "Content-Type": "application/json",
@@ -865,7 +864,7 @@ export class VoxCoreHostClient {
     grant: CreateGrantRequest,
   ): Promise<void> {
     return this.signedPost<void>(
-      "/v1/capability-grants",
+      "/v1/capability-grants/revoke",
       accountId,
       {
         host_context: {
@@ -874,7 +873,6 @@ export class VoxCoreHostClient {
         },
         grant,
       },
-      "DELETE",
     );
   }
 
@@ -1000,7 +998,7 @@ export class VoxCoreHostClient {
     extension: UpdateExtensionRequest,
   ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
-      `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/update`,
       accountId,
       {
         host_context: {
@@ -1009,7 +1007,6 @@ export class VoxCoreHostClient {
         },
         extension,
       },
-      "PUT",
     );
   }
 
@@ -1143,7 +1140,7 @@ export class VoxCoreHostClient {
     extensionId: string,
   ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
-      `/v1/remote-extensions/${encodeURIComponent(extensionId)}`,
+      `/v1/remote-extensions/${encodeURIComponent(extensionId)}/remove`,
       accountId,
       {
         host_context: {
@@ -1151,7 +1148,6 @@ export class VoxCoreHostClient {
           organization_external_key: null,
         },
       },
-      "DELETE",
     );
   }
 
@@ -1407,7 +1403,7 @@ export class VoxCoreHostClient {
 
   async deletePreference(accountId: string, key: string): Promise<void> {
     return this.signedPost<void>(
-      `/v1/preferences/${encodeURIComponent(key)}`,
+      `/v1/preferences/${encodeURIComponent(key)}/delete`,
       accountId,
       {
         host_context: {
@@ -1415,7 +1411,6 @@ export class VoxCoreHostClient {
           organization_external_key: null,
         },
       },
-      "DELETE",
     );
   }
 

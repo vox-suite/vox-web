@@ -38,7 +38,7 @@ export default async function OverviewPage() {
         avatarUrl={user.image}
         coreConfigured={connected}
       />
-      <OverviewStats health={health} coreConfigured={connected} />
+      <OverviewStats health={health} />
       <ManagementModules basePath={isClean ? "" : "/admin"} />
       <WorkspaceRuntimeCard
         health={health}
