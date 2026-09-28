@@ -13,7 +13,7 @@ export function resolveAgentKey(
   picked: string | null,
   agents: ReadonlyArray<{ external_key: string }> | undefined,
 ) {
-  return picked ?? agents?.[0]?.external_key ?? "";
+  return agents?.find((agent) => agent.external_key === picked)?.external_key ?? agents?.[0]?.external_key ?? "";
 }
 
 export function AgentPicker({

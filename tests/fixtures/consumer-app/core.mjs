@@ -40,6 +40,13 @@ const HANDOFF_DISCLAIMER =
 const REVIEWED_PACKAGE = {
   version: 1,
   digest: "a".repeat(64),
+  metadata: {
+    schema_version: 1,
+    protocol_version: "2025-11-25",
+    auth_mode: "oauth",
+    credential_custody: "platform_held",
+    skills: [],
+  },
   manifest: {
     external_key: "team-notes",
     display_name: "Team Notes",
@@ -54,6 +61,7 @@ const REVIEWED_PACKAGE = {
         consequential: false,
         data_recipients: ["Team Notes"],
         access_needs: ["query"],
+        input_schema: { type: "object", properties: {} },
         optional_guarantees: {},
       },
     ],
@@ -266,6 +274,28 @@ function seedUser(hostUserId) {
   ];
 
   const skills = [
+    {
+      id: "skill_summarize_actions",
+      external_key: "summarize-actions",
+      title: "Summarize and extract actions",
+      summary: "Summarize supplied text and identify action items without an account.",
+      curated: true,
+      latest_version: 1,
+      installed_version: null,
+      enabled: false,
+      update_available: false,
+      owner: "vox",
+      versions: {
+        1: {
+          version: 1,
+          title: "Summarize and extract actions",
+          summary: "Summarize supplied text and identify action items without an account.",
+          instructions: "Summarize the supplied text and list explicit actions with owners when known.",
+          requested_capabilities: [],
+          resources: {},
+        },
+      },
+    },
     {
       id: "skill_morning_brief",
       external_key: "morning-brief",
@@ -1127,7 +1157,32 @@ export function createCoreFixture() {
         }
         skill.installed_version = skill.latest_version;
         skill.enabled = true;
+        for (const agent of AGENTS) {
+          const key = agent.definition.external_key;
+          const disabled = new Set(user.agentSkillDisabled[key] ?? []);
+          if (key === body.agent_external_key) disabled.delete(skill.id);
+          else disabled.add(skill.id);
+          user.agentSkillDisabled[key] = [...disabled];
+        }
         return undefined;
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/conversations\/respond$/,
+      (user, _m, body) => {
+        const key = body.agent_external_key;
+        if (!AGENTS.some((agent) => agent.definition.external_key === key))
+          fail(404, "agent_not_found", "Agent not found");
+        const active = user.skills
+          .filter((skill) => skill.installed_version !== null && skill.enabled)
+          .filter((skill) => !(user.agentSkillDisabled[key] ?? []).includes(skill.id));
+        return {
+          conversation_id: body.external_conversation_id,
+          text: active.some((skill) => skill.id === "skill_summarize_actions")
+            ? "I can use Summarize and extract actions. Paste the text to summarize."
+            : "The summary skill is not enabled for this agent.",
+        };
       },
     ],
     [

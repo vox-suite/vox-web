@@ -58,13 +58,14 @@ export async function changeSkill(input: {
   skillId: string;
   action: SkillAction;
   version?: number;
+  agentKey?: string;
 }) {
   try {
     await apiRequest<null>(
       `/api/account/skills/${encodeURIComponent(input.skillId)}`,
       {
         method: "POST",
-        body: { action: input.action, version: input.version },
+        body: { action: input.action, version: input.version, agentKey: input.agentKey },
         fallbackError: "Could not update this skill",
       },
     );

@@ -30,15 +30,25 @@ export function ProposalCard({
   submitting,
   onApprove,
   onReject,
+  onExecute,
 }: {
   proposal: ActionProposal;
   status: ProposalStatus;
   submitting: boolean;
   onApprove: () => void;
   onReject: () => void;
+  onExecute: () => void;
 }) {
-  const details = proposal.details || {};
-  const currency = details.currency || "USD";
+  const source = proposal.details || {};
+  const details = (
+    source.disclosure && typeof source.disclosure === "object"
+      ? source.disclosure
+      : source
+  ) as typeof source;
+  const invocation = source.invocation as
+    { tool_name?: string; arguments?: unknown } | undefined;
+  const connection = source.execution as { connection_id?: string } | undefined;
+  const currency = details.currency;
   const expires = formatAuthoritativeDateTime(proposal.expires_at, "UTC");
   const label = details.title || proposal.id;
   const decidable = status === "pending";
@@ -53,6 +63,11 @@ export function ProposalCard({
         <>
           <span />
           <span className="flex flex-wrap gap-2">
+            {status === "approved" && proposal.approval_id ? (
+              <Button size="sm" disabled={submitting} onClick={onExecute}>
+                Execute approved action
+              </Button>
+            ) : null}
             <Button
               variant="ghost"
               size="sm"
@@ -98,8 +113,14 @@ export function ProposalCard({
           },
           {
             label: "Connected account",
-            value: details.account_reference || "Default Platform Context",
+            value:
+              details.account_reference ||
+              connection?.connection_id ||
+              "Connection not disclosed",
           },
+          invocation?.tool_name
+            ? { label: "Tool", value: invocation.tool_name }
+            : null,
           details.recipient
             ? { label: "Recipient", value: details.recipient }
             : null,
@@ -109,13 +130,13 @@ export function ProposalCard({
           details.time
             ? { label: "Scheduled time", value: details.time }
             : null,
-          details.price !== undefined
+          details.price !== undefined && typeof currency === "string"
             ? {
                 label: "Exact price (provider quote, no conversion)",
                 value: <Amount value={details.price} currency={currency} />,
               }
             : null,
-          details.fees !== undefined
+          details.fees !== undefined && typeof currency === "string"
             ? {
                 label: "Mandatory fees / taxes",
                 value: <Amount value={details.fees} currency={currency} />,
@@ -148,6 +169,14 @@ export function ProposalCard({
           </p>
         </div>
       ) : null}
+      {invocation?.arguments ? (
+        <div className="rounded-md border border-border-edge bg-ink p-3 text-[13px]">
+          <p className="mb-1 text-xs text-smoke">Exact tool inputs</p>
+          <pre className="max-h-60 overflow-auto whitespace-pre-wrap break-words text-mist">
+            {JSON.stringify(invocation.arguments, null, 2)}
+          </pre>
+        </div>
+      ) : null}
       {details.grouped_actions?.length ? (
         <div className="space-y-2">
           <p className="text-xs font-medium text-mist">
@@ -167,7 +196,8 @@ export function ProposalCard({
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  {action.price !== undefined ? (
+                  {action.price !== undefined &&
+                  typeof currency === "string" ? (
                     <Amount value={action.price} currency={currency} />
                   ) : null}
                   <StatusBadge status={action.outcome || "pending"} />

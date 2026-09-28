@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { ConversationPanel } from "@/features/conversations/components/conversation-panel";
+import { AgentPicker } from "@/features/agents/components/agent-picker";
+import { useSelectedAgent } from "@/features/agents/selection";
 import { PageHeader } from "@/components/app";
 import { Notice } from "@/components/ui";
 import { connectErrorMessage } from "@/lib/consumer-auth/connected-apps-messages";
@@ -53,7 +56,10 @@ function useConnectResult() {
 }
 
 export function AppsScreen() {
-  const [view, setView] = useState<"plugins" | "skills">("plugins");
+  const { agentKey, selectAgent } = useSelectedAgent();
+  const [view, setView] = useState<"plugins" | "skills" | "installed">(
+    "plugins",
+  );
   const [source, setSource] = useState<"public" | "personal">("public");
   const connectResult = useConnectResult();
   const { data: catalog = [] } = usePluginCatalog();
@@ -77,7 +83,7 @@ export function AppsScreen() {
             onClick={() => setView("plugins")}
             className={`rounded-full px-8 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist ${view === "plugins" ? "bg-graphite text-pure-white" : "text-smoke hover:text-mist"}`}
           >
-            Plugins
+            Apps
           </button>
           <button
             type="button"
@@ -90,13 +96,15 @@ export function AppsScreen() {
         </div>
       </div>
       <PageHeader
-        title={view === "plugins" ? "Plugins" : "Skills"}
+        title="Library"
         description={
           view === "plugins"
             ? "Link an account through its provider. Operator review and an agent access grant are separate steps."
             : "Install reusable guidance and choose which agent can load it."
         }
       />
+      <AgentPicker value={agentKey} onChange={selectAgent} />
+      <ConversationPanel />
       {connectResult?.kind === "authorized" && (
         <Notice title={`${connectedName} account linked`} tone="success">
           Authorization succeeded. Select an agent and grant the reviewed
@@ -168,7 +176,10 @@ export function AppsScreen() {
             )}
           </div>
 
-          <details className="group border-t border-border-edge pt-5">
+          <details
+            open={connectResult?.kind === "authorized" || undefined}
+            className="group border-t border-border-edge pt-5"
+          >
             <summary className="cursor-pointer list-none text-sm font-medium text-mist hover:text-pure-white focus-visible:outline-2 focus-visible:outline-mist">
               Connected accounts and agent access
               <span

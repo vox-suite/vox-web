@@ -179,7 +179,9 @@ pgTest(
        FROM vox_web_auth.session WHERE "userId" = $1`,
       [sessionBody.user.id],
     );
-    assert.equal(Number(lifetime.rows[0].seconds), 28_800);
+    // Storage rounds timestamps to milliseconds; creation and expiry can
+    // straddle that boundary while preserving the intended eight-hour TTL.
+    assert.ok(Math.abs(Number(lifetime.rows[0].seconds) - 28_800) < 1);
     assert.equal(lifetime.rows[0].authentication_method, "email-otp");
 
     const replay = await auth.handler(

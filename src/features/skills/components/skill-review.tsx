@@ -51,7 +51,7 @@ export function SkillReview({
     >
       <div className="space-y-1">
         <h3 className="text-sm font-medium text-pure-white">
-          Review {skill.title} v{next.version}
+          Review {next.title} v{next.version}
         </h3>
         <p className="text-[13px] text-smoke">
           Requested tools are requirements, not permission. Only tools you grant
@@ -75,7 +75,7 @@ export function SkillReview({
       </p>
       <div className="flex flex-wrap gap-2">
         <Button disabled={pending} onClick={onInstall}>
-          {pending ? "Installing…" : `Install v${next.version}`}
+          {pending ? "Installing…" : `Install and enable v${next.version}`}
         </Button>
         <Button variant="ghost" onClick={onCancel}>
           Cancel

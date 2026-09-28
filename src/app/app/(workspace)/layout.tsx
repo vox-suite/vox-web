@@ -3,6 +3,7 @@ import { AccountProvider } from "@/components/app-shell/account-context";
 import { AppPathsProvider } from "@/components/app-shell/app-paths";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { requireConsumerPage } from "@/lib/consumer-auth/require-consumer";
+import { AgentSelectionProvider } from "@/features/agents/selection";
 import { QueryProvider } from "@/lib/query/query-provider";
 
 export default async function WorkspaceLayout({
@@ -22,7 +23,7 @@ export default async function WorkspaceLayout({
         }}
       >
         <QueryProvider signInHref={`${basePath}/sign-in`}>
-          <AppShell>{children}</AppShell>
+          <AgentSelectionProvider><AppShell>{children}</AppShell></AgentSelectionProvider>
         </QueryProvider>
       </AccountProvider>
     </AppPathsProvider>
