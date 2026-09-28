@@ -147,6 +147,7 @@ function seedUser(hostUserId) {
       authorization_state: "authorized",
       authorized_capabilities: [
         "uber.history",
+        "uber.history_lite",
         "uber.rides.request_handoff",
       ],
       expires_at: t(20 * DAY),
@@ -189,7 +190,8 @@ function seedUser(hostUserId) {
       id: "skill_summarize_actions",
       external_key: "summarize-actions",
       title: "Summarize and extract actions",
-      summary: "Summarize supplied text and identify action items without an account.",
+      summary:
+        "Summarize supplied text and identify action items without an account.",
       curated: true,
       latest_version: 1,
       installed_version: null,
@@ -200,8 +202,10 @@ function seedUser(hostUserId) {
         1: {
           version: 1,
           title: "Summarize and extract actions",
-          summary: "Summarize supplied text and identify action items without an account.",
-          instructions: "Summarize the supplied text and list explicit actions with owners when known.",
+          summary:
+            "Summarize supplied text and identify action items without an account.",
+          instructions:
+            "Summarize the supplied text and list explicit actions with owners when known.",
           requested_capabilities: [],
           resources: {},
         },
@@ -1062,7 +1066,9 @@ export function createCoreFixture() {
           fail(404, "agent_not_found", "Agent not found");
         const active = user.skills
           .filter((skill) => skill.installed_version !== null && skill.enabled)
-          .filter((skill) => !(user.agentSkillDisabled[key] ?? []).includes(skill.id));
+          .filter(
+            (skill) => !(user.agentSkillDisabled[key] ?? []).includes(skill.id),
+          );
         return {
           conversation_id: body.external_conversation_id,
           text: active.some((skill) => skill.id === "skill_summarize_actions")
@@ -1464,19 +1470,29 @@ export function createCoreFixture() {
       "POST",
       /^\/v1\/connected-reads$/,
       (user, _m, body) => {
-        requireAuthorizedConnection(user, body.connection_id, "uber");
+        const connection = requireAuthorizedConnection(
+          user,
+          body.connection_id,
+          "uber",
+        );
+        const capability = body.capability_external_key;
+        if (
+          !["uber.history", "uber.history_lite"].includes(capability) ||
+          !connection.authorized_capabilities.includes(capability)
+        )
+          fail(403, "capability_unavailable", "This read is unavailable");
         requireGrant(
           user,
           body.agent_external_key ?? "saathi",
           body.connection_id,
-          body.capability_external_key,
+          capability,
         );
         const offset = Math.max(0, Number(body.offset ?? 0));
         const limit = Math.min(50, Math.max(1, Number(body.limit ?? 10)));
         const trips = user.uberTrips
           .slice(offset, offset + limit)
           .map((trip) =>
-            body.capability_external_key === "uber.history_lite"
+            capability === "uber.history_lite"
               ? { ...trip, start_city: null }
               : trip,
           );

@@ -30,8 +30,9 @@ export function TripHistory({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-smoke">
-          Vox shows only the start city, time, distance, and status. Precise
-          locations and rider tokens are removed before they reach you.
+          Vox shows trip time, distance, and status
+          {includeCity ? ", plus the start city" : " without city details"}.
+          Precise locations and rider tokens are removed before they reach you.
         </p>
         <Button
           size="sm"
