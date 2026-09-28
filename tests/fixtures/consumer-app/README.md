@@ -100,7 +100,7 @@ The existing `playwright.config.ts` targets port 3100 and the older fixtures. Fo
 | Extensions         | `ext_notion_workspace` active, conformance passed, consented; `ext_splitwise_direct` quarantined, consent_required, conformance pending                                                                                                                                |
 | Tasks              | `task_seed_weekend_plan` waiting_for_approval; `task_seed_calendar_digest` completed. New tasks move from queued to running after 2 s, then to completed after 8 s. If the instruction mentions book, buy, pay or order, the task goes to waiting_for_approval instead |
 | Proposals          | `prop_seed_goa_stay` pending. Approval must echo the exact `details`, otherwise it returns 409                                                                                                                                                                         |
-| Connected accounts | 6 Uber trips; 5 lodging properties (Goa ×2, Jaipur, Bengaluru, Mumbai); existing booking `bk_seed_jaipur` (refundable)                                                                                                                                                 |
+| Connected accounts | 6 Uber trips                                                                                                                                                                                                                                              |
 
 ## Mock Core control routes (fixture-only)
 
@@ -119,7 +119,7 @@ curl -X POST -d '{"state":"failed","wait_reason":null}' http://127.0.0.1:3201/__
   - `/api/account/auth/[...all]` (Better Auth)
   - anything that calls `ConsumerAccountAuthority`
 - **Host assertions are not verified.** The mock Core only requires the `X-Vox-Host-Credential` header plus a `vox-account:` host user id. It does not check the HMAC signature or the federated proof.
-- **Lodging accepts any authorized connection.** Search, book and cancel accept any _authorized_ connection the user owns, whatever its integration. The seeded Expedia connection is expired on purpose, so use `conn_uber_rides` or re-authorize Expedia through the control route. Uber reads require the uber connection **and** a `uber.trips.read` grant for the agent.
+- **Uber reads need a grant.** Reads require the uber connection **and** a `uber.history` or `uber.history_lite` grant for the agent; `history_lite` drops the start city.
 - **Connection setup never completes.** Starting a connection (`POST /api/account/connections`) creates a `pending` connection with a fake authorization URL. The app's callback route returns 503 by design.
 - **State is in memory only.** Core state and sign-out revocations are lost on restart. Minted cookies survive restarts because the tokens are stateless JWTs.
 - **Scope and dev-server limits.** Global sign-out revokes every token of that user minted up to that moment. `scope=others` is a no-op. Only one `next dev` can use this checkout's `.next` directory at a time, so stop other dev servers first.

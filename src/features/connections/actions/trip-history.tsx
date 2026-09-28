@@ -16,7 +16,13 @@ import {
 } from "@/lib/global-formatting";
 import { useReadTripHistory } from "./queries";
 
-export function TripHistory({ connectionId }: { connectionId: string }) {
+export function TripHistory({
+  connectionId,
+  includeCity,
+}: {
+  connectionId: string;
+  includeCity: boolean;
+}) {
   const read = useReadTripHistory();
   const history = read.data;
 
@@ -30,7 +36,7 @@ export function TripHistory({ connectionId }: { connectionId: string }) {
         <Button
           size="sm"
           disabled={read.isPending}
-          onClick={() => read.mutate({ connectionId })}
+          onClick={() => read.mutate({ connectionId, includeCity })}
         >
           {read.isPending
             ? "Loading trips…"

@@ -273,72 +273,6 @@ export type UberReadRequest = {
   include_city?: boolean;
 };
 
-export type LodgingProperty = {
-  property_id: string;
-  name: string;
-  location: string;
-  star_rating: number;
-  price_amount_minor: number;
-  currency: string;
-  available_rate_plans: Array<{
-    rate_plan_id: string;
-    room_name: string;
-    refundable: boolean;
-    cancellation_deadline: string | null;
-  }>;
-};
-
-export type LodgingSearchRequest = {
-  connection_id: string;
-  agent_external_key?: string;
-  destination: string;
-  check_in: string;
-  check_out: string;
-  occupancy: number;
-};
-
-export type LodgingSearchResponse = {
-  properties: LodgingProperty[];
-  total_results: number;
-};
-
-export type LodgingBookingRequest = {
-  connection_id: string;
-  agent_external_key?: string;
-  booking_request: {
-    property_id: string;
-    rate_plan_id: string;
-    guest_name: string;
-    check_in: string;
-    check_out: string;
-    total_amount_minor: number;
-    currency: string;
-  };
-};
-
-export type LodgingBooking = {
-  booking_id: string;
-  expedia_booking_ref: string;
-  property_id: string;
-  status: "confirmed" | "reconciling" | "cancelled" | "failed";
-  check_in: string;
-  check_out: string;
-  total_amount_minor: number;
-  currency: string;
-  cancellation_policy: string;
-  created_at: string;
-};
-
-export type LodgingCancelResponse = {
-  booking_id: string;
-  expedia_booking_ref: string;
-  property_id: string;
-  status: "cancelled" | "reconciling";
-  refund_amount_minor: number;
-  currency: string;
-  cancelled_at: string;
-};
-
 export type AmazonHandoffRequest = {
   asin: string;
   locale?: string;
@@ -1276,65 +1210,6 @@ export class VoxCoreHostClient {
           (request.include_city ?? true) ? "uber.history" : "uber.history_lite",
         offset: request.offset ?? 0,
         limit: request.limit ?? 10,
-      },
-    );
-  }
-
-  async searchLodging(
-    accountId: string,
-    request: LodgingSearchRequest,
-  ): Promise<LodgingSearchResponse> {
-    return this.signedPost<LodgingSearchResponse>(
-      "/v1/lodging/search",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: request.agent_external_key ?? "saathi",
-        connection_id: request.connection_id,
-        destination: request.destination,
-        check_in: request.check_in,
-        check_out: request.check_out,
-        occupancy: request.occupancy,
-      },
-    );
-  }
-
-  async bookLodging(
-    accountId: string,
-    request: LodgingBookingRequest,
-  ): Promise<LodgingBooking> {
-    return this.signedPost<LodgingBooking>("/v1/lodging/bookings", accountId, {
-      host_context: {
-        host_user_id: `vox-account:${accountId}`,
-        organization_external_key: null,
-      },
-      agent_external_key: request.agent_external_key ?? "saathi",
-      connection_id: request.connection_id,
-      booking_request: request.booking_request,
-    });
-  }
-
-  async cancelLodgingBooking(
-    accountId: string,
-    bookingId: string,
-    connectionId: string,
-    reason?: string,
-    agentExternalKey?: string,
-  ): Promise<LodgingCancelResponse> {
-    return this.signedPost<LodgingCancelResponse>(
-      `/v1/lodging/bookings/${encodeURIComponent(bookingId)}/cancel`,
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        agent_external_key: agentExternalKey ?? "saathi",
-        connection_id: connectionId,
-        reason: reason ?? "Consumer requested cancellation",
       },
     );
   }
