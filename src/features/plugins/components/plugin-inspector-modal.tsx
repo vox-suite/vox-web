@@ -143,10 +143,9 @@ export function PluginInspectorModal({
                   </p>
                 )}
                 <p className="text-[11px] leading-relaxed text-smoke">
-                  This list comes from {plugin.displayName} itself. Agent use is
-                  unavailable until an explicit agent grant and verified action
-                  approval are supported. Labels are untrusted reports, not
-                  execution permissions.
+                  This list comes from {plugin.displayName} itself. Only reviewed,
+                  declared tools can be granted to an agent. External changes
+                  still require an exact action approval.
                 </p>
               </div>
             ) : (
@@ -214,7 +213,7 @@ export function PluginInspectorModal({
                   variant="primary"
                   size="sm"
                   disabled={isConnecting}
-                  onClick={() => connectMutation.mutate(plugin.id)}
+                  onClick={() => connectMutation.mutate(plugin)}
                   className="gap-1.5"
                 >
                   {isConnecting ? (

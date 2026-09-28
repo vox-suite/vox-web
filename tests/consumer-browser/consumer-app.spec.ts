@@ -74,7 +74,7 @@ test("plugin library keeps registration and skills reachable", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Public" }).click();
   await expect(
-    page.getByRole("heading", { name: "Public plugin catalog" }),
+    page.getByRole("heading", { name: "Apps", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Personal" }).click();
   await page.getByRole("button", { name: "Add server" }).click();
@@ -93,33 +93,29 @@ test("plugin library keeps registration and skills reachable", async ({
   ).toBeVisible();
 });
 
-test("consumer plugin marketplace enables 1-click install with brand assets and top dock", async ({
+test("manifest-only connector installs and returns from OAuth to agent access", async ({
   page,
 }) => {
   await signIn(page);
   await page.goto("/app/apps");
-
-  // Verify Plugins marketplace headings & categories
+  const card = page.getByTestId("plugin-card-team-notes");
+  await expect(card.getByRole("heading", { name: "Team Notes" })).toBeVisible();
+  await expect(card.getByText("Read notes")).toBeVisible();
+  await card
+    .getByRole("button", { name: "Connect Team Notes", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "Plugins", level: 1 }),
-  ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Popular" })).toBeVisible();
-  await expect(
-    page.getByRole("region", { name: "Food & Groceries" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "DoorDash", level: 3 }).first(),
+    page.getByText("Team Notes account linked", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Uber", level: 3 }).first(),
+    page.getByText(/Select an agent and grant the reviewed/),
   ).toBeVisible();
-
-  // Perform 1-click install on DoorDash
-  await page.getByRole("button", { name: "Install DoorDash" }).first().click();
-
-  // Verify DoorDash installed in top dock
+  await expect(page.getByTestId("connected-badge-team-notes")).toBeVisible();
+  await page
+    .locator("summary", { hasText: "Connected accounts and agent access" })
+    .click();
   await expect(
-    page.getByRole("button", { name: /DoorDash active/i }),
+    page.getByRole("heading", { name: "Agent access" }),
   ).toBeVisible();
 });
 

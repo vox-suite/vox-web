@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 import { CoreHostRequestError } from "@/lib/consumer-auth/core-host-client";
+import { connectedAppsRedirectUri } from "@/lib/consumer-auth/connected-apps";
 import { consumerHref } from "@/lib/consumer-routes";
 
 /**
@@ -9,9 +10,10 @@ import { consumerHref } from "@/lib/consumer-routes";
  * state belongs to this signed-in account before exchanging the code.
  */
 export async function GET(request: NextRequest) {
-  const host = request.headers.get("host");
+  const canonical = new URL(connectedAppsRedirectUri(request));
+  const host = canonical.host;
   const back = (params: Record<string, string>) => {
-    const url = new URL(consumerHref(host, "/apps"), request.nextUrl.origin);
+    const url = new URL(consumerHref(host, "/apps"), canonical.origin);
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.set(key, value);
     }
@@ -22,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   const account = await currentConsumer(request.headers);
   if (!account) {
-    const login = new URL(consumerHref(host, "/"), request.nextUrl.origin);
+    const login = new URL(consumerHref(host, "/"), canonical.origin);
     return NextResponse.redirect(login);
   }
 

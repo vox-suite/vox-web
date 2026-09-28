@@ -2,6 +2,12 @@
 /** User-facing reasons for Core connected-app error codes. */
 export function connectErrorMessage(code: string | undefined): string {
   switch (code) {
+    case "package_conflict":
+      return "This connector version changed or conflicts with your installation. Refresh the catalog before trying again.";
+    case "package_unavailable":
+      return "This connector version is no longer available.";
+    case "package_storage_unavailable":
+      return "The connector catalog is temporarily unavailable.";
     case "authorization_expired":
       return "The sign-in took too long or was already used. Please try again.";
     case "provider_rejected":

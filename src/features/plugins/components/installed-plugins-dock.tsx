@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PLUGIN_CATALOG, type CatalogPlugin } from "../catalog";
+import { presentConnector, type CatalogPlugin } from "../catalog";
+import { useExtensions } from "@/features/extensions/queries";
 import { usePluginConnections } from "../connection-state";
 import { PluginLogo } from "./plugin-logo";
 import { PluginInspectorModal } from "./plugin-inspector-modal";
@@ -21,9 +22,11 @@ export function InstalledPluginsDock({
   const [inspected, setInspected] = useState<CatalogPlugin | null>(null);
   const connectionOf = usePluginConnections();
 
-  const linked = PLUGIN_CATALOG.filter(
-    (plugin) => Boolean(connectionOf(plugin).connection),
-  );
+  const { data: extensions = [] } = useExtensions();
+  const linked = extensions
+    .filter((e) => e.protocol === "mcp" && e.lifecycle_state !== "removed")
+    .map((e) => presentConnector({ ...e, capabilities: e.capabilities ?? [] }))
+    .filter((plugin) => Boolean(connectionOf(plugin).connection));
 
   const handleInspect = (plugin: CatalogPlugin) => {
     onInspect?.(plugin);

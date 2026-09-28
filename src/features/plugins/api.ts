@@ -23,11 +23,10 @@ export type ConnectedApp = ConnectedAppsStatus["connected"][number];
 export async function getPluginCatalog(
   signal?: AbortSignal,
 ): Promise<CatalogPlugin[]> {
-  const data = await apiRequest<CatalogPlugin[] | { plugins: CatalogPlugin[] }>(
-    "/api/account/plugins/catalog",
-    { signal, fallbackError: "Failed to load plugin catalog" },
-  );
-  return Array.isArray(data) ? data : (data.plugins ?? []);
+  return apiRequest<CatalogPlugin[]>("/api/account/plugins/catalog", {
+    signal,
+    fallbackError: "Failed to load plugin catalog",
+  });
 }
 
 export async function getConnectedApps(
@@ -43,10 +42,12 @@ export async function getConnectedApps(
 /** Installs the app if needed and returns where to sign in, if anywhere. */
 export async function connectPlugin(
   pluginId: string,
+  version: number,
+  digest: string,
 ): Promise<ConnectPluginResponse> {
   return apiRequest<ConnectPluginResponse>("/api/account/plugins/connect", {
     method: "POST",
-    body: { pluginId },
+    body: { pluginId, version, digest },
     fallbackError: "Failed to connect app",
   });
 }

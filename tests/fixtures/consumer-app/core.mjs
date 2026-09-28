@@ -36,6 +36,30 @@ const DELETION_DISCLOSURE =
 const HANDOFF_DISCLAIMER =
   "This is a labelled handoff. Vox has not placed an order or made a payment; you complete the action in the provider's own app or site.";
 
+// A manifest-only fixture intentionally has no compiled-in Web brand entry.
+const REVIEWED_PACKAGE = {
+  version: 1,
+  digest: "a".repeat(64),
+  manifest: {
+    external_key: "team-notes",
+    display_name: "Team Notes",
+    protocol: "mcp",
+    endpoint_url: "https://notes.example.test/mcp",
+    operator: { operator_id: "team-notes", operator_name: "Team Notes" },
+    capabilities: [
+      {
+        external_key: "notes.read",
+        display_name: "Read notes",
+        effect: "read",
+        consequential: false,
+        data_recipients: ["Team Notes"],
+        access_needs: ["query"],
+        optional_guarantees: {},
+      },
+    ],
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Time helpers
 
@@ -1143,6 +1167,101 @@ export function createCoreFixture() {
         user.agentSkillDisabled[agentKey] = [...disabled];
         return undefined;
       },
+    ],
+
+    // Reviewed packages and mock provider OAuth. These simulate browser flow,
+    // not the protocol or credential-security contract tested in Rust.
+    ["POST", /^\/v1\/connector-packages\/list$/, () => [REVIEWED_PACKAGE]],
+    [
+      "POST",
+      /^\/v1\/connector-packages\/install$/,
+      (user, _m, body) => {
+        if (
+          body.external_key !== REVIEWED_PACKAGE.manifest.external_key ||
+          body.version !== 1 ||
+          body.digest !== REVIEWED_PACKAGE.digest
+        )
+          fail(409, "package_conflict", "Select the reviewed package version");
+        let extension = user.extensions.find(
+          (e) =>
+            e.external_key === body.external_key &&
+            e.lifecycle_state !== "removed",
+        );
+        if (!extension) {
+          const now = iso(Date.now());
+          extension = {
+            ...structuredClone(REVIEWED_PACKAGE.manifest),
+            id: randomUUID(),
+            current_version: 1,
+            conformance_status: "passed",
+            operator_enabled: true,
+            consent_status: "consented",
+            lifecycle_state: "active",
+            created_at: now,
+            updated_at: now,
+          };
+          user.extensions.push(extension);
+        }
+        return extension;
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/remote-extensions\/([^/]+)\/authorize$/,
+      (user, [, id], body) => {
+        const extension = find(
+          user.extensions,
+          (e) => e.id === id,
+          "Extension",
+        );
+        const state = randomUUID();
+        user.mockOAuth = { state, extensionId: extension.id };
+        const redirect = new URL(body.redirect_uri);
+        redirect.searchParams.set("state", state);
+        redirect.searchParams.set("code", "fixture-provider-code");
+        return {
+          authorization_url: redirect.toString(),
+          expires_at: iso(Date.now() + 600000),
+        };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/connected-apps\/callback$/,
+      (user, _m, body) => {
+        if (
+          !user.mockOAuth ||
+          user.mockOAuth.state !== body.state ||
+          body.code !== "fixture-provider-code"
+        )
+          fail(400, "authorization_expired", "Invalid mock OAuth state");
+        const extension = find(
+          user.extensions,
+          (e) => e.id === user.mockOAuth.extensionId,
+          "Extension",
+        );
+        extension.mockAccountLinked = true;
+        delete user.mockOAuth;
+        return extension;
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/connected-apps\/status$/,
+      (user) => ({
+        connected: user.extensions
+          .filter((e) => e.mockAccountLinked && e.lifecycle_state !== "removed")
+          .map((e) => ({
+            extension_id: e.id,
+            external_key: e.external_key,
+            display_name: e.display_name,
+            tools: e.capabilities.map((c) => ({
+              name: c.external_key,
+              description: c.display_name,
+              input_schema: { type: "object" },
+            })),
+          })),
+      }),
     ],
 
     // Remote extensions

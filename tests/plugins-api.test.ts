@@ -17,10 +17,7 @@ try {
   // ignore
 }
 
-import {
-  PLUGIN_CATALOG,
-  connectablePlugins,
-} from "../src/features/plugins/catalog";
+import { presentConnector } from "../src/features/plugins/catalog";
 import {
   connectPlugin,
   getConnectedApps,
@@ -30,7 +27,6 @@ import {
 import { pluginKeys } from "../src/features/plugins/queries";
 import type {
   ConnectedAppsStatus,
-  InstallExtensionRequest,
   RemoteExtension,
   VoxCoreHostClient,
 } from "../src/lib/consumer-auth/core-host-client";
@@ -109,241 +105,100 @@ function connectRequest(body: unknown, host = "app.voxagent.in") {
   });
 }
 
-test("GET /api/account/plugins/catalog lists configured-client apps only when Core has them", async () => {
+test("catalog exposes only Core-reviewed packages and installation binds the reviewed digest", async () => {
   const {
     getCatalog,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-
-  setMockConsumerForTests(null);
-  const anonymous = await (
-    await getCatalog(
-      new NextRequest("http://localhost/api/account/plugins/catalog"),
-    )
-  ).json();
-  assert.deepEqual(
-    anonymous.map((p: { id: string }) => p.id),
-    connectablePlugins([]).map((p) => p.id),
-  );
-
-  setMockConsumerForTests(mockSession);
-  setCoreHostClientForTests({
-    async connectedAppsStatus() {
-      return {
-        ...emptyStatus,
-        configured_hosts: ["mcp-gateway-external-pilot.spotify.net"],
-      };
-    },
-  } as unknown as VoxCoreHostClient);
-  const signedIn = await (
-    await getCatalog(
-      new NextRequest("http://localhost/api/account/plugins/catalog"),
-    )
-  ).json();
-  assert.ok(signedIn.some((p: { id: string }) => p.id === "spotify"));
-  assert.ok(!signedIn.some((p: { id: string }) => p.id === "google-calendar"));
-
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/connect validates the session, body, and plugin", async () => {
-  const {
     connectRoute,
     setMockConsumerForTests,
     setCoreHostClientForTests,
     resetConsumerAuthRuntimeForTests,
   } = await loadModules();
-
+  const digest = "a".repeat(64);
+  const calls: unknown[] = [];
+  setCoreHostClientForTests({
+    async listConnectorPackages() {
+      return [
+        {
+          version: 2,
+          digest,
+          manifest: {
+            external_key: "custom",
+            display_name: "Custom connector",
+            protocol: "mcp",
+            endpoint_url: "https://custom.example/mcp",
+            operator: {
+              operator_id: "custom",
+              operator_name: "Custom Operator",
+            },
+            capabilities: [
+              {
+                external_key: "custom.read",
+                display_name: "Read custom",
+                effect: "read",
+                data_recipients: ["Custom Operator"],
+              },
+            ],
+          },
+        },
+      ];
+    },
+    async installConnectorPackage(
+      _: string,
+      key: string,
+      version: number,
+      actualDigest: string,
+    ) {
+      calls.push({ key, version, digest: actualDigest });
+      return extensionFixture({ external_key: key });
+    },
+    async connectedAppsStatus() {
+      return emptyStatus;
+    },
+    async authorizeExtension() {
+      return { authorization_url: "https://provider.example/authorize" };
+    },
+  } as unknown as VoxCoreHostClient);
   setMockConsumerForTests(null);
   assert.equal(
-    (await connectRoute(connectRequest({ pluginId: "notion" }))).status,
+    (
+      await getCatalog(
+        new NextRequest("https://app.voxagent.in/api/account/plugins/catalog"),
+      )
+    ).status,
     401,
   );
-
   setMockConsumerForTests(mockSession);
-  assert.equal((await connectRoute(connectRequest({}))).status, 400);
-  assert.equal(
-    (await connectRoute(connectRequest({ pluginId: "uber" }))).status,
-    404,
-  );
-  // Providers that have not approved Vox's callback are refused up front.
-  const unapproved = await connectRoute(connectRequest({ pluginId: "zomato" }));
-  assert.equal(unapproved.status, 409);
-  assert.equal((await unapproved.json()).code, "provider_approval_required");
-  setCoreHostClientForTests(null);
-  assert.equal(
-    (await connectRoute(connectRequest({ pluginId: "notion" }))).status,
-    503,
-  );
-
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/connect installs the app and returns the provider sign-in URL", async () => {
-  const {
-    connectRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-  setMockConsumerForTests(mockSession);
-
-  const installed: RemoteExtension[] = [];
-  const authorizeCalls: { extensionId: string; redirectUri: string }[] = [];
-  let status: ConnectedAppsStatus = emptyStatus;
-  setCoreHostClientForTests({
-    async listExtensions() {
-      return [...installed];
-    },
-    async installExtension(_: string, request: InstallExtensionRequest) {
-      assert.equal(request.external_key, "notion");
-      assert.equal(request.endpoint_url, "https://mcp.notion.com/mcp");
-      assert.equal(request.protocol, "mcp");
-      const ext = extensionFixture();
-      installed.push(ext);
-      return ext;
-    },
-    async connectedAppsStatus() {
-      return status;
-    },
-    async authorizeExtension(
-      _: string,
-      extensionId: string,
-      redirectUri: string,
-    ) {
-      authorizeCalls.push({ extensionId, redirectUri });
-      return {
-        authorization_url: "https://mcp-server.notion.com/authorize?state=s",
-        expires_at: new Date().toISOString(),
-      };
-    },
-  } as unknown as VoxCoreHostClient);
-
-  const res = await connectRoute(connectRequest({ pluginId: "notion" }));
-  assert.equal(res.status, 200);
-  const body = await res.json();
-  assert.equal(body.status, "authorize");
-  assert.equal(
-    body.authorizationUrl,
-    "https://mcp-server.notion.com/authorize?state=s",
-  );
-  // On the consumer host the callback has no /app prefix.
-  assert.deepEqual(authorizeCalls, [
-    {
-      extensionId: "ext-notion",
-      redirectUri: "https://app.voxagent.in/apps/oauth/callback",
-    },
-  ]);
-
-  // Elsewhere (previews, local) routes live under /app.
-  await connectRoute(connectRequest({ pluginId: "notion" }, "localhost:3000"));
-  assert.equal(
-    authorizeCalls[1].redirectUri,
-    "https://localhost:3000/app/apps/oauth/callback",
-  );
-  assert.equal(installed.length, 1, "an existing install is reused");
-
-  // Once provider authorization succeeds, no new sign-in is started while
-  // the extension waits for operator review.
-  status = {
-    ...emptyStatus,
-    connected: [
-      {
-        extension_id: "ext-notion",
-        connection_id: "connection-notion",
-        connected_at: "",
-        lifecycle_state: "installed",
-        tools: [],
-      },
-    ],
-  };
-  const again = await (
-    await connectRoute(connectRequest({ pluginId: "notion" }))
+  const catalog = await (
+    await getCatalog(
+      new NextRequest("https://app.voxagent.in/api/account/plugins/catalog"),
+    )
   ).json();
-  assert.equal(again.status, "authorized");
-  assert.equal(authorizeCalls.length, 2);
-
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/connect shares one attempt between overlapping clicks and adopts a 409 winner", async () => {
-  const {
-    connectRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-  setMockConsumerForTests(mockSession);
-
-  let installs = 0;
-  let lists = 0;
-  setCoreHostClientForTests({
-    async listExtensions() {
-      lists += 1;
-      return lists === 1 ? [] : [extensionFixture()];
-    },
-    async installExtension() {
-      installs += 1;
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      throw new CoreHostRequestError(409, "/v1/remote-extensions");
-    },
-    async connectedAppsStatus() {
-      return emptyStatus;
-    },
-    async authorizeExtension() {
-      return { authorization_url: "https://x.example/auth", expires_at: "" };
-    },
-  } as unknown as VoxCoreHostClient);
-
-  const [a, b] = await Promise.all([
-    connectRoute(connectRequest({ pluginId: "notion" })),
-    connectRoute(connectRequest({ pluginId: "notion" })),
-  ]);
-  assert.equal(a.status, 200);
-  assert.equal(b.status, 200);
-  assert.equal(installs, 1);
-  assert.equal((await a.json()).status, "authorize");
-
-  setMockConsumerForTests(undefined);
-  resetConsumerAuthRuntimeForTests();
-});
-
-test("POST /api/account/plugins/connect explains Core failures without leaking internals", async () => {
-  const {
-    connectRoute,
-    setMockConsumerForTests,
-    setCoreHostClientForTests,
-    resetConsumerAuthRuntimeForTests,
-  } = await loadModules();
-  setMockConsumerForTests(mockSession);
-  setCoreHostClientForTests({
-    async listExtensions() {
-      return [extensionFixture()];
-    },
-    async connectedAppsStatus() {
-      return emptyStatus;
-    },
-    async authorizeExtension() {
-      throw new CoreHostRequestError(
-        502,
-        "/v1/remote-extensions/x/authorize",
-        "provider_error",
-      );
-    },
-  } as unknown as VoxCoreHostClient);
-
-  const res = await connectRoute(connectRequest({ pluginId: "notion" }));
-  assert.equal(res.status, 502);
-  const body = await res.json();
-  assert.equal(body.code, "provider_error");
-  assert.match(body.error, /couldn't be reached/);
-  assert.doesNotMatch(body.error, /v1\//);
-
+  assert.equal(catalog.length, 1);
+  assert.equal(catalog[0].id, "custom");
+  assert.equal(catalog[0].packageDigest, digest);
+  assert.equal(
+    (await connectRoute(connectRequest({ pluginId: "custom" }))).status,
+    400,
+  );
+  for (const invalid of [
+    null,
+    [],
+    1,
+    "custom",
+    { pluginId: "custom", version: 0, digest },
+  ]) {
+    assert.equal((await connectRoute(connectRequest(invalid))).status, 400);
+  }
+  assert.equal(calls.length, 0);
+  const result = await connectRoute(
+    connectRequest({ pluginId: "custom", version: 2, digest }),
+  );
+  assert.equal(result.status, 200);
+  assert.equal(
+    (await result.json()).authorizationUrl,
+    "https://provider.example/authorize",
+  );
+  assert.deepEqual(calls, [{ key: "custom", version: 2, digest }]);
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
@@ -545,9 +400,22 @@ test("client api functions call the plugin routes", async () => {
     globalThis.fetch = async (url, init) => {
       assert.ok(String(url).includes("/api/account/plugins/catalog"));
       assert.equal(init?.method, "GET");
-      return Response.json(PLUGIN_CATALOG);
+      return Response.json([
+        presentConnector(
+          {
+            external_key: "custom",
+            display_name: "Custom",
+            protocol: "mcp",
+            endpoint_url: "https://example.com/mcp",
+            operator: { operator_id: "custom", operator_name: "Custom" },
+            capabilities: [],
+          },
+          1,
+          "a".repeat(64),
+        ),
+      ]);
     };
-    assert.equal((await getPluginCatalog()).length, PLUGIN_CATALOG.length);
+    assert.equal((await getPluginCatalog()).length, 1);
 
     globalThis.fetch = async (url) => {
       assert.ok(String(url).includes("/api/account/plugins/status"));
@@ -565,7 +433,10 @@ test("client api functions call the plugin routes", async () => {
         extension: {},
       });
     };
-    assert.equal((await connectPlugin("notion")).status, "authorize");
+    assert.equal(
+      (await connectPlugin("notion", 1, "a".repeat(64))).status,
+      "authorize",
+    );
 
     globalThis.fetch = async (url, init) => {
       assert.ok(String(url).includes("/api/account/plugins/ext-notion"));
