@@ -24,7 +24,7 @@ and federated-identity endpoints.
 
    ```json
    {
-     "deployment_external_key": "production",
+     "deployment_external_key": "vox.standalone.deployment",
      "host_app_external_key": "vox-web",
      "allowed_origins": ["https://app.voxagent.in"]
    }
@@ -32,13 +32,17 @@ and federated-identity endpoints.
 
    Store the returned credential ID, audience, and one-time raw secret as
    `VOX_HOST_CREDENTIAL_ID`, `VOX_HOST_AUDIENCE`, and `VOX_HOST_SECRET`.
+   Use the existing standalone deployment, which contains the selected
+   general agent and the reviewed default skills. Web remains its own host
+   app and user-context boundary; its credential audience is
+   `vox-host:vox.standalone.deployment:vox-web`.
 
 6. Generate an Ed25519 keypair. Register the public key through
    `POST /v1/identity-adapters` with the operator bearer credential:
 
    ```json
    {
-     "deployment_external_key": "production",
+     "deployment_external_key": "vox.standalone.deployment",
      "external_key": "vox-web-primary",
      "configuration": {
        "kind": "federated_ed25519",
