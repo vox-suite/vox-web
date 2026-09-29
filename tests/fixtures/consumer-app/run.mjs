@@ -106,6 +106,7 @@ async function main() {
     // behaviour such as link prefetching); the default is `next dev`.
     [
       process.env.CONSUMER_FIXTURE_MODE === "start" ? "start" : "dev",
+      ...(process.env.CONSUMER_FIXTURE_MODE === "start" ? [] : ["--webpack"]),
       "--hostname",
       "127.0.0.1",
       "--port",
