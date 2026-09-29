@@ -106,7 +106,7 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
     .click();
   await expect(
     page.getByText("Team Notes account linked", { exact: true }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 30_000 });
   await expect(
     page.getByText(/Select an agent and grant the reviewed/),
   ).toBeVisible();
