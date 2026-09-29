@@ -43,6 +43,7 @@ export function PluginInspectorModal({
 
   const { state, extension, connection: live } = connection;
   const tools = live?.tools ?? [];
+  const noAccount = plugin.metadata?.auth_mode === "none";
   const isDisconnecting =
     uninstallMutation.isPending &&
     uninstallMutation.variables === extension?.id;
@@ -76,7 +77,7 @@ export function PluginInspectorModal({
                   {state === "reviewed" && (
                     <span className="inline-flex items-center gap-1 rounded-md border border-success-green/20 bg-success-green/10 px-2 py-0.5 text-xs font-medium text-success-green">
                       <Check className="size-3 stroke-[2.5]" />
-                      Account linked
+                      {noAccount ? "Installed" : "Account linked"}
                     </span>
                   )}
                   {state === "awaiting_review" && (
@@ -111,6 +112,48 @@ export function PluginInspectorModal({
             <p className="text-sm leading-relaxed text-mist">
               {plugin.description}
             </p>
+
+            {plugin.metadata && (
+              <section className="space-y-3" aria-label="Reviewed package details">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-smoke">
+                  Reviewed access · version {plugin.packageVersion}
+                </h4>
+                <p className="text-xs leading-relaxed text-ash">
+                  {noAccount
+                    ? "Public access; no provider sign-in or stored account credential is required. Agent access remains a separate choice."
+                    : "Provider sign-in is required. Vox holds an encrypted access credential; an agent still needs a separate capability grant."}
+                </p>
+                <ul className="space-y-2">
+                  {plugin.capabilities.map((capability) => (
+                    <li
+                      key={capability.external_key}
+                      className="rounded-lg border border-border-edge bg-obsidian/50 p-3 text-xs text-ash"
+                    >
+                      <p className="font-medium text-mist">
+                        {capability.display_name} · {capability.effect}
+                      </p>
+                      <p className="mt-1">
+                        Data recipients: {capability.data_recipients?.join(", ") || "None declared"}
+                      </p>
+                      {capability.access_needs?.length ? (
+                        <p>Account access: {capability.access_needs.join(", ")}</p>
+                      ) : null}
+                      {capability.supported_regions?.length ? (
+                        <p>Regions: {capability.supported_regions.join(", ")}</p>
+                      ) : null}
+                      {capability.consequential ? (
+                        <p>External change: requires an exact approval before execution.</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+                {plugin.metadata.skills.length > 0 && (
+                  <p className="text-xs text-ash">
+                    Included guidance: {plugin.metadata.skills.map((skill) => `${skill.external_key} v${skill.version}`).join(", ")}. Enable a skill for an agent separately.
+                  </p>
+                )}
+              </section>
+            )}
 
             {state === "reviewed" ? (
               <div className="space-y-3">
@@ -173,10 +216,11 @@ export function PluginInspectorModal({
                     How connecting works
                   </p>
                   <p>
-                    You sign in on {plugin.displayName}’s own page and choose
-                    what to allow. Vox never sees your password. The access it
-                    gets is stored encrypted. Operator review and agent access
-                    are separate from sign-in. You can disconnect at any time.
+                    {!plugin.metadata
+                      ? "This server has no published package details here. Operator review and an agent grant are required before its tools can be used."
+                      : noAccount
+                      ? "Install this public app, then choose an agent and grant only the reviewed capabilities it needs. No provider account is linked."
+                      : `You sign in on ${plugin.displayName}’s own page and choose what to allow. Vox never sees your password. Operator review and agent access are separate from sign-in.`}
                   </p>
                   {state === "awaiting_review" && (
                     <p>
@@ -234,7 +278,9 @@ export function PluginInspectorModal({
                       <span>
                         {state === "incomplete"
                           ? "Finish connecting"
-                          : `Connect ${plugin.displayName}`}
+                          : noAccount
+                            ? `Install ${plugin.displayName}`
+                            : `Connect ${plugin.displayName}`}
                       </span>
                     </>
                   )}

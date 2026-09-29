@@ -99,7 +99,7 @@ export function AppsScreen() {
         title="Library"
         description={
           view === "plugins"
-            ? "Link an account through its provider. Operator review and an agent access grant are separate steps."
+            ? "Install reviewed apps. Some need provider sign-in; agent access is always a separate choice."
             : "Install reusable guidance and choose which agent can load it."
         }
       />

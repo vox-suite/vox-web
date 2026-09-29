@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { presentConnector, type CatalogPlugin } from "../catalog";
 import { useExtensions } from "@/features/extensions/queries";
 import { usePluginConnections } from "../connection-state";
+import { usePluginCatalog } from "../queries";
 import { PluginLogo } from "./plugin-logo";
 import { PluginInspectorModal } from "./plugin-inspector-modal";
 
@@ -14,18 +15,29 @@ export interface InstalledPluginsDockProps {
   className?: string;
 }
 
-/** Linked accounts, including ones still awaiting operator review. */
+/** Installed MCP apps, including ones still awaiting operator review. */
 export function InstalledPluginsDock({
   onInspect,
   className,
 }: InstalledPluginsDockProps) {
   const [inspected, setInspected] = useState<CatalogPlugin | null>(null);
   const connectionOf = usePluginConnections();
+  const { data: catalog = [] } = usePluginCatalog();
 
   const { data: extensions = [] } = useExtensions();
   const linked = extensions
     .filter((e) => e.protocol === "mcp" && e.lifecycle_state !== "removed")
-    .map((e) => presentConnector({ ...e, capabilities: e.capabilities ?? [] }))
+    .map(
+      (e) =>
+        catalog.find(
+          (plugin) =>
+            plugin.id === e.external_key &&
+            plugin.packageVersion === e.current_version &&
+            plugin.endpointUrl === e.endpoint_url &&
+            plugin.operator.operatorId === e.operator.operator_id,
+        ) ??
+        presentConnector({ ...e, capabilities: e.capabilities ?? [] }),
+    )
     .filter((plugin) => Boolean(connectionOf(plugin).connection));
 
   const handleInspect = (plugin: CatalogPlugin) => {
@@ -47,10 +59,10 @@ export function InstalledPluginsDock({
             <Sparkles className="size-3.5" />
           </div>
           <div>
-            <p className="font-medium text-mist">No accounts linked yet</p>
+            <p className="font-medium text-mist">No apps installed yet</p>
             <p className="text-[11px] text-smoke">
-              Link an account below. Operator review and agent access are
-              separate steps.
+              Install an app below. Some require provider sign-in; agent access
+              is a separate step.
             </p>
           </div>
         </div>
@@ -74,10 +86,10 @@ export function InstalledPluginsDock({
       >
         <div className="flex flex-col shrink-0 pr-3 border-r border-border-edge">
           <span className="text-xs font-semibold text-pure-white">
-            Linked accounts
+            Installed apps
           </span>
           <span className="text-[11px] text-smoke">
-            {linked.length} {linked.length === 1 ? "account" : "accounts"} ·{" "}
+            {linked.length} {linked.length === 1 ? "app" : "apps"} ·{" "}
             {toolCount} reported {toolCount === 1 ? "tool" : "tools"}
           </span>
         </div>
@@ -88,8 +100,8 @@ export function InstalledPluginsDock({
               key={plugin.id}
               type="button"
               onClick={() => handleInspect(plugin)}
-              title={`${plugin.displayName} · Account linked`}
-              aria-label={`${plugin.displayName} account linked`}
+              title={`${plugin.displayName} · Installed`}
+              aria-label={`${plugin.displayName} installed`}
               className="group relative flex items-center justify-center rounded-xl transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ash/50"
             >
               <PluginLogo

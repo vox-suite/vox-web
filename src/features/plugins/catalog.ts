@@ -1,4 +1,7 @@
-import type { InstallExtensionRequest } from "@/lib/consumer-auth/core-host-client";
+import type {
+  InstallExtensionRequest,
+  PackageMetadata,
+} from "@/lib/consumer-auth/core-host-client";
 
 /** Presentation only. Package availability, endpoint, operator and tools come from Core. */
 export type PluginCategory =
@@ -19,6 +22,8 @@ export type CatalogPluginOperator = {
 export type CatalogPlugin = {
   packageVersion?: number;
   packageDigest?: string;
+  metadata?: PackageMetadata;
+  capabilities: InstallExtensionRequest["capabilities"];
   id: string;
   displayName: string;
   tagline: string;
@@ -143,6 +148,7 @@ export function presentConnector(
   manifest: InstallExtensionRequest,
   version?: number,
   digest?: string,
+  metadata?: PackageMetadata,
 ): CatalogPlugin {
   const brand = getPluginBrand(manifest.external_key);
   return {
@@ -166,5 +172,7 @@ export function presentConnector(
     protocol: "mcp",
     packageVersion: version,
     packageDigest: digest,
+    metadata,
+    capabilities: manifest.capabilities,
   };
 }

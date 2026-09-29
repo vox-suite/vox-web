@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const packages = await core.listConnectorPackages(account.accountId);
     const plugins = packages
       .filter((p) => p.manifest.protocol === "mcp")
-      .map((p) => presentConnector(p.manifest, p.version, p.digest));
+      .map((p) => presentConnector(p.manifest, p.version, p.digest, p.metadata));
     const response = NextResponse.json(plugins);
     response.headers.set("Cache-Control", "private, no-store");
     return response;

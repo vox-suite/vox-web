@@ -25,6 +25,7 @@ export function PluginCard({
   const connectMutation = useConnectPlugin();
   const isConnecting = useIsConnectingPlugin(plugin.id);
   const { state } = connection;
+  const noAccount = plugin.metadata?.auth_mode === "none";
 
   const handleConnect = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -102,7 +103,7 @@ export function PluginCard({
               className="inline-flex items-center gap-1 rounded-lg border border-success-green/20 bg-success-green/10 px-2 py-1 text-xs font-medium text-success-green"
             >
               <Check className="size-3.5 stroke-[2.5]" />
-              <span>Account linked</span>
+              <span>{noAccount ? "Installed" : "Account linked"}</span>
             </span>
           ) : state === "awaiting_review" || state === "unavailable" ? (
             <span className="inline-flex items-center rounded-lg border border-border-edge bg-obsidian px-2 py-1 text-xs font-medium text-ash">
@@ -113,7 +114,7 @@ export function PluginCard({
               variant="secondary"
               size="sm"
               onClick={handleConnect}
-              aria-label={`${state === "incomplete" ? "Finish connecting" : "Connect"} ${plugin.displayName}`}
+              aria-label={`${state === "incomplete" ? "Finish connecting" : noAccount ? "Install" : "Connect"} ${plugin.displayName}`}
               className="h-8 rounded-lg px-2.5 text-xs text-mist hover:text-pure-white hover:border-ash transition-colors"
             >
               {state === "incomplete" ? (
@@ -122,7 +123,11 @@ export function PluginCard({
                 <Plug className="size-3.5 stroke-[2.5]" />
               )}
               <span>
-                {state === "incomplete" ? "Finish connecting" : "Connect"}
+                {state === "incomplete"
+                  ? "Finish connecting"
+                  : noAccount
+                    ? "Install"
+                    : "Connect"}
               </span>
             </Button>
           )}
