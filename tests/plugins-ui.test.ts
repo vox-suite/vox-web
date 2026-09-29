@@ -82,3 +82,30 @@ test("account authorization and operator review remain distinct states", () => {
     "none",
   );
 });
+
+test("reviewed package metadata stays attached to the catalog presentation", () => {
+  const manifest = {
+    ...extension({ external_key: "public-notes" }),
+    capabilities: [
+      {
+        external_key: "notes.read",
+        display_name: "Read notes",
+        effect: "read" as const,
+        input_schema: { type: "object" },
+        data_recipients: ["Notes operator"],
+        access_needs: [],
+      },
+    ],
+  };
+  const metadata = {
+    schema_version: 1,
+    protocol_version: "2025-11-25",
+    auth_mode: "none" as const,
+    credential_custody: "none" as const,
+    skills: [{ external_key: "summarize", version: 2, digest: "a".repeat(64) }],
+  };
+  const plugin = presentConnector(manifest, 3, "b".repeat(64), metadata);
+  assert.equal(plugin.metadata?.auth_mode, "none");
+  assert.deepEqual(plugin.metadata?.skills, metadata.skills);
+  assert.equal(plugin.capabilities[0].data_recipients?.[0], "Notes operator");
+});

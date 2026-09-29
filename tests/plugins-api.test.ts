@@ -177,6 +177,16 @@ test("catalog exposes only Core-reviewed packages and installation binds the rev
   assert.equal(catalog.length, 1);
   assert.equal(catalog[0].id, "custom");
   assert.equal(catalog[0].packageDigest, digest);
+  assert.equal(catalog[0].metadata.auth_mode, "oauth");
+  assert.equal(catalog[0].metadata.credential_custody, "platform_held");
+  assert.deepEqual(catalog[0].capabilities, [
+    {
+      external_key: "custom.read",
+      display_name: "Read custom",
+      effect: "read",
+      data_recipients: ["Custom Operator"],
+    },
+  ]);
   assert.equal(
     (await connectRoute(connectRequest({ pluginId: "custom" }))).status,
     400,
