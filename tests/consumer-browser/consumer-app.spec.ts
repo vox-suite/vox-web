@@ -136,7 +136,15 @@ test("a default skill installs for the selected agent and is available in conver
   const skill = page.getByRole("article", {
     name: "Summarize and extract actions",
   });
+  // Wait for the version response, including a cold Next.js route compile,
+  // before asserting the review UI. A failed response still fails this gate.
+  const versionResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+      "/api/account/skills/skill_summarize_actions/versions/1",
+  );
   await skill.getByRole("button", { name: "Review and install" }).click();
+  expect((await versionResponse).ok()).toBeTruthy();
   await expect(
     page.getByRole("heading", {
       name: "Review Summarize and extract actions v1",
