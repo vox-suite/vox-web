@@ -230,3 +230,59 @@ test("create, edit and archive a specialist without changing the default", async
     page.getByRole("button", { name: /Personal Assistant · Default/ }),
   ).toBeVisible();
 });
+
+test("inspect, clear and disable memory separately for an assistant", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Personal Assistant", exact: true })
+    .click();
+  const memory = page.getByRole("region", {
+    name: "Personal Assistant memory",
+  });
+  await expect(
+    memory.getByText("Private assistant note", { exact: true }),
+  ).toBeVisible();
+  await memory
+    .getByRole("button", { name: "Clear memory", exact: true })
+    .click();
+  await memory
+    .getByRole("button", { name: "Confirm clear memory", exact: true })
+    .click();
+  await expect(
+    memory.getByText("No retained memory.", { exact: true }),
+  ).toBeVisible();
+  await memory.getByLabel("Retain memory for this assistant").uncheck();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).not.toBeChecked();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).toBeEnabled();
+  await page.reload();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Personal Assistant", exact: true })
+    .click();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).not.toBeChecked();
+  await memory.getByLabel("Retain memory for this assistant").check();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).toBeEnabled();
+  await expect(
+    memory.getByText("No retained memory.", { exact: true }),
+  ).toBeVisible();
+  const rejected = await page.request.post(
+    "/api/account/agents/general/memory",
+    {
+      data: { operation: "clear" },
+      headers: { Origin: "https://foreign.example" },
+    },
+  );
+  expect(rejected.status()).toBe(403);
+});
