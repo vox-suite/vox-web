@@ -424,8 +424,25 @@ export type PortableExportResponse = {
 };
 
 export type SelectedAgent = {
-  definition: { external_key: string; purpose: string };
+  definition: {
+    external_key: string;
+    purpose: string;
+    display_name: string;
+    is_default: boolean;
+    instruction_version: number;
+  };
 };
+
+export type AgentMutation =
+  | { operation: "create"; name: string; instructions: string }
+  | {
+      operation: "update";
+      agent_key: string;
+      name: string;
+      instructions: string;
+      expected_version: number;
+    }
+  | { operation: "archive"; agent_key: string };
 
 export type EffectiveSkill = { id: string };
 
@@ -793,6 +810,16 @@ export class VoxCoreHostClient {
     });
   }
 
+  async manageAgent(accountId: string, mutation: AgentMutation): Promise<void> {
+    return this.signedPost<void>("/v1/agents/manage", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      mutation,
+    });
+  }
+
   async setSkillAgentEnabled(
     accountId: string,
     agentKey: string,
@@ -863,17 +890,13 @@ export class VoxCoreHostClient {
     accountId: string,
     grant: CreateGrantRequest,
   ): Promise<void> {
-    return this.signedPost<void>(
-      "/v1/capability-grants/revoke",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        grant,
+    return this.signedPost<void>("/v1/capability-grants/revoke", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      grant,
+    });
   }
 
   async startTask(

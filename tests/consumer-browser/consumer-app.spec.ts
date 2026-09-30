@@ -116,18 +116,32 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
   ).toBeVisible();
 });
 
-test("a default skill installs for the selected agent and is available in conversation", async ({ page }) => {
+test("a default skill installs for the selected agent and is available in conversation", async ({
+  page,
+}) => {
   await signIn(page);
   await page.goto("/app/apps");
   await page.getByRole("button", { name: "Skills", exact: true }).click();
-  const skill = page.getByRole("article", { name: "Summarize and extract actions" });
+  const skill = page.getByRole("article", {
+    name: "Summarize and extract actions",
+  });
   await skill.getByRole("button", { name: "Review and install" }).click();
-  await expect(page.getByRole("heading", { name: "Review Summarize and extract actions v1" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Review Summarize and extract actions v1",
+    }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Install and enable v1" }).click();
-  await expect(page.getByText(/Summarize and extract actions is installed and available/)).toBeVisible();
+  await expect(
+    page.getByText(/Summarize and extract actions is installed and available/),
+  ).toBeVisible();
   await page.getByLabel(/^Ask /).fill("Summarize my notes");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByText("I can use Summarize and extract actions. Paste the text to summarize.")).toBeVisible();
+  await expect(
+    page.getByText(
+      "I can use Summarize and extract actions. Paste the text to summarize.",
+    ),
+  ).toBeVisible();
 });
 
 test("connected accounts offer only what each connection allows", async ({
@@ -152,4 +166,44 @@ test("connected accounts offer only what each connection allows", async ({
   // Old bookmarks land on Apps & skills.
   await page.goto("/app/journeys");
   await expect(page).toHaveURL(/\/app\/apps$/);
+});
+
+test("create, edit and archive a specialist without changing the default", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page.getByLabel("Assistant name").fill("Engineering");
+  await page
+    .getByLabel("Instructions", { exact: true })
+    .fill("Review code and cite files.");
+  await page
+    .getByRole("button", { name: "Create assistant", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Engineering", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Engineering", exact: true })
+    .click();
+  await page.getByLabel("Assistant name").fill("Code Reviewer");
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Code Reviewer", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Code Reviewer", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Archive assistant", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Code Reviewer", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /Saathi · Default/ }),
+  ).toBeVisible();
 });

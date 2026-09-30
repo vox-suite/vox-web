@@ -91,6 +91,8 @@ const AGENTS = [
   {
     definition: {
       external_key: "saathi",
+      is_default: true,
+      instruction_version: 1,
       display_name: "Saathi",
       purpose:
         "Everyday personal assistant: reminders, calendar, rides and small errands.",
@@ -102,6 +104,8 @@ const AGENTS = [
   {
     definition: {
       external_key: "concierge",
+      is_default: false,
+      instruction_version: 1,
       display_name: "Concierge",
       purpose:
         "Travel and stays: searches lodging, prepares bookings for your explicit approval.",
@@ -635,12 +639,12 @@ function seedUser(hostUserId) {
     dropoff_longitude: to[1],
   }));
 
-
   return {
     hostUserId,
     userContextId,
     connections,
     grants,
+    agents: structuredClone(AGENTS),
     agentSkillDisabled: { saathi: [], concierge: ["skill_morning_brief"] },
     skills,
     extensions,
@@ -877,7 +881,47 @@ export function createCoreFixture() {
     ],
 
     // Agents + grants
-    ["POST", /^\/v1\/agents\/selected$/, () => AGENTS],
+    ["POST", /^\/v1\/agents\/selected$/, (user) => user.agents],
+    [
+      "POST",
+      /^\/v1\/agents\/manage$/,
+      (user, _m, body) => {
+        const m = body.mutation;
+        if (m.operation === "create") {
+          user.agents.push({
+            definition: {
+              external_key: randomUUID(),
+              display_name: m.name,
+              purpose: m.instructions,
+              is_default: false,
+              instruction_version: 1,
+            },
+          });
+        } else {
+          const a = user.agents.find(
+            (a) => a.definition.external_key === m.agent_key,
+          );
+          if (!a) fail(404, "not_found", "Agent not found");
+          if (m.operation === "update") {
+            if (a.definition.instruction_version !== m.expected_version)
+              fail(409, "conflict", "Agent changed");
+            Object.assign(a.definition, {
+              display_name: m.name,
+              purpose: m.instructions,
+              instruction_version: m.expected_version + 1,
+            });
+          } else if (m.operation === "archive" && !a.definition.is_default) {
+            user.agents = user.agents.filter(
+              (a) => a.definition.external_key !== m.agent_key,
+            );
+            user.grants = user.grants.filter(
+              (g) => g.agent_external_key !== m.agent_key,
+            );
+          } else fail(400, "invalid", "Cannot archive default");
+        }
+        return null;
+      },
+    ],
     [
       "POST",
       /^\/v1\/agents\/([^/]+)\/effective-capability-grants$/,
@@ -890,7 +934,7 @@ export function createCoreFixture() {
       (user, _m, body) => {
         const grant = body.grant ?? {};
         if (
-          !AGENTS.some(
+          !user.agents.some(
             (a) => a.definition.external_key === grant.agent_external_key,
           )
         )
@@ -1047,7 +1091,7 @@ export function createCoreFixture() {
         }
         skill.installed_version = skill.latest_version;
         skill.enabled = true;
-        for (const agent of AGENTS) {
+        for (const agent of user.agents) {
           const key = agent.definition.external_key;
           const disabled = new Set(user.agentSkillDisabled[key] ?? []);
           if (key === body.agent_external_key) disabled.delete(skill.id);
@@ -1062,7 +1106,7 @@ export function createCoreFixture() {
       /^\/v1\/conversations\/respond$/,
       (user, _m, body) => {
         const key = body.agent_external_key;
-        if (!AGENTS.some((agent) => agent.definition.external_key === key))
+        if (!user.agents.some((agent) => agent.definition.external_key === key))
           fail(404, "agent_not_found", "Agent not found");
         const active = user.skills
           .filter((skill) => skill.installed_version !== null && skill.enabled)
@@ -1090,7 +1134,7 @@ export function createCoreFixture() {
       "POST",
       /^\/v1\/agents\/([^/]+)\/effective-skills$/,
       (user, [, agentKey]) => {
-        if (!AGENTS.some((a) => a.definition.external_key === agentKey))
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
           fail(404, "not_found", "Agent not found");
         const disabled = user.agentSkillDisabled[agentKey] ?? [];
         return user.skills
@@ -1103,7 +1147,7 @@ export function createCoreFixture() {
       "POST",
       /^\/v1\/agents\/([^/]+)\/skills\/([^/]+)\/enable$/,
       (user, [, agentKey, skillId], body) => {
-        if (!AGENTS.some((a) => a.definition.external_key === agentKey))
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
           fail(404, "not_found", "Agent not found");
         const skill = find(user.skills, (s) => s.id === skillId, "Skill");
         if (skill.installed_version === null)
@@ -1344,7 +1388,7 @@ export function createCoreFixture() {
           fail(400, "invalid_request", "title and instruction are required");
         if (
           task.agent_external_key &&
-          !AGENTS.some(
+          !user.agents.some(
             (a) => a.definition.external_key === task.agent_external_key,
           )
         ) {
@@ -1759,7 +1803,7 @@ export function createCoreFixture() {
           }));
         if (categories.includes("config"))
           payload.config = {
-            agents: AGENTS.map((a) => a.definition.external_key),
+            agents: user.agents.map((a) => a.definition.external_key),
             skills: user.skills
               .filter((s) => s.installed_version !== null)
               .map((s) => ({

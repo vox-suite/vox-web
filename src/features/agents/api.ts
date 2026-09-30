@@ -1,7 +1,16 @@
 import { apiRequest } from "@/lib/api/http";
 import type { SelectedAgent } from "@/lib/consumer-auth/core-host-client";
+import type { AgentMutation } from "@/lib/consumer-auth/core-host-client";
 
 export type Agent = SelectedAgent["definition"];
+
+export async function manageAgent(mutation: AgentMutation): Promise<void> {
+  await apiRequest("/api/account/agents", {
+    method: "POST",
+    body: mutation,
+    fallbackError: "Unable to save agent",
+  });
+}
 
 export async function listAgents(signal?: AbortSignal): Promise<Agent[]> {
   const { agents } = await apiRequest<{ agents: SelectedAgent[] }>(

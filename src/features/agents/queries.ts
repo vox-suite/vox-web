@@ -7,7 +7,7 @@ export const agentKeys = {
 };
 
 export const agentQueries = {
-  /** The agents selected for this deployment rarely change during a session. */
+  /** Owned assistants are cached briefly and invalidated after configuration changes. */
   selected: () =>
     queryOptions({
       queryKey: agentKeys.selected(),
