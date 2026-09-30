@@ -90,10 +90,10 @@ function nextLocalMorning(now, hourUtc = 2, minuteUtc = 30) {
 const AGENTS = [
   {
     definition: {
-      external_key: "saathi",
+      external_key: "general",
       is_default: true,
       instruction_version: 1,
-      display_name: "Saathi",
+      display_name: "Personal Assistant",
       purpose:
         "Everyday personal assistant: reminders, calendar, rides and small errands.",
       version: 3,
@@ -176,14 +176,14 @@ function seedUser(hostUserId) {
 
   const grants = [
     {
-      id: "grant_saathi_gcal_read",
-      agent_external_key: "saathi",
+      id: "grant_general_gcal_read",
+      agent_external_key: "general",
       connection_id: "conn_gcal_primary",
       capability_external_key: "calendar.events.read",
     },
     {
-      id: "grant_saathi_uber_trips",
-      agent_external_key: "saathi",
+      id: "grant_general_uber_trips",
+      agent_external_key: "general",
       connection_id: "conn_uber_rides",
       capability_external_key: "uber.history",
     },
@@ -538,7 +538,7 @@ function seedUser(hostUserId) {
       id: "task_seed_calendar_digest",
       title: "Summarise next week",
       instruction: "Summarise my calendar for next week and flag conflicts.",
-      agent_external_key: "saathi",
+      agent_external_key: "general",
       state: "completed",
       run_id: "run_seed_calendar_digest",
       wait_reason: null,
@@ -645,7 +645,7 @@ function seedUser(hostUserId) {
     connections,
     grants,
     agents: structuredClone(AGENTS),
-    agentSkillDisabled: { saathi: [], concierge: ["skill_morning_brief"] },
+    agentSkillDisabled: { general: [], concierge: ["skill_morning_brief"] },
     skills,
     extensions,
     reminders,
@@ -1527,7 +1527,7 @@ export function createCoreFixture() {
           fail(403, "capability_unavailable", "This read is unavailable");
         requireGrant(
           user,
-          body.agent_external_key ?? "saathi",
+          body.agent_external_key ?? "general",
           body.connection_id,
           capability,
         );

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const agentKey = searchParams.get("agentKey") || "saathi";
+  const agentKey = searchParams.get("agentKey") || "general";
 
   const core = getCoreHostClient();
   if (!core) {

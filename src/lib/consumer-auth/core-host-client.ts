@@ -1227,7 +1227,7 @@ export class VoxCoreHostClient {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,
         },
-        agent_external_key: request.agent_external_key ?? "saathi",
+        agent_external_key: request.agent_external_key ?? "general",
         connection_id: request.connection_id,
         capability_external_key:
           (request.include_city ?? true) ? "uber.history" : "uber.history_lite",
@@ -1248,7 +1248,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         asin: handoff.asin,
@@ -1270,7 +1270,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         res_id: handoff.res_id ?? null,
@@ -1291,7 +1291,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         pickup_latitude: handoff.pickup_latitude,

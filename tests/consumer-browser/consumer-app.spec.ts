@@ -76,7 +76,7 @@ test("plugin library keeps registration and skills reachable", async ({
   await expect(
     page.getByRole("heading", { name: "Apps", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Personal" }).click();
+  await page.getByRole("button", { name: "Personal", exact: true }).click();
   await page.getByRole("button", { name: "Add server" }).click();
   await expect(
     page.getByRole("form", { name: "Add MCP server" }),
@@ -204,6 +204,6 @@ test("create, edit and archive a specialist without changing the default", async
     page.getByRole("button", { name: "Code Reviewer", exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: /Saathi · Default/ }),
+    page.getByRole("button", { name: /Personal Assistant · Default/ }),
   ).toBeVisible();
 });
