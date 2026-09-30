@@ -1,15 +1,17 @@
 import { apiRequest } from "@/lib/api/http";
 import type {
   ConnectedAppsStatus,
+  ConnectorSetupConsent,
+  ConnectorSetupResult,
   RemoteExtension,
 } from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "./catalog";
 
 export type ConnectPluginResponse =
-  | { status: "authorized"; extension: RemoteExtension }
+  | { status: "authorized" | "needs_review"; setup: ConnectorSetupResult }
   | {
       status: "authorize";
-      extension: RemoteExtension;
+      setup: ConnectorSetupResult;
       authorizationUrl: string;
     };
 
@@ -44,10 +46,11 @@ export async function connectPlugin(
   pluginId: string,
   version: number,
   digest: string,
+  consent: ConnectorSetupConsent | null,
 ): Promise<ConnectPluginResponse> {
   return apiRequest<ConnectPluginResponse>("/api/account/plugins/connect", {
     method: "POST",
-    body: { pluginId, version, digest },
+    body: { pluginId, version, digest, consent },
     fallbackError: "Failed to connect app",
   });
 }

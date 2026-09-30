@@ -2,6 +2,12 @@
 /** User-facing reasons for Core connected-app error codes. */
 export function connectErrorMessage(code: string | undefined): string {
   switch (code) {
+    case "setup_needs_review":
+      return "Your assistant or access changed. Review your choices and start setup again.";
+    case "setup_unavailable":
+      return "This setup expired or is no longer available. Start setup again from the catalog.";
+    case "setup_storage_unavailable":
+      return "Setup is temporarily unavailable. Your access choices have not been applied.";
     case "package_conflict":
       return "This connector version changed or conflicts with your installation. Refresh the catalog before trying again.";
     case "package_unavailable":

@@ -7,7 +7,6 @@ import {
   Globe,
   KeyRound,
   Loader2,
-  Plug,
   ShieldCheck,
   Unplug,
   X,
@@ -15,11 +14,8 @@ import {
 import { Badge, Button, Notice } from "@/components/ui";
 import type { CatalogPlugin } from "../catalog";
 import type { PluginConnection } from "../connection-state";
-import {
-  useConnectPlugin,
-  useIsConnectingPlugin,
-  useUninstallPlugin,
-} from "../queries";
+import { useUninstallPlugin } from "../queries";
+import { PluginSetup } from "./plugin-setup";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginInspectorModalProps {
@@ -35,9 +31,7 @@ export function PluginInspectorModal({
   isOpen,
   onClose,
 }: PluginInspectorModalProps) {
-  const connectMutation = useConnectPlugin();
   const uninstallMutation = useUninstallPlugin();
-  const isConnecting = useIsConnectingPlugin(plugin?.id ?? "");
 
   if (!plugin) return null;
 
@@ -114,7 +108,10 @@ export function PluginInspectorModal({
             </p>
 
             {plugin.metadata && (
-              <section className="space-y-3" aria-label="Reviewed package details">
+              <section
+                className="space-y-3"
+                aria-label="Reviewed package details"
+              >
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-smoke">
                   Reviewed access · version {plugin.packageVersion}
                 </h4>
@@ -133,28 +130,48 @@ export function PluginInspectorModal({
                         {capability.display_name} · {capability.effect}
                       </p>
                       <p className="mt-1">
-                        Data recipients: {capability.data_recipients?.join(", ") || "None declared"}
+                        Data recipients:{" "}
+                        {capability.data_recipients?.join(", ") ||
+                          "None declared"}
                       </p>
                       {capability.access_needs?.length ? (
-                        <p>Account access: {capability.access_needs.join(", ")}</p>
+                        <p>
+                          Account access: {capability.access_needs.join(", ")}
+                        </p>
                       ) : null}
                       {capability.supported_regions?.length ? (
-                        <p>Regions: {capability.supported_regions.join(", ")}</p>
+                        <p>
+                          Regions: {capability.supported_regions.join(", ")}
+                        </p>
                       ) : null}
                       {capability.consequential ? (
-                        <p>External change: requires an exact approval before execution.</p>
+                        <p>
+                          External change: requires an exact approval before
+                          execution.
+                        </p>
                       ) : null}
                     </li>
                   ))}
                 </ul>
                 {plugin.metadata.skills.length > 0 && (
                   <p className="text-xs text-ash">
-                    Included guidance: {plugin.metadata.skills.map((skill) => `${skill.external_key} v${skill.version}`).join(", ")}. Enable a skill for an agent separately.
+                    Included guidance:{" "}
+                    {plugin.metadata.skills
+                      .map((skill) => `${skill.external_key} v${skill.version}`)
+                      .join(", ")}
+                    .
                   </p>
                 )}
               </section>
             )}
 
+            {plugin.metadata &&
+              ["none", "incomplete", "reviewed"].includes(state) && (
+                <PluginSetup
+                  key={`${plugin.id}:${plugin.packageDigest}`}
+                  plugin={plugin}
+                />
+              )}
             {state === "reviewed" ? (
               <div className="space-y-3">
                 <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-smoke">
@@ -219,8 +236,8 @@ export function PluginInspectorModal({
                     {!plugin.metadata
                       ? "This server has no published package details here. Operator review and an agent grant are required before its tools can be used."
                       : noAccount
-                      ? "Install this public app, then choose an agent and grant only the reviewed capabilities it needs. No provider account is linked."
-                      : `You sign in on ${plugin.displayName}’s own page and choose what to allow. Vox never sees your password. Operator review and agent access are separate from sign-in.`}
+                        ? "Choose assistant access above, then install. No provider account is needed."
+                        : `You sign in on ${plugin.displayName}’s own page and choose what to allow. Vox never sees your password. Operator review and agent access are separate from sign-in.`}
                   </p>
                   {state === "awaiting_review" && (
                     <p>
@@ -245,11 +262,6 @@ export function PluginInspectorModal({
               </p>
             </div>
 
-            {connectMutation.isError && (
-              <Notice title="Couldn't connect" tone="error">
-                {connectMutation.error.message}
-              </Notice>
-            )}
             {uninstallMutation.isError && (
               <Notice title="Couldn't disconnect" tone="error">
                 {uninstallMutation.error.message}
@@ -259,33 +271,6 @@ export function PluginInspectorModal({
 
           <div className="mt-8 flex items-center justify-between gap-3 border-t border-border-edge pt-4">
             <div className="flex items-center gap-2">
-              {(state === "none" || state === "incomplete") && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={isConnecting}
-                  onClick={() => connectMutation.mutate(plugin)}
-                  className="gap-1.5"
-                >
-                  {isConnecting ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" />
-                      <span>Opening {plugin.displayName}…</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plug className="size-3.5" />
-                      <span>
-                        {state === "incomplete"
-                          ? "Finish connecting"
-                          : noAccount
-                            ? `Install ${plugin.displayName}`
-                            : `Connect ${plugin.displayName}`}
-                      </span>
-                    </>
-                  )}
-                </Button>
-              )}
               {extension && (
                 <Button
                   variant={live ? "destructive" : "ghost"}

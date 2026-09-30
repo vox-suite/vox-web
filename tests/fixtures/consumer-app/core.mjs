@@ -1165,6 +1165,120 @@ export function createCoreFixture() {
     ["POST", /^\/v1\/connector-packages\/list$/, () => [REVIEWED_PACKAGE]],
     [
       "POST",
+      /^\/v1\/connector-packages\/setup$/,
+      (user, _m, body) => {
+        const setup = body.setup;
+        if (
+          setup.external_key !== REVIEWED_PACKAGE.manifest.external_key ||
+          setup.version !== 1 ||
+          setup.digest !== REVIEWED_PACKAGE.digest
+        )
+          fail(409, "package_conflict", "Review the current package");
+        if (
+          setup.consent &&
+          !user.agents.some(
+            (a) =>
+              a.definition.external_key === setup.consent.agent_external_key &&
+              a.definition.instruction_version ===
+                setup.consent.agent_instruction_version,
+          )
+        )
+          fail(409, "setup_needs_review", "Review assistant access");
+        let extension = user.extensions.find(
+          (e) =>
+            e.external_key === setup.external_key &&
+            e.lifecycle_state !== "removed",
+        );
+        if (!extension) {
+          extension = {
+            ...structuredClone(REVIEWED_PACKAGE.manifest),
+            id: randomUUID(),
+            current_version: 1,
+            conformance_status: "passed",
+            operator_enabled: true,
+            consent_status: "consented",
+            lifecycle_state: "active",
+            created_at: iso(Date.now()),
+            updated_at: iso(Date.now()),
+          };
+          user.extensions.push(extension);
+        }
+        const state = randomUUID();
+        user.mockOAuth = {
+          state,
+          extensionId: extension.id,
+          setupId: randomUUID(),
+          consent: setup.consent,
+        };
+        const redirect = new URL(setup.redirect_uri);
+        redirect.searchParams.set("state", state);
+        redirect.searchParams.set("code", "fixture-provider-code");
+        return {
+          setup_id: user.mockOAuth.setupId,
+          extension_id: extension.id,
+          external_key: extension.external_key,
+          state: "authorize",
+          authorization_url: redirect.toString(),
+        };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/connector-packages\/setup\/callback$/,
+      (user, _m, body) => {
+        const pending = user.mockOAuth;
+        if (
+          !pending ||
+          pending.state !== body.state ||
+          body.code !== "fixture-provider-code"
+        )
+          fail(400, "authorization_expired", "Invalid mock OAuth state");
+        const extension = find(
+          user.extensions,
+          (e) => e.id === pending.extensionId,
+          "Extension",
+        );
+        extension.mockAccountLinked = true;
+        const consent = pending.consent;
+        const valid =
+          !consent ||
+          user.agents.some(
+            (a) =>
+              a.definition.external_key === consent.agent_external_key &&
+              a.definition.instruction_version ===
+                consent.agent_instruction_version,
+          );
+        if (consent && valid)
+          for (const key of consent.capability_external_keys) {
+            if (!extension.capabilities.some((cap) => cap.external_key === key))
+              fail(409, "setup_needs_review", "Unknown capability");
+            if (
+              !user.grants.some(
+                (g) =>
+                  g.agent_external_key === consent.agent_external_key &&
+                  g.connection_id === extension.id &&
+                  g.capability_external_key === key,
+              )
+            )
+              user.grants.push({
+                id: randomUUID(),
+                agent_external_key: consent.agent_external_key,
+                connection_id: extension.id,
+                capability_external_key: key,
+              });
+          }
+        delete user.mockOAuth;
+        return {
+          setup_id: pending.setupId,
+          extension_id: extension.id,
+          external_key: extension.external_key,
+          state: valid ? "complete" : "needs_review",
+          authorization_url: null,
+        };
+      },
+    ],
+    [
+      "POST",
       /^\/v1\/connector-packages\/install$/,
       (user, _m, body) => {
         if (
