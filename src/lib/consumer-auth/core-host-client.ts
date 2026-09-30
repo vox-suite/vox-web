@@ -16,6 +16,21 @@ export type HostContext = {
   organizationExternalKey: string | null;
 };
 
+export type ConnectorSetupConsent = {
+  agent_external_key: string;
+  agent_instruction_version: number;
+  capability_external_keys: string[];
+  enable_bundled_skills: boolean;
+};
+
+export type ConnectorSetupResult = {
+  setup_id: string | null;
+  extension_id: string;
+  external_key: string;
+  state: "authorize" | "complete" | "needs_review" | "account_linked";
+  authorization_url: string | null;
+};
+
 type AssertionClock = {
   issuedAtSeconds: number;
   nonce: string;
@@ -1195,6 +1210,50 @@ export class VoxCoreHostClient {
         external_key: externalKey,
         version,
         digest,
+      },
+    );
+  }
+
+  async setupConnectorPackage(
+    accountId: string,
+    setup: {
+      external_key: string;
+      version: number;
+      digest: string;
+      redirect_uri: string;
+      consent: ConnectorSetupConsent | null;
+    },
+  ): Promise<ConnectorSetupResult> {
+    return this.signedPost<ConnectorSetupResult>(
+      "/v1/connector-packages/setup",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        setup,
+      },
+    );
+  }
+
+  async completeConnectorSetup(
+    accountId: string,
+    state: string,
+    code: string,
+    issuer?: string | null,
+  ): Promise<ConnectorSetupResult> {
+    return this.signedPost<ConnectorSetupResult>(
+      "/v1/connector-packages/setup/callback",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        state,
+        code,
+        iss: issuer ?? null,
       },
     );
   }

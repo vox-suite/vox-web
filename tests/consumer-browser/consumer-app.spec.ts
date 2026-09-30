@@ -93,7 +93,7 @@ test("plugin library keeps registration and skills reachable", async ({
   ).toBeVisible();
 });
 
-test("manifest-only connector installs and returns from OAuth to agent access", async ({
+test("reviewed connector preserves chosen assistant access through OAuth", async ({
   page,
 }) => {
   await signIn(page);
@@ -104,11 +104,22 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
   await card
     .getByRole("button", { name: "Connect Team Notes", exact: true })
     .click();
+  const setup = page.getByRole("region", { name: "Assistant access" });
+  await expect(setup.getByRole("combobox")).toHaveValue("general");
+  await expect(
+    setup.getByRole("checkbox", { name: "Read notes", exact: true }),
+  ).toBeChecked();
+  await setup
+    .getByRole("button", {
+      name: "Connect and enable for Personal Assistant",
+      exact: true,
+    })
+    .click();
   await expect(
     page.getByText("Team Notes account linked", { exact: true }),
   ).toBeVisible({ timeout: 30_000 });
   await expect(
-    page.getByText(/Select an agent and grant the reviewed/),
+    page.getByText(/Setup completed with your chosen assistant access/),
   ).toBeVisible();
   await expect(page.getByTestId("connected-badge-team-notes")).toBeVisible();
   await expect(

@@ -2,11 +2,11 @@
 
 import React from "react";
 import { Check, Loader2, Plug, RotateCw } from "lucide-react";
-import { Button, Notice } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { CatalogPlugin } from "../catalog";
 import type { PluginConnection } from "../connection-state";
-import { useConnectPlugin, useIsConnectingPlugin } from "../queries";
+import { useIsConnectingPlugin } from "../queries";
 import { PluginLogo } from "./plugin-logo";
 
 export interface PluginCardProps {
@@ -22,7 +22,6 @@ export function PluginCard({
   onInspect,
   className,
 }: PluginCardProps) {
-  const connectMutation = useConnectPlugin();
   const isConnecting = useIsConnectingPlugin(plugin.id);
   const { state } = connection;
   const noAccount = plugin.metadata?.auth_mode === "none";
@@ -30,7 +29,7 @@ export function PluginCard({
   const handleConnect = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isConnecting || !["none", "incomplete"].includes(state)) return;
-    connectMutation.mutate(plugin);
+    onInspect?.(plugin);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -133,11 +132,6 @@ export function PluginCard({
           )}
         </div>
       </div>
-      {connectMutation.isError && (
-        <Notice title={`Couldn't connect ${plugin.displayName}`} tone="error">
-          {connectMutation.error.message}
-        </Notice>
-      )}
     </div>
   );
 }

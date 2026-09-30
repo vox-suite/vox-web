@@ -20,7 +20,13 @@ import {
 } from "@/features/plugins/components";
 
 type ConnectResult =
-  { kind: "authorized"; name: string } | { kind: "error"; message: string };
+  | {
+      kind: "authorized";
+      name: string;
+      needsReview: boolean;
+      accountOnly: boolean;
+    }
+  | { kind: "error"; message: string };
 
 /** Read and clear the result the OAuth callback left in the URL. */
 function useConnectResult() {
@@ -38,10 +44,13 @@ function useConnectResult() {
         ? {
             kind: "authorized",
             name: connected,
+            needsReview: params.get("setup_result") === "needs_review",
+            accountOnly: params.get("setup_result") === "account_linked",
           }
         : { kind: "error", message: connectErrorMessage(error ?? undefined) },
     );
     params.delete("authorization_complete");
+    params.delete("setup_result");
     params.delete("connect_error");
     const query = params.toString();
     window.history.replaceState(
@@ -99,7 +108,7 @@ export function AppsScreen() {
         title="Library"
         description={
           view === "plugins"
-            ? "Install reviewed apps. Some need provider sign-in; agent access is always a separate choice."
+            ? "Choose assistant access and connect a reviewed app. Some apps need provider sign-in."
             : "Install reusable guidance and choose which agent can load it."
         }
       />
@@ -107,8 +116,11 @@ export function AppsScreen() {
       <ConversationPanel />
       {connectResult?.kind === "authorized" && (
         <Notice title={`${connectedName} account linked`} tone="success">
-          Authorization succeeded. Select an agent and grant the reviewed
-          capabilities under Agent access before using this account.
+          {connectResult.needsReview
+            ? "The account linked, but access changed during sign-in. Open the app, review your choices and finish setup."
+            : connectResult.accountOnly
+              ? "The account linked. Choose reviewed capabilities under Agent access before an assistant can use it."
+              : "Setup completed with your chosen assistant access. Manage current permissions under Agent access."}
         </Notice>
       )}
       {connectResult?.kind === "error" && (
