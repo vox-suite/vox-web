@@ -644,7 +644,10 @@ function seedUser(hostUserId) {
     userContextId,
     connections,
     grants,
-    agents: structuredClone(AGENTS),
+    agents: structuredClone(AGENTS).map((a) => ({
+      ...a,
+      definition: { ...a.definition, id: randomUUID() },
+    })),
     agentSkillDisabled: { general: [], concierge: ["skill_morning_brief"] },
     skills,
     extensions,
@@ -829,6 +832,43 @@ export function createCoreFixture() {
       }),
     ],
 
+    [
+      "POST",
+      /^\/v1\/agents\/([^/]+)\/memory$/,
+      (user, [, agentKey], body) => {
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
+          fail(404, "not_found", "Assistant not found");
+        user.agentMemories ??= {};
+        const view = (user.agentMemories[agentKey] ??= {
+          retention_enabled: true,
+          cleared_at: "1970-01-01T00:00:00Z",
+          retained: {
+            facts: { focus: "Private assistant note" },
+            commitments: [],
+            decisions: [],
+            recent_recaps: [],
+          },
+        });
+        const change = body.change;
+        if (
+          change.operation === "clear" ||
+          (change.operation === "set_retention" &&
+            change.enabled !== view.retention_enabled)
+        ) {
+          view.retained = {
+            facts: {},
+            commitments: [],
+            decisions: [],
+            recent_recaps: [],
+          };
+          view.cleared_at = iso(Date.now());
+        }
+        if (change.operation === "set_retention")
+          view.retention_enabled = change.enabled;
+        return view;
+      },
+    ],
+
     // Connections
     ["POST", /^\/v1\/connections\/list$/, (user) => user.connections],
     [
@@ -890,6 +930,7 @@ export function createCoreFixture() {
         if (m.operation === "create") {
           user.agents.push({
             definition: {
+              id: randomUUID(),
               external_key: randomUUID(),
               display_name: m.name,
               purpose: m.instructions,

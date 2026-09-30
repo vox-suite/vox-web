@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Field, TextArea } from "@/components/ui";
 import { manageAgent, type Agent } from "../api";
+import { AgentMemory } from "./agent-memory";
 import { agentKeys } from "../queries";
 import { errorMessage } from "@/lib/api/http";
 
@@ -17,11 +18,11 @@ export function AgentManager({ agents }: { agents: Agent[] }) {
   const mutation = useMutation({
     mutationFn: manageAgent,
     onSuccess: async () => {
-      await cache.invalidateQueries({ queryKey: agentKeys.all });
       setEditing(null);
       setName("");
       setInstructions("");
       setOpen(false);
+      await cache.invalidateQueries({ queryKey: agentKeys.all });
     },
   });
   function edit(agent: Agent | null) {
@@ -137,6 +138,7 @@ export function AgentManager({ agents }: { agents: Agent[] }) {
               </p>
             )}
           </form>
+          {editing && <AgentMemory key={editing.id} agent={editing} />}
         </div>
       )}
     </div>

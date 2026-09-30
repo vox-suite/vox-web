@@ -440,11 +440,27 @@ export type PortableExportResponse = {
 
 export type SelectedAgent = {
   definition: {
+    id: string;
     external_key: string;
     purpose: string;
     display_name: string;
     is_default: boolean;
     instruction_version: number;
+  };
+};
+
+export type AgentMemoryChange =
+  | { operation: "read" }
+  | { operation: "clear" }
+  | { operation: "set_retention"; enabled: boolean };
+export type AgentMemoryView = {
+  retention_enabled: boolean;
+  cleared_at: string;
+  retained: {
+    facts: Record<string, unknown>;
+    commitments: string[];
+    decisions: string[];
+    recent_recaps: string[];
   };
 };
 
@@ -823,6 +839,24 @@ export class VoxCoreHostClient {
         organization_external_key: null,
       },
     });
+  }
+
+  async agentMemory(
+    accountId: string,
+    agentKey: string,
+    change: AgentMemoryChange,
+  ): Promise<AgentMemoryView> {
+    return this.signedPost<AgentMemoryView>(
+      `/v1/agents/${encodeURIComponent(agentKey)}/memory`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        change,
+      },
+    );
   }
 
   async manageAgent(accountId: string, mutation: AgentMutation): Promise<void> {
