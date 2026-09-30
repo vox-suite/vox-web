@@ -184,6 +184,10 @@ test("create, edit and archive a specialist without changing the default", async
   await expect(
     page.getByRole("button", { name: "Engineering", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Engineering", exact: true }).click();
+  await expect(
+    page.getByLabel("Ask Engineering", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Manage assistants" }).first().click();
   await page
     .getByRole("button", { name: "Edit Engineering", exact: true })

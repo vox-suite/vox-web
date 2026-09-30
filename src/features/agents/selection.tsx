@@ -19,8 +19,10 @@ export function useSelectedAgent() {
   const agents = useAgents();
   // Standalone embedded panels can use a local selection too.
   const [local, setLocal] = useState<string | null>(null);
+  const agentKey = resolveAgentKey(selection?.picked ?? local, agents.data);
   return {
-    agentKey: resolveAgentKey(selection?.picked ?? local, agents.data),
+    agentKey,
+    agent: agents.data?.find((agent) => agent.external_key === agentKey),
     selectAgent: selection?.select ?? setLocal,
   };
 }

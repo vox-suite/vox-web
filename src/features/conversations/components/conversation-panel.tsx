@@ -5,7 +5,13 @@ import { Button, TextArea } from "@/components/ui";
 import { Panel, Callout } from "@/components/app";
 import { apiRequest, errorMessage } from "@/lib/api/http";
 type Message = { role: "user" | "assistant"; text: string };
-function Conversation({ agentKey }: { agentKey: string }) {
+function Conversation({
+  agentKey,
+  agentName,
+}: {
+  agentKey: string;
+  agentName: string;
+}) {
   const [id] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -48,7 +54,7 @@ function Conversation({ agentKey }: { agentKey: string }) {
         {messages.map((message, index) => (
           <div key={index} className="rounded-md border border-border-edge p-3">
             <p className="mb-1 text-xs text-smoke">
-              {message.role === "user" ? "You" : agentKey}
+              {message.role === "user" ? "You" : agentName}
             </p>
             <p className="whitespace-pre-wrap text-sm text-mist">
               {message.text}
@@ -59,7 +65,7 @@ function Conversation({ agentKey }: { agentKey: string }) {
       <form onSubmit={submit} className="space-y-3">
         <TextArea
           id="library-message"
-          label={`Ask ${agentKey}`}
+          label={`Ask ${agentName}`}
           rows={3}
           value={text}
           maxLength={16000}
@@ -80,14 +86,18 @@ function Conversation({ agentKey }: { agentKey: string }) {
   );
 }
 export function ConversationPanel() {
-  const { agentKey } = useSelectedAgent();
+  const { agentKey, agent } = useSelectedAgent();
   return (
     <Panel
       title="Try your agent"
       description="Uses this agent’s enabled skills and current connection grants. External changes require a separate approval."
     >
-      {agentKey ? (
-        <Conversation key={agentKey} agentKey={agentKey} />
+      {agent ? (
+        <Conversation
+          key={agentKey}
+          agentKey={agentKey}
+          agentName={agent.display_name}
+        />
       ) : (
         <p>Choose an available agent to start.</p>
       )}
