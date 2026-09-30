@@ -272,6 +272,9 @@ test("inspect, clear and disable memory separately for an assistant", async ({
   ).not.toBeChecked();
   await memory.getByLabel("Retain memory for this assistant").check();
   await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).toBeEnabled();
+  await expect(
     memory.getByText("No retained memory.", { exact: true }),
   ).toBeVisible();
   const rejected = await page.request.post(
