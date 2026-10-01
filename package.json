@@ -13,7 +13,8 @@
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:consumer": "playwright test -c playwright.consumer.config.ts",
-    "generate:page": "node scripts/create-admin-page.mjs"
+    "generate:page": "node scripts/create-admin-page.mjs",
+    "test:auth-hook": "node scripts/test-identity-hook.mjs"
   },
   "allowScripts": {
     "esbuild": true,

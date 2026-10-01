@@ -14,7 +14,10 @@ export function setMockConsumerForTests(
 export async function currentConsumer(): Promise<ConsumerSession | null> {
   if (mockConsumerForTests !== undefined) return mockConsumerForTests;
   try {
-    return await resolveConsumer((await createClient()).auth);
+    return await resolveConsumer(
+      (await createClient()).auth,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "")}/auth/v1`,
+    );
   } catch {
     return null;
   }

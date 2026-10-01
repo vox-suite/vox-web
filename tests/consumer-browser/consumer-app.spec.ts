@@ -58,6 +58,28 @@ test("email verification, reload and sign-out use the Supabase session boundary"
   expect((await page.request.get("/api/account/agents")).status()).toBe(401);
 });
 
+test("verified but unpinned sessions fail closed and identity joining stays unavailable", async ({
+  page,
+}) => {
+  const cookies = playwrightCookies({
+    email: `unpinned${Date.now()}@example.test`,
+    includePin: false,
+  }) as Parameters<BrowserContext["addCookies"]>[0];
+  await page.context().addCookies(cookies);
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+  await page.goto("/app/account");
+  await expect(page).toHaveURL(/\/app\/sign-in/);
+  await page.context().clearCookies();
+  await signIn(page);
+  await page.goto("/app/account");
+  await expect(
+    page.getByText("Identity linking is not available yet", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Link a verified Google identity" }),
+  ).toHaveCount(0);
+});
+
 test("every area loads for a signed-in user", async ({ page }) => {
   const email = await signIn(page);
   await page.goto("/app");

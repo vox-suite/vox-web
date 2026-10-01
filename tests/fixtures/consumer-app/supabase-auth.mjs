@@ -119,7 +119,7 @@ export function userObject(claims) {
     user_metadata: claims.user_metadata,
     identities: [
       {
-        identity_id: `${claims.sub}-${provider}`,
+        identity_id: claims.vox_identity?.identity_id ?? claims.sub,
         id: claims.sub,
         user_id: claims.sub,
         provider,
@@ -151,7 +151,7 @@ export function mintSession(input = {}) {
   const ttl = input.ttlSeconds ?? DEFAULT_SESSION_TTL_SECONDS;
   const sessionId = input.sessionId ?? randomUUID();
   const claims = {
-    iss: `fixture-supabase-auth`,
+    iss: `http://127.0.0.1:${process.env.CONSUMER_FIXTURE_AUTH_PORT ?? 54321}/auth/v1`,
     sub: user.id,
     aud: "authenticated",
     exp: now + ttl,
@@ -163,6 +163,16 @@ export function mintSession(input = {}) {
     aal: "aal1",
     session_id: sessionId,
     is_anonymous: false,
+    amr: [
+      { method: user.provider === "google" ? "oauth" : "otp", timestamp: now },
+    ],
+    vox_identity: {
+      version: 1,
+      user_id: user.id,
+      session_id: sessionId,
+      provider: user.provider,
+      identity_id: user.id,
+    },
     app_metadata: {
       provider: user.provider,
       providers: [user.provider],
@@ -175,6 +185,7 @@ export function mintSession(input = {}) {
       sub: user.id,
     },
   };
+  if (input.includePin === false) delete claims.vox_identity;
   const refreshToken = signJwt({
     typ: "refresh",
     sub: user.id,

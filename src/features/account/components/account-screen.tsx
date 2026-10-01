@@ -6,42 +6,17 @@ import { Button } from "@/components/ui";
 import { Callout, MetaList, PageHeader, Panel } from "@/components/app";
 import { useAccount } from "@/components/app-shell/account-context";
 import { useAppPaths } from "@/components/app-shell/app-paths";
-import { linkGoogleIdentity, signOut, type SignOutScope } from "../session";
+import { signOut, type SignOutScope } from "../session";
 
 function LinkedIdentities() {
-  const { basePath } = useAppPaths();
-  const [pending, setPending] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  async function link() {
-    setPending(true);
-    setFailed(false);
-    const { error } = await linkGoogleIdentity(basePath);
-    // On success the browser navigates to Google; only failures return here.
-    if (error) {
-      setPending(false);
-      setFailed(true);
-    }
-  }
-
   return (
-    <div className="space-y-4">
-      <Button disabled={pending} onClick={() => void link()}>
-        {pending ? "Opening Google…" : "Link a verified Google identity"}
-      </Button>
-      {failed ? (
-        <Callout
-          tone="danger"
-          title="Google identity was not linked"
-          live="assertive"
-        >
-          <p>
-            The identity may already belong to another Vox account, or its email
-            may not match this account.
-          </p>
-        </Callout>
-      ) : null}
-    </div>
+    <Callout title="Identity linking is not available yet">
+      <p>
+        Use the sign-in method you originally chose. Joining another login
+        identity will require verifying both identities. Matching email
+        addresses do not grant access to an existing Vox account.
+      </p>
+    </Callout>
   );
 }
 
@@ -97,7 +72,7 @@ export function AccountScreen() {
       <div className="grid items-start gap-6 xl:grid-cols-2">
         <Panel
           title="Linked identities"
-          description="Manage sign-in identities through your account provider. Connected service accounts and assistant permissions remain separate."
+          description="Connected service accounts and assistant permissions remain separate from sign-in identities."
         >
           <LinkedIdentities />
         </Panel>

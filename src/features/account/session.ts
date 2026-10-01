@@ -11,12 +11,3 @@ export async function signOut(scope: SignOutScope, signInHref: string) {
   );
   window.location.assign(signInHref);
 }
-
-export async function linkGoogleIdentity(basePath: string) {
-  return getSupabase().auth.linkIdentity({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback?next=${basePath || "/"}`,
-    },
-  });
-}
