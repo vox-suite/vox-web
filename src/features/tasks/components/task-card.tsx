@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui";
 import { Callout, ItemCard, Tag } from "@/components/app";
@@ -19,6 +20,7 @@ export function TaskCard({
 }) {
   const cancel = useCancelTask();
   const resume = useResumeTask();
+  const [reply, setReply] = useState("");
 
   const failure = cancel.error ?? resume.error;
 
@@ -47,8 +49,18 @@ export function TaskCard({
             <Button
               variant="secondary"
               size="sm"
-              disabled={resume.isPending}
-              onClick={() => resume.mutate(task.id)}
+              disabled={
+                resume.isPending ||
+                (task.wait_reason === "clarification" &&
+                  (!reply.trim() ||
+                    new TextEncoder().encode(reply).length > 8192))
+              }
+              onClick={() =>
+                resume.mutate({
+                  taskId: task.id,
+                  ...(task.wait_reason === "clarification" ? { reply } : {}),
+                })
+              }
             >
               {resume.isPending ? "Continuing…" : "Check and continue"}
             </Button>
@@ -75,6 +87,17 @@ export function TaskCard({
         </span>
       }
     >
+      {task.state === "waiting" && task.wait_reason === "clarification" ? (
+        <label>
+          Answer this assistant
+          <textarea
+            aria-label={`Answer for task: ${task.title}`}
+            value={reply}
+            onChange={(event) => setReply(event.target.value)}
+            disabled={resume.isPending}
+          />
+        </label>
+      ) : null}
       {task.wait_reason ? (
         <Callout tone="warning" title="Waiting">
           <p>{task.result.checkpoint?.question ?? task.wait_reason}</p>

@@ -888,11 +888,16 @@ export class VoxCoreHostClient {
     );
   }
 
-  async resumeTask(accountId: string, taskId: string): Promise<DurableTask> {
+  async resumeTask(
+    accountId: string,
+    taskId: string,
+    reply?: string,
+  ): Promise<DurableTask> {
     return this.signedPost<DurableTask>(
       `/v1/durable-tasks/${encodeURIComponent(taskId)}/resume`,
       accountId,
       {
+        ...(reply === undefined ? {} : { reply }),
         host_context: {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,

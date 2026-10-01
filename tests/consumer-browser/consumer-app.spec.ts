@@ -141,6 +141,41 @@ test("saved tasks survive reload and stop rejects foreign-origin requests", asyn
   ).toBeVisible();
 });
 
+test("clarification answers stay bound to the waiting task", async ({
+  page,
+  request,
+}) => {
+  await signIn(page);
+  await page.goto("/app/tasks");
+  await page.getByLabel("Task title").fill("Clarify trip");
+  await page.getByLabel("Instruction").fill("Suggest trip options");
+  await page.getByRole("button", { name: "Submit durable task" }).click();
+  const card = page.getByRole("article", { name: "Clarify trip" });
+  await expect(card).toBeVisible();
+  const id = (await card.getAttribute("data-testid"))!.slice(5);
+  await request.post(`http://127.0.0.1:3201/__fixture/tasks/${id}/state`, {
+    data: { state: "waiting", wait_reason: "clarification", pinned: true },
+  });
+  await card
+    .getByRole("button", {
+      name: "Check authoritative status for task: Clarify trip",
+    })
+    .click();
+  const answer = card.getByLabel("Answer for task: Clarify trip");
+  await expect(answer).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "Check and continue" }),
+  ).toBeDisabled();
+  const tooLong = await page.request.post(`/api/account/tasks/${id}/resume`, {
+    headers: { origin: "http://127.0.0.1:3200" },
+    data: { reply: "😀".repeat(2049) },
+  });
+  expect(tooLong.status()).toBe(400);
+  await answer.fill("A weekend in October");
+  await card.getByRole("button", { name: "Check and continue" }).click();
+  await expect(answer).toHaveCount(0);
+});
+
 test("plugin library keeps registration and skills reachable", async ({
   page,
 }) => {

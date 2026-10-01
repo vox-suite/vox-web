@@ -378,3 +378,23 @@ test("saved task queries bind pagination to the signed account context", async (
     limit: 20,
   });
 });
+
+test("clarification resume signs the account and passes only the explicit reply", async () => {
+  let captured: Record<string, unknown> | undefined;
+  const client = new VoxCoreHostClient(testConfig, {
+    fetch: async (_input, init) => {
+      captured = JSON.parse(String(init?.body));
+      return Response.json({});
+    },
+    now: () => 1795622400,
+    nonce: () => "reply-nonce",
+  });
+  await client.resumeTask("user-1", "task-id", "October weekend");
+  assert.deepEqual(captured, {
+    host_context: {
+      host_user_id: "vox-account:user-1",
+      organization_external_key: null,
+    },
+    reply: "October weekend",
+  });
+});

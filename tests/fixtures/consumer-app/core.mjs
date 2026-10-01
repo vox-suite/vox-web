@@ -1595,13 +1595,21 @@ export function createCoreFixture() {
     [
       "POST",
       /^\/v1\/durable-tasks\/([^/]+)\/resume$/,
-      (user, [, id]) => {
+      (user, [, id], body) => {
         const task = find(user.tasks, (x) => x.id === id, "Task");
         if (
           task.state !== "waiting" ||
           ["approval", "budget"].includes(task.wait_reason)
         )
           fail(409, "task_waiting", "Resolve the current wait first");
+        if (
+          task.wait_reason === "clarification"
+            ? typeof body.reply !== "string" ||
+              !body.reply.trim() ||
+              Buffer.byteLength(body.reply) > 8192
+            : body.reply !== undefined
+        )
+          fail(400, "invalid_reply", "Answer the current question only");
         task.state = "queued";
         task.wait_reason = null;
         task.result = {};

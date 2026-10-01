@@ -19,9 +19,27 @@ export async function POST(
   const core = getCoreHostClient();
   if (!core)
     return NextResponse.json({ error: "Core unavailable" }, { status: 503 });
+  let reply: string | undefined;
+  try {
+    const text = await request.text();
+    const body = text ? JSON.parse(text) : {};
+    if (
+      body.reply !== undefined &&
+      (typeof body.reply !== "string" ||
+        !body.reply.trim() ||
+        Buffer.byteLength(body.reply, "utf8") > 8192)
+    )
+      return NextResponse.json(
+        { error: "Enter an answer of at most 8192 bytes" },
+        { status: 400 },
+      );
+    reply = body.reply;
+  } catch {
+    return NextResponse.json({ error: "Invalid task reply" }, { status: 400 });
+  }
   try {
     const { id } = await params;
-    const task = await core.resumeTask(account.accountId, id);
+    const task = await core.resumeTask(account.accountId, id, reply);
     return NextResponse.json(
       { task },
       { headers: { "Cache-Control": "private, no-store" } },

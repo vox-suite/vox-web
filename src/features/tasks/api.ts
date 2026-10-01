@@ -33,10 +33,20 @@ export async function getTask(taskId: string, signal?: AbortSignal) {
   return task;
 }
 
-export async function resumeTask(taskId: string) {
+export async function resumeTask({
+  taskId,
+  reply,
+}: {
+  taskId: string;
+  reply?: string;
+}) {
   const { task } = await apiRequest<{ task: DurableTask }>(
     `/api/account/tasks/${encodeURIComponent(taskId)}/resume`,
-    { method: "POST", fallbackError: "Task cannot continue yet" },
+    {
+      method: "POST",
+      body: reply === undefined ? undefined : { reply },
+      fallbackError: "Task cannot continue yet",
+    },
   );
   return task;
 }
