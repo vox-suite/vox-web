@@ -268,7 +268,8 @@ export function ConsumerSignInForm({ enabled }: { enabled: boolean }) {
       </form>
 
       <p className="text-center text-xs leading-5 text-smoke">
-        Google and email identities are never merged automatically.
+        Sign-in is managed by your account provider. Connecting an external
+        service requires separate authorization.
       </p>
     </div>
   );

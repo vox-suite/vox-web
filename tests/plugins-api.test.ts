@@ -61,13 +61,9 @@ async function loadModules() {
 
 const mockSession: ConsumerSession = {
   accountId: "acc-user-123",
-  coreUserContextId: "ctx-user-123",
   name: "Test User",
   email: "test@example.com",
   image: null,
-  authenticationMethod: "google",
-  expiresAt: new Date(Date.now() + 86400000),
-  recoveryEnabled: true,
 };
 
 function extensionFixture(

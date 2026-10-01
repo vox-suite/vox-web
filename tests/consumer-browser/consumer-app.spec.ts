@@ -27,6 +27,32 @@ test("signed-out visitors are sent to sign-in", async ({ page }) => {
   await expect(page).toHaveURL(/\/app\/sign-in/);
 });
 
+test("email verification, reload and sign-out use the Supabase session boundary", async ({
+  page,
+}) => {
+  const email = `otp${Date.now()}@example.test`;
+  await page.goto("/app/sign-in");
+  await page.getByLabel("Email address").fill(email);
+  await page.getByRole("button", { name: "Continue with email" }).click();
+  await page.getByLabel("Verification code").fill("000000");
+  await page.getByRole("button", { name: "Verify and sign in" }).click();
+  await expect(page.getByText("That code is invalid or expired. Request a new code and try again.", { exact: true })).toBeVisible();
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+  await page.getByLabel("Verification code").fill("123456");
+  await page.getByRole("button", { name: "Verify and sign in" }).click();
+  await expect(page).toHaveURL(/\/app$/);
+  await page.goto("/app/account");
+  await expect(
+    page.getByRole("main").getByText(email, { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Email recovery is enabled")).toHaveCount(0);
+  await page.reload();
+  expect((await page.request.get("/api/account/agents")).status()).toBe(200);
+  await page.getByRole("button", { name: "Sign out everywhere" }).click();
+  await expect(page).toHaveURL(/\/app\/sign-in$/);
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+});
+
 test("every area loads for a signed-in user", async ({ page }) => {
   const email = await signIn(page);
   await page.goto("/app");

@@ -1,9 +1,4 @@
-import {
-  createHmac,
-  createPrivateKey,
-  randomUUID,
-  sign as signEd25519,
-} from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 
 export type HostCredential = {
   credentialId: string;
@@ -35,14 +30,6 @@ type AssertionClock = {
   issuedAtSeconds: number;
   nonce: string;
 };
-
-export type FederatedIdentityCredential = {
-  issuer: string;
-  audience: string;
-  privateKeyPkcs8Base64: string;
-};
-
-type FederatedClock = AssertionClock & { expiresAtSeconds: number };
 
 export type Connection = {
   id: string;
@@ -480,9 +467,6 @@ export type EffectiveSkill = { id: string };
 export type VoxCoreHostClientConfig = {
   baseUrl: string;
   hostCredential: HostCredential;
-  /** Only the legacy Better Auth account authority signs federated identity proofs. */
-  identityCredential?: FederatedIdentityCredential;
-  identityAdapterKey?: string;
 };
 
 type VoxCoreHostClientDependencies = {
@@ -530,42 +514,6 @@ export function createHostAssertion(
   };
 }
 
-export function createFederatedProof(
-  credential: FederatedIdentityCredential,
-  subject: string,
-  clock: FederatedClock = {
-    issuedAtSeconds: Math.floor(Date.now() / 1_000),
-    expiresAtSeconds: Math.floor(Date.now() / 1_000) + 300,
-    nonce: randomUUID(),
-  },
-) {
-  const normalizedSubject = subject.trim();
-  const message = canonical("vox-federated-identity-v1", [
-    credential.issuer,
-    credential.audience,
-    normalizedSubject,
-    String(clock.issuedAtSeconds),
-    String(clock.expiresAtSeconds),
-    clock.nonce,
-  ]);
-  const key = createPrivateKey({
-    key: Buffer.from(credential.privateKeyPkcs8Base64, "base64"),
-    format: "der",
-    type: "pkcs8",
-  });
-  const signature = signEd25519(null, Buffer.from(message, "utf8"), key);
-
-  return {
-    issuer: credential.issuer,
-    audience: credential.audience,
-    subject: normalizedSubject,
-    issued_at: clock.issuedAtSeconds,
-    expires_at: clock.expiresAtSeconds,
-    nonce: clock.nonce,
-    signature: signature.toString("hex"),
-  };
-}
-
 export class CoreHostRequestError extends Error {
   constructor(
     public readonly status: number,
@@ -586,66 +534,6 @@ export class VoxCoreHostClient {
       nonce: randomUUID,
     },
   ) {}
-
-  async authenticateAccount(accountId: string, establishedContextId?: string) {
-    const hostUserId = `vox-account:${accountId}`;
-    const hostContext: HostContext = {
-      hostUserId,
-      organizationExternalKey: null,
-    };
-    const { identityCredential, identityAdapterKey } = this.config;
-    if (!identityCredential || !identityAdapterKey) {
-      throw new Error("Federated identity credential is not configured");
-    }
-    const issuedAtSeconds = this.dependencies.now();
-    const assertion = createHostAssertion(
-      this.config.hostCredential,
-      hostContext,
-      { issuedAtSeconds, nonce: this.dependencies.nonce() },
-    );
-    const proof = createFederatedProof(identityCredential, hostUserId, {
-      issuedAtSeconds,
-      expiresAtSeconds: issuedAtSeconds + 300,
-      nonce: this.dependencies.nonce(),
-    });
-    const response = await this.dependencies.fetch(
-      new URL("/v1/identity/authentications", this.config.baseUrl),
-      {
-        method: "POST",
-        headers: {
-          ...assertion.headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          host_context: {
-            host_user_id: hostContext.hostUserId,
-            organization_external_key: null,
-          },
-          authentication: {
-            adapter_external_key: identityAdapterKey,
-            proof: { type: "federated", proof },
-          },
-        }),
-        cache: "no-store",
-      },
-    );
-    if (!response.ok) {
-      throw new Error("Core rejected consumer authentication");
-    }
-    const body = (await response.json()) as Record<string, unknown>;
-    const userContextId = body.user_context_id;
-    if (typeof userContextId !== "string" || userContextId.length === 0) {
-      throw new Error(
-        "Core returned an invalid consumer authentication result",
-      );
-    }
-    if (establishedContextId && establishedContextId !== userContextId) {
-      throw new Error(
-        "Core user context does not match the established account",
-      );
-    }
-    return { userContextId };
-  }
 
   private async signedPost<T>(
     path: string,

@@ -7,7 +7,6 @@ import { Callout, MetaList, PageHeader, Panel } from "@/components/app";
 import { useAccount } from "@/components/app-shell/account-context";
 import { useAppPaths } from "@/components/app-shell/app-paths";
 import { linkGoogleIdentity, signOut, type SignOutScope } from "../session";
-import { RecoveryEnrollment } from "./recovery-enrollment";
 
 function LinkedIdentities() {
   const { basePath } = useAppPaths();
@@ -85,7 +84,7 @@ export function AccountScreen() {
     <div className="space-y-6">
       <PageHeader
         title="Account"
-        description="Identity, recovery, and sessions for your Vox account."
+        description="Identity and sessions for your Vox account."
       />
       <Panel title="Profile">
         <MetaList
@@ -97,14 +96,8 @@ export function AccountScreen() {
       </Panel>
       <div className="grid items-start gap-6 xl:grid-cols-2">
         <Panel
-          title="Email recovery"
-          description="Enable this explicitly before email codes may recover a Google account."
-        >
-          <RecoveryEnrollment enabled={account.recoveryEnabled} />
-        </Panel>
-        <Panel
           title="Linked identities"
-          description="Linking is always explicit. Vox never merges accounts because two providers report the same email."
+          description="Manage sign-in identities through your account provider. Connected service accounts and assistant permissions remain separate."
         >
           <LinkedIdentities />
         </Panel>

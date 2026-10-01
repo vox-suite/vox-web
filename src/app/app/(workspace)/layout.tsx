@@ -19,7 +19,6 @@ export default async function WorkspaceLayout({
           name: account.name,
           email: account.email,
           image: account.image,
-          recoveryEnabled: account.recoveryEnabled,
         }}
       >
         <QueryProvider signInHref={`${basePath}/sign-in`}>

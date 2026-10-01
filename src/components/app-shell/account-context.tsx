@@ -6,7 +6,6 @@ export type AppAccount = {
   name: string;
   email: string;
   image: string | null;
-  recoveryEnabled: boolean;
 };
 
 const AccountContext = createContext<AppAccount | null>(null);

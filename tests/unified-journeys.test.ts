@@ -2,9 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { VoxCoreHostClient } from "../src/lib/consumer-auth/core-host-client";
 
-const privateKey =
-  "MC4CAQAwBQYDK2VwBCIEIBERERERERERERERERERERERERERERERERERERERERER";
-
 const testConfig = {
   baseUrl: "https://core.vox.test",
   hostCredential: {
@@ -12,12 +9,6 @@ const testConfig = {
     audience: "vox-host:test:vox-web",
     secret: "host-secret-fixture",
   },
-  identityCredential: {
-    issuer: "https://app.vox.test",
-    audience: "vox-core:test",
-    privateKeyPkcs8Base64: privateKey,
-  },
-  identityAdapterKey: "vox-web-primary",
 };
 
 test("readUberHistory posts signed host context and retrieves minimized trips", async () => {

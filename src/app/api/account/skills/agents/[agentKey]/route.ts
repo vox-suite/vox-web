@@ -5,7 +5,7 @@ import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 type RouteContext = { params: Promise<{ agentKey: string }> };
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();

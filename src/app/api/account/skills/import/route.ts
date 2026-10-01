@@ -4,7 +4,7 @@ import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 import { CoreHostRequestError } from "@/lib/consumer-auth/core-host-client";
 
 export async function POST(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();

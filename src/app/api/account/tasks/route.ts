@@ -3,7 +3,7 @@ import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 
 export async function GET(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
