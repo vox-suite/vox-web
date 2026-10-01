@@ -13,8 +13,7 @@
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:consumer": "playwright test -c playwright.consumer.config.ts",
-    "db:migrate:consumer-auth": "node scripts/migrate-consumer-auth.mjs",
-    "generate:page": "node scripts/create-admin-page.mjs"
+    "db:migrate:consumer-auth": "node scripts/migrate-consumer-auth.mjs"
   },
   "allowScripts": {
     "esbuild": true,

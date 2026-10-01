@@ -96,8 +96,6 @@ async function main() {
   servers.push(await startCore({ port: corePort }));
 
   const env = { ...process.env, ...fixtureEnv };
-  // Never let an ambient admin canonical origin redirect local requests.
-  delete env.VOX_ADMIN_ORIGIN;
 
   const nextBin = resolve(repoRoot, "node_modules/.bin/next");
   const child = spawn(

@@ -15,7 +15,7 @@ export function isConsumerHost(host: string | null | undefined) {
 
 export function consumerDestination(host: string, path: string) {
   if (!isConsumerHost(host)) return null;
-  if (/^\/(app|admin|auth|api|_next)(\/|$)/.test(path) || path.includes("."))
+  if (/^\/(app|auth|api|_next)(\/|$)/.test(path) || path.includes("."))
     return null;
   return path === "/" ? "/app" : `/app${path}`;
 }

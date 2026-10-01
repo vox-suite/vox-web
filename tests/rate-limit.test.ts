@@ -32,25 +32,25 @@ test("rate limiting allows requests within limit and rejects once exceeded", () 
   const limit = 3;
   const windowMs = 10_000;
 
-  const r1 = checkRateLimit(ip, "/api/admin/health", { limit, windowMs });
+  const r1 = checkRateLimit(ip, "/api/health", { limit, windowMs });
   assert.equal(r1.success, true);
   assert.equal(r1.limit, 3);
   assert.equal(r1.remaining, 2);
 
-  const r2 = checkRateLimit(ip, "/api/admin/health", { limit, windowMs });
+  const r2 = checkRateLimit(ip, "/api/health", { limit, windowMs });
   assert.equal(r2.success, true);
   assert.equal(r2.remaining, 1);
 
-  const r3 = checkRateLimit(ip, "/api/admin/health", { limit, windowMs });
+  const r3 = checkRateLimit(ip, "/api/health", { limit, windowMs });
   assert.equal(r3.success, true);
   assert.equal(r3.remaining, 0);
 
-  const r4 = checkRateLimit(ip, "/api/admin/health", { limit, windowMs });
+  const r4 = checkRateLimit(ip, "/api/health", { limit, windowMs });
   assert.equal(r4.success, false);
   assert.equal(r4.remaining, 0);
   assert.ok(r4.retryAfter && r4.retryAfter > 0);
 
-  const other = checkRateLimit("192.168.1.20", "/api/admin/health", {
+  const other = checkRateLimit("192.168.1.20", "/api/health", {
     limit,
     windowMs,
   });
@@ -72,6 +72,6 @@ test("auth endpoints bucket separately from general traffic", () => {
   });
   assert.equal(authBlocked.success, false);
 
-  const general = checkRateLimit(ip, "/admin/health", { limit, windowMs });
+  const general = checkRateLimit(ip, "/health", { limit, windowMs });
   assert.equal(general.success, true);
 });

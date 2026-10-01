@@ -4,7 +4,7 @@ import { Brand } from "./brand";
 export function AuthFrame({
   children,
   brandHref = "/",
-  footer = "Vox administration · Access by invitation",
+  footer = "Vox",
 }: {
   children: ReactNode;
   brandHref?: string;

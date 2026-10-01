@@ -1,6 +1,6 @@
 # Vox web
 
-Next.js App Router application for the Vox public website, standalone consumer account, and Google-authenticated superuser workspace. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
+Next.js App Router application for the Vox public website and standalone consumer account. Tailwind CSS v4 provides the semantic theme; reusable components provide the page design.
 
 ## Develop
 
@@ -12,9 +12,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The website is at http://localhost:3000. Local administration is at `/admin`. Without authentication configuration, the login page explains that setup is incomplete and every management data request is denied.
-Local consumer sign-in is at `/app/sign-in`. Consumer sessions and Core identity
-are separate from administrator access. See `docs/consumer-auth.md` for the
+The website is at http://localhost:3000.
+Local consumer sign-in is at `/app/sign-in`. See `docs/consumer-auth.md` for the
 database migration, Core registration, callback, rollout, and rotation runbook.
 
 ```sh
@@ -34,26 +33,12 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/app/globals.css`: Tailwind theme variables, native element defaults, component styling and responsive behavior.
 - `src/components/ui`: shared layout, controls, feedback, cards, tables and typography.
 - `src/components/marketing`: public website sections and illustrative conversation preview.
-- `src/components/admin`: navigation, management features and sign-in controls.
 - `src/app/app/(workspace)`: the signed-in consumer app (app.voxagent.in). One layout resolves the session and renders the sidebar shell; each page renders a feature screen.
 - `src/features/<domain>`: consumer features. `api.ts` holds typed calls to `/api/account/*`, `queries.ts` holds TanStack Query keys, queries and mutations, and `components/` holds the UI.
 - `src/components/app`, `src/components/app-shell`: consumer app primitives and the responsive sidebar shell. They are kept separate from `src/components/ui`, which the public website also uses.
 - `src/lib/api/http.ts`, `src/lib/query`: the single HTTP client (error normalization) and the QueryClient defaults (a 401 returns the user to sign-in).
 - `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
-- `src/lib/admin-modules.ts`: management navigation registry.
-- `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
-- `src/lib/core-admin.ts`: server-only connection to the protected Core admin API.
-- `src/proxy.ts`: admin subdomain routing and private/no-store response headers. It is not the authorization boundary.
-
-## Add a management page
-
-```sh
-npm run generate:page -- schedules "Schedules"
-```
-
-This creates a protected page and registers navigation. Every management module lives inside `src/app/admin/(console)` and inherits `AdminShell`. Compose `Page`, `Card`, `Stack`, `Grid`, `Field`, `DataTable`, `Notice`, and `EmptyState`; see `docs/design-system.md`. New modules should add domain-specific components below this layer only when needed. Do not build new navigation, permission checks, spacing scales or button styles per page.
-
-Call `requireSuperuser()` in server pages that retrieve data. Every new API handler or server action must independently authorize the current session, even though the layout is protected. Keep backend credentials in server-only modules. Add resource-specific authorization if non-superuser roles are introduced later.
+- `src/proxy.ts`: consumer host routing, rate limiting and private/no-store response headers. It is not the authorization boundary.
 
 ## Production activation
 
@@ -63,9 +48,5 @@ See `docs/deployment.md` for exact Google callback, domain mapping and backend r
 | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                                                       |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key for browser/server auth                                                  |
-| `SUPERUSER_EMAILS`              | Comma-separated exact email allowlist; no domain wildcards; empty denies everyone          |
-| `VOX_ADMIN_ORIGIN`              | Canonical admin origin (`https://admin.voxagent.in`) for host redirects                    |
-| `VOX_CORE_ADMIN_URL`            | HTTPS origin of Core for admin telemetry; loopback HTTP is accepted locally          |
-| `VOX_ADMIN_TOKEN`               | Dedicated shared admin credential, also configured in Core; separate from `VOX_AUTH_TOKEN` |
 
-Admin Google sign-in is configured in the Supabase dashboard (Auth → Providers → Google). Redirect URLs must include `https://admin.voxagent.in/auth/callback` and `http://localhost:3000/auth/callback`. Redis stays on the backend private network. Web instances are stateless; there is no local session database. Changes to the allowlist apply on subsequent requests after environment configuration is rolled out. Signing out clears the Supabase session cookies.
+Web instances are stateless; there is no local session database. Signing out clears the Supabase session cookies.

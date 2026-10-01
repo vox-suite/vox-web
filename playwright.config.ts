@@ -41,10 +41,6 @@ export default defineConfig({
       env: {
         NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "fixture-anon-key",
-        SUPERUSER_EMAILS: "admin@example.test",
-        VOX_ADMIN_E2E_SECRET: "isolated-playwright-secret-not-for-production",
-        VOX_CORE_ADMIN_URL: "http://127.0.0.1:3101",
-        VOX_ADMIN_TOKEN: "fixture-admin-token",
         RATE_LIMIT_MAX: "1000",
         ...(consumerDatabaseUrl
           ? {

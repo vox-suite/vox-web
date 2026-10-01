@@ -3,7 +3,7 @@ import { SignInShell } from "@/features/account/components/sign-in-shell";
 import { Notice } from "@/components/ui";
 import { readConsumerAuthConfig } from "@/lib/consumer-auth/config";
 import { currentConsumer } from "@/lib/consumer-auth/session";
-import { consumerHref } from "@/lib/access";
+import { consumerHref } from "@/lib/consumer-routes";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

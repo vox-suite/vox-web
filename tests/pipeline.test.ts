@@ -6,7 +6,6 @@ import {
   PIPELINE_EDGES,
   TRACE_SCENARIOS,
 } from "../src/components/pipeline/data";
-import { adminModules } from "../src/lib/admin-modules";
 
 test("pipeline stages define 8 coherent architectural phases", () => {
   assert.equal(PIPELINE_STAGES.length, 8);
@@ -82,10 +81,4 @@ test("simulation scenarios traverse existing nodes and edges", () => {
       }
     }
   }
-});
-
-test("pipeline is registered in admin console navigation", () => {
-  const pipelineMod = adminModules.find((m) => m.slug === "pipeline");
-  assert.ok(pipelineMod, "pipeline module must be present in adminModules");
-  assert.equal(pipelineMod?.icon, "pipeline");
 });
