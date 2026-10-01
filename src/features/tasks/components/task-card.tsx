@@ -2,24 +2,32 @@
 
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui";
-import { Callout, ItemCard, StatusBadge } from "@/components/app";
+import { Callout, ItemCard, Tag } from "@/components/app";
 import { errorMessage } from "@/lib/api/http";
 import { isTaskTerminal } from "../api";
-import { useCancelTask, useTask } from "../queries";
+import type { DurableTask } from "@/lib/consumer-auth/core-host-client";
+import { useCancelTask, useResumeTask } from "../queries";
 
-export function TaskCard({ taskId }: { taskId: string }) {
-  const { data: task, error, isFetching, refetch } = useTask(taskId);
+export function TaskCard({
+  task,
+  isFetching,
+  onRefresh,
+}: {
+  task: DurableTask;
+  isFetching: boolean;
+  onRefresh: () => void;
+}) {
   const cancel = useCancelTask();
+  const resume = useResumeTask();
 
-  if (!task) return null;
-  const failure = cancel.error ?? error;
+  const failure = cancel.error ?? resume.error;
 
   return (
     <ItemCard
       testId={`task-${task.id}`}
       title={task.title}
-      subtitle={task.instruction}
-      badges={<StatusBadge status={task.state} />}
+      subtitle={task.result.summary ?? `Run ${task.run_id}`}
+      badges={<Tag label={`Task status: ${task.state}`}>{task.state}</Tag>}
       actions={
         <>
           <Button
@@ -27,7 +35,7 @@ export function TaskCard({ taskId }: { taskId: string }) {
             size="sm"
             aria-label={`Check authoritative status for task: ${task.title}`}
             disabled={isFetching}
-            onClick={() => void refetch()}
+            onClick={onRefresh}
           >
             <RotateCw
               aria-hidden="true"
@@ -35,6 +43,16 @@ export function TaskCard({ taskId }: { taskId: string }) {
             />
             {isFetching ? "Checking…" : "Refresh status"}
           </Button>
+          {task.state === "waiting" && task.wait_reason !== "budget" ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={resume.isPending}
+              onClick={() => resume.mutate(task.id)}
+            >
+              {resume.isPending ? "Continuing…" : "Check and continue"}
+            </Button>
+          ) : null}
           {!isTaskTerminal(task) ? (
             <Button
               variant="danger"
@@ -48,12 +66,30 @@ export function TaskCard({ taskId }: { taskId: string }) {
           ) : null}
         </>
       }
-      footer={<span>Agent: {task.agent_external_key || "None"}</span>}
+      footer={
+        <span>
+          Assistant: {task.agent_external_key || "None"}
+          {task.instruction_version !== null
+            ? ` · instructions v${task.instruction_version}`
+            : ""}
+        </span>
+      }
     >
       {task.wait_reason ? (
         <Callout tone="warning" title="Waiting">
-          <p>{task.wait_reason}</p>
+          <p>{task.result.checkpoint?.question ?? task.wait_reason}</p>
+          {task.result.checkpoint?.proposal_id ? (
+            <p>Review the exact action in Approvals before continuing.</p>
+          ) : null}
         </Callout>
+      ) : null}
+      {task.state === "failed" && task.result.code ? (
+        <Callout tone="danger" title="Task failed">
+          <p>{task.result.code}</p>
+        </Callout>
+      ) : null}
+      {task.state === "cancelled" ? (
+        <p>Future work stopped. Completed actions have not been undone.</p>
       ) : null}
       {failure ? (
         <Callout tone="danger" live="assertive">

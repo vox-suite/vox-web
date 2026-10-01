@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
+import { isSameOriginRequest } from "@/lib/consumer-auth/request";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 
 export async function GET(request: NextRequest) {
@@ -10,8 +11,18 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const taskId = searchParams.get("taskId");
-  if (!taskId) {
-    return NextResponse.json({ error: "taskId is required" }, { status: 400 });
+  const cursor = searchParams.get("cursor") ?? undefined;
+  const limit = Number(searchParams.get("limit") ?? "20");
+  if (
+    !Number.isSafeInteger(limit) ||
+    limit < 1 ||
+    limit > 50 ||
+    (cursor &&
+      !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+        cursor,
+      ))
+  ) {
+    return NextResponse.json({ error: "Invalid task page" }, { status: 400 });
   }
 
   const core = getCoreHostClient();
@@ -23,8 +34,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const task = await core.getTask(account.accountId, taskId);
-    return NextResponse.json({ task });
+    const result = taskId
+      ? { task: await core.getTask(account.accountId, taskId) }
+      : await core.queryTasks(account.accountId, { cursor, limit });
+    return NextResponse.json(result, {
+      headers: { "Cache-Control": "private, no-store" },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to get task" },
@@ -38,6 +53,12 @@ export async function POST(request: NextRequest) {
   if (!account) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  if (!isSameOriginRequest(request))
+    return NextResponse.json(
+      { error: "Invalid request origin" },
+      { status: 403 },
+    );
 
   const core = getCoreHostClient();
   if (!core) {

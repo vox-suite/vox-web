@@ -87,24 +87,33 @@ export type CreateGrantRequest = {
   capability_external_key: string;
 };
 
+export type TaskWaitReason =
+  | "clarification"
+  | "connection"
+  | "approval"
+  | "authentication"
+  | "reconciliation"
+  | "budget";
 export type DurableTask = {
   id: string;
   title: string;
-  instruction: string;
   agent_external_key: string | null;
+  instruction_version: number | null;
   state:
-    | "queued"
-    | "running"
-    | "waiting_for_clarification"
-    | "waiting_for_approval"
-    | "waiting_for_connection"
-    | "completed"
-    | "cancelled"
-    | "failed";
+    "queued" | "running" | "waiting" | "completed" | "cancelled" | "failed";
   run_id: string;
-  wait_reason?: string | null;
-  created_at: string;
-  updated_at: string;
+  wait_reason: TaskWaitReason | null;
+  result: {
+    state?: "completed" | "waiting" | "failed";
+    summary?: string;
+    reason?: TaskWaitReason;
+    code?: string;
+    checkpoint?: { code?: string; question?: string; proposal_id?: string };
+  };
+};
+export type DurableTaskPage = {
+  tasks: DurableTask[];
+  next_cursor: string | null;
 };
 
 export type StartTaskRequest = {
@@ -849,9 +858,39 @@ export class VoxCoreHostClient {
     });
   }
 
+  async queryTasks(
+    accountId: string,
+    query: { cursor?: string; limit?: number } = {},
+  ): Promise<DurableTaskPage> {
+    return this.signedPost<DurableTaskPage>(
+      "/v1/durable-tasks/query",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        ...query,
+      },
+    );
+  }
+
   async getTask(accountId: string, taskId: string): Promise<DurableTask> {
     return this.signedPost<DurableTask>(
       `/v1/durable-tasks/${encodeURIComponent(taskId)}`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async resumeTask(accountId: string, taskId: string): Promise<DurableTask> {
+    return this.signedPost<DurableTask>(
+      `/v1/durable-tasks/${encodeURIComponent(taskId)}/resume`,
       accountId,
       {
         host_context: {

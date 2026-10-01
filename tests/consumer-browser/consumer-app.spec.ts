@@ -36,7 +36,12 @@ test("email verification, reload and sign-out use the Supabase session boundary"
   await page.getByRole("button", { name: "Continue with email" }).click();
   await page.getByLabel("Verification code").fill("000000");
   await page.getByRole("button", { name: "Verify and sign in" }).click();
-  await expect(page.getByText("That code is invalid or expired. Request a new code and try again.", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      "That code is invalid or expired. Request a new code and try again.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   expect((await page.request.get("/api/account/agents")).status()).toBe(401);
   await page.getByLabel("Verification code").fill("123456");
   await page.getByRole("button", { name: "Verify and sign in" }).click();
@@ -87,6 +92,52 @@ test("start a durable task", async ({ page }) => {
   await page.getByRole("button", { name: "Submit durable task" }).click();
   await expect(
     page.getByRole("article", { name: "Plan the week" }),
+  ).toBeVisible();
+});
+
+test("saved tasks survive reload and stop rejects foreign-origin requests", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/tasks");
+  await page.getByLabel("Task title").fill("Retain this task");
+  await page
+    .getByLabel("Instruction")
+    .fill("Find choices, then ask me to book");
+  await page.getByRole("button", { name: "Submit durable task" }).click();
+  const card = page.getByRole("article", { name: "Retain this task" });
+  await expect(card).toBeVisible();
+  await page.reload();
+  await expect(card).toBeVisible();
+  const id = (await card.getAttribute("data-testid"))!.slice(5);
+  const denied = await page.request.post(`/api/account/tasks/${id}/cancel`, {
+    headers: { origin: "https://foreign.example" },
+  });
+  expect(denied.status()).toBe(403);
+  await card
+    .getByRole("button", { name: "Cancel task: Retain this task" })
+    .click();
+  await expect(
+    card.getByText(
+      "Future work stopped. Completed actions have not been undone.",
+    ),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    card.getByText(
+      "Future work stopped. Completed actions have not been undone.",
+    ),
+  ).toBeVisible();
+  const approvalTask = page.getByRole("article", {
+    name: "Plan a Goa weekend",
+  });
+  await approvalTask
+    .getByRole("button", { name: "Check and continue" })
+    .click();
+  await expect(
+    approvalTask.getByText(
+      "Task cannot continue yet. Resolve its current wait and refresh status.",
+    ),
   ).toBeVisible();
 });
 

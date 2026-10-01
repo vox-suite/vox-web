@@ -45,3 +45,28 @@ test("host configuration rejects incomplete or insecure remote access", () => {
     /at least 32/,
   );
 });
+
+test("mutation origin check compares the browser host rather than the internal Next URL", async () => {
+  const { isSameOriginRequest } =
+    await import("../src/lib/consumer-auth/request");
+  assert.equal(
+    isSameOriginRequest(
+      new Request("http://localhost:3200/api/account/tasks", {
+        headers: { host: "127.0.0.1:3200", origin: "http://127.0.0.1:3200" },
+      }),
+    ),
+    true,
+  );
+  assert.equal(
+    isSameOriginRequest(
+      new Request("http://localhost:3200/api/account/tasks", {
+        headers: { host: "127.0.0.1:3200", origin: "https://foreign.example" },
+      }),
+    ),
+    false,
+  );
+  assert.equal(
+    isSameOriginRequest(new Request("http://localhost:3200/api/account/tasks")),
+    false,
+  );
+});
