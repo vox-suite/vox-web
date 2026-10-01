@@ -67,7 +67,7 @@ export const PIPELINE_STAGES: PipelineStage[] = [
     title: "Chunker & TTS Engine",
     subtitle: "Audio Synthesis",
     description:
-      "Punctuation streaming boundaries, leading filler stripping, and low-latency ElevenLabs/Sarvam TTS chunking.",
+      "Punctuation streaming boundaries, leading filler stripping, and low-latency ElevenLabs TTS chunking.",
     badge: "06 / TTS",
     color: "#6366f1",
     bounds: { x: 2660, y: 50, width: 340, height: 1040 },
@@ -1220,7 +1220,7 @@ for sentence in sentences {
     stageId: "stage-5",
     subsystem: "tts",
     title: "Streaming TTS Engine",
-    subtitle: "ElevenLabs / Sarvam / Cartesia",
+    subtitle: "ElevenLabs",
     description:
       "Synthesizes sentence chunks into high-fidelity streaming audio chunks with sub-100ms TTFB.",
     latency: "60 - 120ms (TTFB)",
@@ -1256,7 +1256,7 @@ while let Some(chunk) = audio.next().await {
 }`,
       payloadSample: `AudioStreamChunk { bytes: 640, format: "pcm_16000", duration_ms: 20 }`,
       fallbackStrategy:
-        "Falls back to Sarvam or Cartesia provider if primary provider hits rate limit.",
+        "No secondary TTS provider is configured; a failed TTS request ends the turn.",
       keyInvariants: [
         "Sets audio_playing = true on first byte",
         "Pipes audio chunks immediately to telephony and desktop channels",
@@ -1906,7 +1906,7 @@ export const TRACE_SCENARIOS: TraceScenario[] = [
         edgeId: "e17",
         label: "TTS Synthesis TTFB",
         elapsedMs: 665,
-        description: "ElevenLabs / Sarvam emits first audio chunk (75ms TTFB).",
+        description: "ElevenLabs emits first audio chunk (75ms TTFB).",
         dataPayload: `AudioStream: 8000Hz PCM chunk`,
       },
       {
