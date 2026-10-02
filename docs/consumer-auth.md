@@ -12,6 +12,12 @@ Core subject. Anonymous Supabase users do not receive consumer access.
 - Configure Google OAuth, email OTP delivery, redirect allowlists and session
   policy in Supabase. The Web callback is `/auth/callback`; register the exact
   production origin `https://app.voxagent.in` with the provider.
+- `VOX_CONNECTED_APPS_REDIRECT_URI`: exact public connected-service callback,
+  normally `https://app.voxagent.in/apps/oauth/callback` on the consumer subdomain.
+  It is separate from Supabase's login `/auth/callback`. Add this same URI to Core's
+  `VOX_MCP_OAUTH_REDIRECT_URIS`. For a shared-origin `/app` deployment use the actual
+  `/app/apps/oauth/callback` path. Explicitly configure the production URI rather
+  than deriving it from reverse-proxy request origins.
 - Register Web as a Core host in `vox.standalone.deployment`. Store only these
   server variables: `VOX_CORE_URL`, `VOX_HOST_CREDENTIAL_ID`, `VOX_HOST_AUDIENCE`,
   `VOX_HOST_SECRET`. The expected host audience is
@@ -20,6 +26,13 @@ Core subject. Anonymous Supabase users do not receive consumer access.
   host user. Core resolves its own isolated user context; a Supabase UUID is not
   a Core context ID. No separate consumer account database, SMTP client, Ed25519 signing
   key or separate recovery-enrollment API is required.
+
+The minimal consumer environment is the two public Supabase values, the four Core
+host variables and the connected-service callback above. Web does not use or need
+`SUPABASE_JWT_SECRET`: the Supabase SDK verifies tokens using the configured Auth
+service/JWKS. The optional administrator console separately uses `SUPERUSER_EMAILS`,
+`VOX_ADMIN_ORIGIN`, `VOX_CORE_ADMIN_URL` and `VOX_ADMIN_TOKEN`; these do not establish
+consumer host trust. Store server secrets only in the deployment environment.
 
 ## Identity and session behavior
 

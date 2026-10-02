@@ -57,3 +57,22 @@ actual Web routes, Supabase SDK and signed-host client; they simulate Core worke
 state transitions and do not certify deployed routing or provider availability.
 The held Web stack additionally requires its configured Supabase identity-pin hook
 and live signed-in Web → Core verification before release.
+
+## Remaining participant and streaming contracts
+
+Web currently consumes the nonstreaming conversation envelope. Core's current SSE
+endpoint emits text deltas, errors and `[DONE]`; it does not expose a public captured
+task event. Web cannot recover consent authority from streamed model text. Before
+using streaming for these flows, Core must retain task capture and emit a scoped
+public task projection in a documented event, with error/cancellation semantics;
+Web must then parse bounded events and refresh the captured task by its ID.
+
+Explicit `@Agent` participants in an existing Personal Assistant conversation are
+not implemented by the current contract. Selecting `agent_external_key` starts a
+separate direct agent conversation; inserting a name in model text does not create
+a governed participant or a bounded context handoff. Implementing mentions requires
+an authenticated owned-participant reference, immutable conversation owner, explicit
+bounded context and scoped delegation under Core's authority. Ordinary chat remains
+owned by Personal Assistant. Library's explicit specialist test chats retain separate
+conversation IDs and memories. Do not report mentions or streaming consent complete
+until both backend and host conformance tests exercise those contracts.
