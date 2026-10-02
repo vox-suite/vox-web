@@ -3,7 +3,13 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { cancelTask, listTasks, resumeTask, startTask } from "./api";
+import {
+  cancelTask,
+  listTasks,
+  resumeTask,
+  startTask,
+  stopAllTasks,
+} from "./api";
 
 export const taskKeys = {
   all: ["tasks"] as const,
@@ -20,7 +26,10 @@ export function useTasks() {
     refetchInterval: (query) =>
       query.state.data?.pages.some((page) =>
         page.tasks.some(
-          (task) => task.state === "queued" || task.state === "running",
+          (task) =>
+            task.state === "queued" ||
+            task.state === "running" ||
+            task.wait_reason === "specialist",
         ),
       )
         ? 15_000
@@ -48,5 +57,13 @@ export function useResumeTask() {
   return useMutation({
     mutationFn: resumeTask,
     onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.list() }),
+  });
+}
+
+export function useStopAllTasks() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: stopAllTasks,
+    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.all }),
   });
 }

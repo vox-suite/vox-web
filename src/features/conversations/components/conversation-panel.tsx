@@ -1,5 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
+import { useAgents } from "@/features/agents/queries";
 import { useSelectedAgent } from "@/features/agents/selection";
 import { Button, TextArea } from "@/components/ui";
 import { Panel, Callout } from "@/components/app";
@@ -100,6 +101,39 @@ export function ConversationPanel() {
         />
       ) : (
         <p>Choose an available agent to start.</p>
+      )}
+    </Panel>
+  );
+}
+
+/** Ordinary conversation always starts with the user's default Personal Assistant. */
+export function PersonalAssistantConversationPanel() {
+  const agents = useAgents();
+  const assistant = agents.data?.find((agent) => agent.is_default);
+  return (
+    <Panel
+      title="Personal Assistant"
+      description="Ask naturally. Your assistant uses relevant enabled skills and permitted connections; specialist access and external changes require separate permission."
+    >
+      {assistant ? (
+        <Conversation
+          key={assistant.external_key}
+          agentKey={assistant.external_key}
+          agentName={assistant.display_name}
+        />
+      ) : agents.error ? (
+        <Callout tone="danger" live="assertive">
+          {errorMessage(agents.error, "Your assistant could not be loaded")}
+          <Button variant="secondary" onClick={() => void agents.refetch()}>
+            Try again
+          </Button>
+        </Callout>
+      ) : (
+        <p>
+          {agents.isPending
+            ? "Loading your assistant…"
+            : "Your Personal Assistant is unavailable."}
+        </p>
       )}
     </Panel>
   );

@@ -19,7 +19,7 @@
 //
 // Usage: node tests/fixtures/consumer-app/core.mjs [--port 3201]
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 
@@ -122,12 +122,12 @@ const AGENTS = [
 function seedUser(hostUserId) {
   const now = Date.now();
   const accountId = hostUserId.replace(/^vox-account:/, "");
-  const userContextId = `ctx_${accountId.replace(/-/g, "").slice(0, 16)}`;
+  const userContextId = `ctx_${createHash("sha256").update(accountId).digest("hex").slice(0, 16)}`;
   const t = (offsetMs) => iso(now + offsetMs);
 
   const connections = [
     {
-      id: "conn_gcal_primary",
+      id: "aaaaaaaa-1111-4111-8111-111111111111",
       integration_external_key: "google-calendar",
       external_account_reference: "gcal:primary",
       account_display_id: "asha.raman@example.test",
@@ -143,7 +143,7 @@ function seedUser(hostUserId) {
       updated_at: t(-2 * DAY),
     },
     {
-      id: "conn_uber_rides",
+      id: "bbbbbbbb-2222-4222-8222-222222222222",
       integration_external_key: "uber",
       external_account_reference: "uber:rider:7f3a",
       account_display_id: "Asha R. (Uber rider)",
@@ -160,7 +160,7 @@ function seedUser(hostUserId) {
       updated_at: t(-25 * DAY),
     },
     {
-      id: "conn_expedia_travel",
+      id: "cccccccc-3333-4333-8333-333333333333",
       integration_external_key: "expedia",
       external_account_reference: "expedia:partner:asha",
       account_display_id: "Expedia traveller profile",
@@ -178,17 +178,23 @@ function seedUser(hostUserId) {
     {
       id: "grant_general_gcal_read",
       agent_external_key: "general",
-      connection_id: "conn_gcal_primary",
+      connection_id: "aaaaaaaa-1111-4111-8111-111111111111",
       capability_external_key: "calendar.events.read",
     },
     {
       id: "grant_general_uber_trips",
       agent_external_key: "general",
-      connection_id: "conn_uber_rides",
+      connection_id: "bbbbbbbb-2222-4222-8222-222222222222",
       capability_external_key: "uber.history",
     },
   ];
 
+  grants.push({
+    id: "grant_concierge_calendar_write",
+    agent_external_key: "concierge",
+    connection_id: "aaaaaaaa-1111-4111-8111-111111111111",
+    capability_external_key: "calendar.events.write",
+  });
   const skills = [
     {
       id: "skill_summarize_actions",
@@ -528,7 +534,7 @@ function seedUser(hostUserId) {
         "Find two refundable stays in North Goa for 10-12 October under Rs 9,000 a night.",
       agent_external_key: "concierge",
       state: "waiting",
-      run_id: "run_seed_weekend_plan",
+      run_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       wait_reason: "approval",
       created_at: t(-3 * HOUR),
       updated_at: t(-2 * HOUR),
@@ -540,7 +546,7 @@ function seedUser(hostUserId) {
       instruction: "Summarise my calendar for next week and flag conflicts.",
       agent_external_key: "general",
       state: "completed",
-      run_id: "run_seed_calendar_digest",
+      run_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       wait_reason: null,
       created_at: t(-1 * DAY),
       updated_at: t(-1 * DAY + 2 * MINUTE),
@@ -556,7 +562,7 @@ function seedUser(hostUserId) {
       approval_id: null,
       state: "pending",
       span_id: "span_seed_goa",
-      task_run_id: "run_seed_weekend_plan",
+      task_run_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       agent_external_key: "concierge",
       details: {
         title: "Book Tamarind Courtyard Stay, 10-12 Oct",
@@ -648,6 +654,7 @@ function seedUser(hostUserId) {
       ...a,
       definition: { ...a.definition, id: randomUUID() },
     })),
+    delegationPermissions: [],
     agentSkillDisabled: { general: [], concierge: ["skill_morning_brief"] },
     skills,
     extensions,
@@ -684,6 +691,8 @@ const publicTask = (task) => {
   delete copy.instruction;
   delete copy.created_at;
   delete copy.updated_at;
+  copy.parent_task_id = task.parent_task_id ?? null;
+  copy.root_task_id = task.root_task_id ?? task.id;
   copy.instruction_version = task.instruction_version ?? 1;
   copy.result =
     task.result ??
@@ -1545,6 +1554,154 @@ export function createCoreFixture() {
       },
     ],
 
+    [
+      "POST",
+      /^\/v1\/delegation-scopes$/,
+      (user, _m, body) => {
+        if (
+          body.requester_agent_key === body.specialist_agent_key ||
+          !user.agents.some(
+            (agent) =>
+              agent.definition.external_key === body.requester_agent_key,
+          ) ||
+          !user.agents.some(
+            (agent) =>
+              agent.definition.external_key === body.specialist_agent_key,
+          )
+        )
+          fail(404, "not_found", "Assistant not found");
+        return {
+          capabilities: user.grants
+            .filter(
+              (grant) => grant.agent_external_key === body.specialist_agent_key,
+            )
+            .flatMap((grant) => {
+              const connection = user.connections.find(
+                (connection) =>
+                  connection.id === grant.connection_id &&
+                  connection.authorization_state === "authorized",
+              );
+              return connection
+                ? [
+                    {
+                      connection_id: grant.connection_id,
+                      capability_external_key: grant.capability_external_key,
+                      account_display_id: connection.account_display_id,
+                      integration_name:
+                        connection.integration_external_key ===
+                        "google-calendar"
+                          ? "Google Calendar"
+                          : connection.integration_external_key,
+                      tool_name:
+                        grant.capability_external_key ===
+                        "calendar.events.write"
+                          ? "Create calendar events"
+                          : "Read calendar events",
+                    },
+                  ]
+                : [];
+            }),
+          preferences: user.preferences
+            .filter((preference) => !preference.is_sensitive)
+            .map(({ preference_key }) => ({ key: preference_key })),
+        };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/delegation-permissions\/query$/,
+      (user) => ({ permissions: user.delegationPermissions }),
+    ],
+    [
+      "POST",
+      /^\/v1\/delegation-permissions$/,
+      (user, _m, body) => {
+        const permission = body.permission;
+        if (
+          !permission ||
+          permission.requester_agent_key === permission.specialist_agent_key ||
+          !user.agents.some(
+            (agent) =>
+              agent.definition.external_key === permission.requester_agent_key,
+          ) ||
+          !user.agents.some(
+            (agent) =>
+              agent.definition.external_key === permission.specialist_agent_key,
+          )
+        )
+          fail(404, "not_found", "Assistant not found");
+        for (const cap of permission.scope.capabilities)
+          requireGrant(
+            user,
+            permission.specialist_agent_key,
+            cap.connection_id,
+            cap.capability_external_key,
+          );
+        if (
+          permission.parent_run_id &&
+          !user.tasks.some(
+            (task) =>
+              task.run_id === permission.parent_run_id &&
+              task.agent_external_key === permission.requester_agent_key &&
+              !task.parent_task_id,
+          )
+        )
+          fail(404, "not_found", "Parent task not found");
+        for (const key of permission.preference_keys ?? [])
+          if (
+            !user.preferences.some(
+              (preference) =>
+                preference.preference_key === key && !preference.is_sensitive,
+            )
+          )
+            fail(409, "invalid_preference", "Preference cannot be shared");
+        const saved = {
+          id: randomUUID(),
+          requester_agent_key: permission.requester_agent_key,
+          specialist_agent_key: permission.specialist_agent_key,
+          scope: permission.scope,
+          selected_shared_preferences: (permission.preference_keys ?? []).map(
+            (key) => ({ key, digest: "fixture-not-user-visible" }),
+          ),
+          mode: permission.parent_run_id ? "once" : "remembered",
+          parent_run_id: permission.parent_run_id ?? null,
+          state: "enabled",
+          used: false,
+        };
+        user.delegationPermissions.push(saved);
+        return { id: saved.id };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/delegation-permissions\/([^/]+)\/revoke$/,
+      (user, [, id]) => {
+        const permission = find(
+          user.delegationPermissions,
+          (permission) => permission.id === id,
+          "Permission",
+        );
+        permission.state = "revoked";
+        return undefined;
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/durable-tasks\/stop-all$/,
+      (user) => {
+        let cancelled = 0;
+        for (const task of user.tasks) {
+          if (!["completed", "cancelled", "failed"].includes(task.state)) {
+            task.state = "cancelled";
+            task.wait_reason = null;
+            task.pinned = true;
+            cancelled++;
+          }
+        }
+        return { cancelled, undo: false };
+      },
+    ],
+
     // Durable tasks
     [
       "POST",
@@ -1568,7 +1725,7 @@ export function createCoreFixture() {
           instruction: task.instruction,
           agent_external_key: task.agent_external_key ?? null,
           state: "queued",
-          run_id: `run_${randomUUID().slice(0, 12)}`,
+          run_id: randomUUID(),
           wait_reason: null,
           created_at: now,
           updated_at: now,
@@ -2104,6 +2261,16 @@ export function createCoreFixture() {
           if (task) {
             task.state = body.state ?? task.state;
             task.wait_reason = body.wait_reason ?? null;
+            if (body.parent_task_id) {
+              const parent = user.tasks.find(
+                (candidate) => candidate.id === body.parent_task_id,
+              );
+              if (!parent) fail(404, "not_found", "Parent task not found");
+              task.parent_task_id = parent.id;
+              task.root_task_id = parent.root_task_id ?? parent.id;
+              task.agent_external_key =
+                body.agent_external_key ?? task.agent_external_key;
+            }
             task.pinned = true;
             task.updated_at = iso(Date.now());
             results.push(publicTask(task));

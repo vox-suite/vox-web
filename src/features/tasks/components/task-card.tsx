@@ -13,8 +13,12 @@ export function TaskCard({
   task,
   isFetching,
   onRefresh,
+  assistantName,
+  lineage,
 }: {
   task: DurableTask;
+  assistantName: string;
+  lineage: string;
   isFetching: boolean;
   onRefresh: () => void;
 }) {
@@ -28,7 +32,7 @@ export function TaskCard({
     <ItemCard
       testId={`task-${task.id}`}
       title={task.title}
-      subtitle={task.result.summary ?? `Run ${task.run_id}`}
+      subtitle={task.result.summary ?? "Saved task"}
       badges={<Tag label={`Task status: ${task.state}`}>{task.state}</Tag>}
       actions={
         <>
@@ -80,7 +84,7 @@ export function TaskCard({
       }
       footer={
         <span>
-          Assistant: {task.agent_external_key || "None"}
+          {lineage} · Assistant: {assistantName}
           {task.instruction_version !== null
             ? ` · instructions v${task.instruction_version}`
             : ""}
@@ -100,7 +104,12 @@ export function TaskCard({
       ) : null}
       {task.wait_reason ? (
         <Callout tone="warning" title="Waiting">
-          <p>{task.result.checkpoint?.question ?? task.wait_reason}</p>
+          <p>
+            {task.result.checkpoint?.question ??
+              (task.wait_reason === "specialist"
+                ? "Waiting for the specialist’s relevant result."
+                : task.wait_reason)}
+          </p>
           {task.result.checkpoint?.proposal_id ? (
             <p>Review the exact action in Approvals before continuing.</p>
           ) : null}

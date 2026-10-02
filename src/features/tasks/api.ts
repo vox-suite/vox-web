@@ -68,3 +68,10 @@ const TERMINAL_STATES: ReadonlySet<DurableTask["state"]> = new Set([
 export function isTaskTerminal(task: Pick<DurableTask, "state">) {
   return TERMINAL_STATES.has(task.state);
 }
+
+export function stopAllTasks() {
+  return apiRequest<{ cancelled: number; undo: false }>(
+    "/api/account/tasks/stop-all",
+    { method: "POST", fallbackError: "Tasks could not be stopped" },
+  );
+}

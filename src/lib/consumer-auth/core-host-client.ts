@@ -87,13 +87,47 @@ export type CreateGrantRequest = {
   capability_external_key: string;
 };
 
+export type DelegationCapability = {
+  connection_id: string;
+  capability_external_key: string;
+};
+export type DelegationPermissionRequest = {
+  requester_agent_key: string;
+  specialist_agent_key: string;
+  scope: { capabilities: DelegationCapability[] };
+  parent_run_id?: string | null;
+  preference_keys?: string[];
+};
+export type DelegationPermission = {
+  id: string;
+  requester_agent_key: string;
+  specialist_agent_key: string;
+  scope: { capabilities: DelegationCapability[] };
+  selected_shared_preferences: { key: string }[];
+  used: boolean;
+  mode: "once" | "remembered";
+  parent_run_id: string | null;
+  state: "enabled" | "revoked";
+};
+export type DelegationScopes = {
+  capabilities: Array<
+    DelegationCapability & {
+      account_display_id: string | null;
+      integration_name: string;
+      tool_name: string;
+    }
+  >;
+  preferences: { key: string }[];
+};
+
 export type TaskWaitReason =
   | "clarification"
   | "connection"
   | "approval"
   | "authentication"
   | "reconciliation"
-  | "budget";
+  | "budget"
+  | "specialist";
 export type DurableTask = {
   id: string;
   title: string;
@@ -102,6 +136,8 @@ export type DurableTask = {
   state:
     "queued" | "running" | "waiting" | "completed" | "cancelled" | "failed";
   run_id: string;
+  parent_task_id: string | null;
+  root_task_id: string;
   wait_reason: TaskWaitReason | null;
   result: {
     state?: "completed" | "waiting" | "failed";
@@ -1230,6 +1266,77 @@ export class VoxCoreHostClient {
   ): Promise<RemoteExtension> {
     return this.signedPost<RemoteExtension>(
       `/v1/remote-extensions/${encodeURIComponent(extensionId)}/remove`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+
+  async listDelegationPermissions(accountId: string) {
+    return this.signedPost<{ permissions: DelegationPermission[] }>(
+      "/v1/delegation-permissions/query",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+  async delegationScopes(
+    accountId: string,
+    requester: string,
+    specialist: string,
+  ) {
+    return this.signedPost<DelegationScopes>(
+      "/v1/delegation-scopes",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        requester_agent_key: requester,
+        specialist_agent_key: specialist,
+      },
+    );
+  }
+  async createDelegationPermission(
+    accountId: string,
+    permission: DelegationPermissionRequest,
+  ) {
+    return this.signedPost<{ id: string }>(
+      "/v1/delegation-permissions",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        permission,
+      },
+    );
+  }
+  async revokeDelegationPermission(accountId: string, id: string) {
+    return this.signedPost<void>(
+      `/v1/delegation-permissions/${encodeURIComponent(id)}/revoke`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+      },
+    );
+  }
+  async stopAllTasks(accountId: string) {
+    return this.signedPost<{ cancelled: number; undo: false }>(
+      "/v1/durable-tasks/stop-all",
       accountId,
       {
         host_context: {

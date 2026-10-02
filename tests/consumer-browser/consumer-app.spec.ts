@@ -80,6 +80,43 @@ test("verified but unpinned sessions fail closed and identity joining stays unav
   ).toHaveCount(0);
 });
 
+test("ordinary chat uses Personal Assistant without agent selection and rejects foreign-origin messages", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app");
+  await expect(
+    page.getByLabel("Ask Personal Assistant", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("group", { name: "Choose an agent" }),
+  ).toHaveCount(0);
+  const request = page.waitForRequest(
+    (request) =>
+      request.url().endsWith("/api/account/conversations") &&
+      request.method() === "POST",
+  );
+  await page
+    .getByLabel("Ask Personal Assistant", { exact: true })
+    .fill("Summarize my day");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  expect((await request).postDataJSON().agentKey).toBe("general");
+  await expect(
+    page.getByText("The summary skill is not enabled for this agent.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  const denied = await page.request.post("/api/account/conversations", {
+    headers: { Origin: "https://untrusted.example" },
+    data: {
+      agentKey: "general",
+      conversationId: "11111111-1111-4111-8111-111111111111",
+      text: "Do something",
+    },
+  });
+  expect(denied.status()).toBe(403);
+});
+
 test("every area loads for a signed-in user", async ({ page }) => {
   const email = await signIn(page);
   await page.goto("/app");
@@ -306,13 +343,17 @@ test("connected accounts offer only what each connection allows", async ({
     .locator("summary", { hasText: "Connected accounts and agent access" })
     .click();
 
-  const uber = page.getByTestId("connection-conn_uber_rides");
+  const uber = page.getByTestId(
+    "connection-bbbbbbbb-2222-4222-8222-222222222222",
+  );
   await uber.getByText("Trip history", { exact: true }).click();
   await uber.getByRole("button", { name: "Load trip history" }).click();
   await expect(uber.getByText(/^Trip #/).first()).toBeVisible();
 
   // The Expedia connection has expired, so it offers no booking actions.
-  const expedia = page.getByTestId("connection-conn_expedia_travel");
+  const expedia = page.getByTestId(
+    "connection-cccccccc-3333-4333-8333-333333333333",
+  );
   await expect(expedia).toBeVisible();
   await expect(expedia.getByText("Find a stay")).toHaveCount(0);
 
@@ -419,4 +460,162 @@ test("inspect, clear and disable memory separately for an assistant", async ({
     },
   );
   expect(rejected.status()).toBe(403);
+});
+
+test("specialist permissions name accounts/tools and retain once vs remembered scopes with revocation", async ({
+  page,
+}) => {
+  await signIn(page);
+  const parentResponse = await page.request.post("/api/account/tasks", {
+    headers: { Origin: "http://127.0.0.1:3200" },
+    data: {
+      title: "Arrange next week",
+      instruction: "Plan my calendar",
+      agent_external_key: "general",
+    },
+  });
+  expect(parentResponse.status()).toBe(201);
+  const parent = (await parentResponse.json()).task;
+  await page.request.post(
+    `http://127.0.0.1:3201/__fixture/tasks/${parent.id}/state`,
+    { data: { state: "waiting", wait_reason: "clarification" } },
+  );
+  await page.goto("/app/tasks");
+  await page
+    .getByLabel("Specialist assistant", { exact: true })
+    .selectOption("concierge");
+  await expect(
+    page.getByLabel(
+      "Create calendar events · Google Calendar · asha.raman@example.test",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByLabel("Share allergies", { exact: true })).toHaveCount(
+    0,
+  );
+  await page.getByLabel("Task for one-time permission").selectOption(parent.id);
+  await page
+    .getByLabel(
+      "Create calendar events · Google Calendar · asha.raman@example.test",
+      { exact: true },
+    )
+    .check();
+  await page.getByLabel("Share seat preference", { exact: true }).check();
+  const onceRequest = page.waitForRequest(
+    (request) =>
+      request.url().endsWith("/api/account/delegation") &&
+      request.method() === "POST",
+  );
+  await page
+    .getByRole("button", { name: "Allow specialist work", exact: true })
+    .click();
+  const once = (await onceRequest).postDataJSON();
+  expect(once.parent_run_id).toBe(parent.run_id);
+  expect(once.preference_keys).toEqual(["seat_preference"]);
+  expect(once.scope.capabilities).toEqual([
+    {
+      connection_id: "aaaaaaaa-1111-4111-8111-111111111111",
+      capability_external_key: "calendar.events.write",
+    },
+  ]);
+  await expect(
+    page.getByText("Once for this task", { exact: true }).last(),
+  ).toBeVisible();
+  await page.getByLabel("Remember for future tasks", { exact: true }).check();
+  await page
+    .getByLabel(
+      "Create calendar events · Google Calendar · asha.raman@example.test",
+      { exact: true },
+    )
+    .check();
+  await page
+    .getByRole("button", { name: "Allow specialist work", exact: true })
+    .click();
+  await expect(
+    page.getByText("Remembered for future tasks", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  const saved = page
+    .getByRole("region", { name: "Personal Assistant to Concierge permission" })
+    .filter({ hasText: "Remembered for future tasks" });
+  await expect(saved).toBeVisible();
+  await expect(
+    page.getByText("fixture-not-user-visible", { exact: false }),
+  ).toHaveCount(0);
+  await saved.getByRole("button", { name: "Revoke permission" }).click();
+  await expect(saved.getByText("Revoked", { exact: true })).toBeVisible();
+  expect(
+    (
+      await page.request.post("/api/account/delegation", {
+        headers: { Origin: "https://foreign.example" },
+        data: once,
+      })
+    ).status(),
+  ).toBe(403);
+});
+
+test("specialist lineage is visible and Stop all stops future parent and child work", async ({
+  page,
+}) => {
+  await signIn(page);
+  const start = async (title: string) =>
+    (
+      await (
+        await page.request.post("/api/account/tasks", {
+          headers: { Origin: "http://127.0.0.1:3200" },
+          data: {
+            title,
+            instruction: "Plan my calendar",
+            agent_external_key: "general",
+          },
+        })
+      ).json()
+    ).task;
+  const parent = await start("Plan my week");
+  const child = await start("Check meeting availability");
+  await page.request.post(
+    `http://127.0.0.1:3201/__fixture/tasks/${parent.id}/state`,
+    { data: { state: "waiting", wait_reason: "specialist" } },
+  );
+  await page.request.post(
+    `http://127.0.0.1:3201/__fixture/tasks/${child.id}/state`,
+    {
+      data: {
+        state: "running",
+        parent_task_id: parent.id,
+        agent_external_key: "concierge",
+      },
+    },
+  );
+  await page.goto("/app/tasks");
+  await expect(page.getByTestId(`task-${child.id}`)).toContainText(
+    "Specialist work for Plan my week",
+  );
+  await expect(page.getByTestId(`task-${child.id}`)).toContainText(
+    "Assistant: Concierge",
+  );
+  await expect(page.getByTestId(`task-${parent.id}`)).toContainText(
+    "Waiting for the specialist’s relevant result.",
+  );
+  expect(
+    (
+      await page.request.post("/api/account/tasks/stop-all", {
+        headers: { Origin: "https://foreign.example" },
+      })
+    ).status(),
+  ).toBe(403);
+  await page
+    .getByRole("button", { name: "Stop all tasks", exact: true })
+    .click();
+  await expect(
+    page.getByText("Future task work stopped", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId(`task-${parent.id}`)).toContainText(
+    "cancelled",
+  );
+  await expect(page.getByTestId(`task-${child.id}`)).toContainText("cancelled");
+  await page.reload();
+  await expect(page.getByTestId(`task-${child.id}`)).toContainText(
+    "Completed actions have not been undone.",
+  );
 });
