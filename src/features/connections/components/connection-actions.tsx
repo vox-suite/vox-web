@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
+import { PlayStationCapture } from "./playstation";
 import { TripHistory } from "../actions/trip-history";
 
 type ConnectionAction = {
@@ -15,6 +16,16 @@ type ConnectionAction = {
  * connection with no matching capability shows nothing.
  */
 function actionsFor(connection: Connection): ConnectionAction[] {
+  if (
+    connection.integration_external_key === "playstation" &&
+    connection.authorization_state !== "revoked"
+  )
+    return [
+      {
+        label: "Gaming activity",
+        render: (c) => <PlayStationCapture connectionId={c.id} />,
+      },
+    ];
   if (connection.authorization_state !== "authorized") return [];
   const granted = new Set(connection.authorized_capabilities);
   const actions: ConnectionAction[] = [];

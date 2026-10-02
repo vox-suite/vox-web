@@ -13,6 +13,7 @@ import {
 import { errorMessage } from "@/lib/api/http";
 import type { Connection } from "@/lib/consumer-auth/core-host-client";
 import { useConnections, useDisconnectConnection } from "../queries";
+import { PlayStationLink } from "./playstation";
 import { ConnectionActions } from "./connection-actions";
 
 function ConnectionCard({ connection }: { connection: Connection }) {
@@ -38,7 +39,7 @@ function ConnectionCard({ connection }: { connection: Connection }) {
         />
       }
       actions={
-        authorized ? (
+        authorized || connection.integration_external_key === "playstation" ? (
           <Button
             variant="danger"
             size="sm"
@@ -98,6 +99,7 @@ export function ConnectionsPanel({ id }: { id?: string }) {
           grants are configured separately under Agent access.
         </p>
       </Callout>
+      <PlayStationLink />
       <QueryContent
         query={connections}
         loadingLabel="Loading connections"
@@ -106,7 +108,8 @@ export function ConnectionsPanel({ id }: { id?: string }) {
         empty={
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <EmptyMessage title="No connected accounts">
-              Link a supported app from the Plugins tab to begin provider authorization.
+              Link a supported app from the Plugins tab to begin provider
+              authorization.
             </EmptyMessage>
           </div>
         }

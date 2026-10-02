@@ -642,6 +642,20 @@ export class VoxCoreHostClient {
     return (await response.json()) as T;
   }
 
+  async playStation<T>(
+    accountId: string,
+    action: string,
+    input: Record<string, unknown> = {},
+  ): Promise<T> {
+    return this.signedPost<T>(`/v1/playstation/${action}`, accountId, {
+      ...input,
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+    });
+  }
+
   async listConnections(accountId: string): Promise<Connection[]> {
     return this.signedPost<Connection[]>("/v1/connections/list", accountId, {
       host_context: {
@@ -863,17 +877,13 @@ export class VoxCoreHostClient {
     accountId: string,
     grant: CreateGrantRequest,
   ): Promise<void> {
-    return this.signedPost<void>(
-      "/v1/capability-grants/revoke",
-      accountId,
-      {
-        host_context: {
-          host_user_id: `vox-account:${accountId}`,
-          organization_external_key: null,
-        },
-        grant,
+    return this.signedPost<void>("/v1/capability-grants/revoke", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
       },
-    );
+      grant,
+    });
   }
 
   async startTask(
