@@ -5,6 +5,7 @@ const config: NextConfig = {
   async redirects() {
     // Journeys was folded into connected accounts on Apps & skills.
     return [
+      { source: "/privacy", destination: "/privacy-policy", permanent: true },
       { source: "/app/journeys", destination: "/app/apps", permanent: true },
     ];
   },

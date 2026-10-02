@@ -87,7 +87,8 @@ const footerColumns = [
   {
     title: "Vox",
     links: [
-      { href: "/privacy", label: "Privacy" },
+      { href: "/privacy-policy", label: "Privacy" },
+      { href: "/terms-of-service", label: "Terms" },
       { href: "/#main", label: "Back to top" },
     ],
   },

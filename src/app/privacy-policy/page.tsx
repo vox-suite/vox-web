@@ -3,7 +3,7 @@ import { PrivacySection } from "./section";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy & Compliance",
+  title: "Privacy Policy",
   description:
     "Privacy policy, security commitments, and legal compliance disclosures for Vox.",
 };

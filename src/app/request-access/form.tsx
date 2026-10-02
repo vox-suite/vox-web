@@ -133,7 +133,7 @@ export function RequestAccessForm() {
         >
           I confirm that I am at least 18 years old (or 13+ with parental
           authorization) and accept the{" "}
-          <a href="/privacy" style={{ textDecoration: "underline" }}>
+          <a href="/privacy-policy" style={{ textDecoration: "underline" }}>
             Privacy Policy
           </a>
           .

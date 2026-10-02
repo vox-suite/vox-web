@@ -78,7 +78,7 @@ export function SignInShell({
           <span>Vox account · Private by default</span>
           <span className="flex items-center gap-4">
             <Link
-              href="https://voxagent.in/privacy"
+              href="https://voxagent.in/privacy-policy"
               className="transition-colors hover:text-pure-white"
             >
               Privacy
