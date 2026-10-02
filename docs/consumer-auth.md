@@ -104,3 +104,15 @@ consent, grants, read and revoke need separate provider evidence.
 Removing the former Better Auth implementation does not delete an existing
 `vox_web_auth` database schema or revoke its historical data automatically.
 No live database mutation or credential rotation is part of this code change.
+
+### Token issuance ordering review
+
+The official [Auth token service](https://github.com/supabase/auth/blob/master/internal/tokens/service.go)
+creates the session and its authentication claim before issuing the token, then
+invokes the custom access-token hook with the same transaction. This supports
+the hook's session-existence check at initial login; refresh cannot bootstrap a
+new pin. Local SQL tests cover the policy, while live hook registration and
+actual OAuth/OTP issuance remain release gates. The review also checked the
+current [custom-token-hook contract](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook)
+and Auth changelog before release; the deployed Auth version still needs a live
+compatibility check.
