@@ -4,6 +4,15 @@ Ordinary home conversation uses the owned default Personal Assistant. It does no
 inherit the Library's agent selection. Library still supports testing/configuring
 an individual specialist without redefining normal chat.
 
+When ordinary chat needs specialist access, Core creates a durable root task before
+requesting consent and returns its public projection in the conversation response's
+optional `task` field. Chat shows that task's named specialist request and requested
+account/tool references. Once consent binds to the returned run; remembered consent
+remains explicitly separate. Saving consent sends an authenticated clarification
+reply to resume the same saved task. Chat refreshes authoritative status by that task
+ID and removes stale consent after continuation. Reload recovery uses Saved tasks,
+without searching task titles or inferring authority from model text.
+
 Tasks presents authenticated Core state and a specialist permission form. The user
 chooses the requesting assistant, specialist, exact connected accounts/tools and
 optional nonsensitive saved-preference keys. Discovery exposes no preference values.
@@ -33,6 +42,7 @@ started-task index is used.
 
 This feature requires the Core signed-host endpoints:
 
+- `/v1/conversations/respond` with the optional public `task` projection
 - `/v1/delegation-scopes`
 - `/v1/delegation-permissions`, `/query`, `/{id}/revoke`
 - `/v1/durable-tasks/stop-all`

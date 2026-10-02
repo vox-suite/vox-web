@@ -700,3 +700,71 @@ test("a persisted specialist consent request binds permission and continuation t
     card.getByRole("button", { name: "Allow and continue task", exact: true }),
   ).toHaveCount(0);
 });
+
+for (const mode of ["once", "remembered"] as const) {
+  test(`ordinary chat receives saved consent task and ${mode} permission continues that same run`, async ({
+    page,
+  }) => {
+    await signIn(page);
+    await page.goto("/app");
+    await page
+      .getByLabel("Ask Personal Assistant", { exact: true })
+      .fill("Ask Concierge to check availability");
+    const responded = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/account/conversations") &&
+        response.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    const envelope = await (await responded).json();
+    expect(envelope.task.result.checkpoint.code).toBe(
+      "delegation_consent_required",
+    );
+    await expect(
+      page.getByText("Personal Assistant wants help from Concierge.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    if (mode === "remembered")
+      await page
+        .getByLabel("Remember for future tasks", { exact: true })
+        .check();
+    const saved = page.waitForRequest(
+      (request) =>
+        request.url().endsWith("/api/account/delegation") &&
+        request.method() === "POST",
+    );
+    const resumed = page.waitForResponse(
+      (response) =>
+        response
+          .url()
+          .endsWith(`/api/account/tasks/${envelope.task.id}/resume`) &&
+        response.request().method() === "POST",
+    );
+    await page
+      .getByRole("button", { name: "Allow and continue task", exact: true })
+      .click();
+    expect((await saved).postDataJSON().parent_run_id).toBe(
+      mode === "once" ? envelope.task.run_id : null,
+    );
+    expect((await (await resumed).json()).task.id).toBe(envelope.task.id);
+    await expect(
+      page.getByText("Personal Assistant wants help from Concierge.", {
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await page
+      .getByRole("link", { name: "View saved task and current status" })
+      .click();
+    await expect(page).toHaveURL(/\/app\/tasks$/);
+    await page.reload();
+    await expect(page.getByTestId(`task-${envelope.task.id}`)).toBeVisible();
+    const permissions = await (
+      await page.request.get("/api/account/delegation")
+    ).json();
+    expect(permissions.permissions[0].mode).toBe(mode);
+    expect(permissions.permissions[0].parent_run_id).toBe(
+      mode === "once" ? envelope.task.run_id : null,
+    );
+  });
+}

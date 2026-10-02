@@ -41,14 +41,14 @@ export function useStartTask() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: startTask,
-    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.list() }),
+    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.all }),
   });
 }
 export function useCancelTask() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: cancelTask,
-    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.list() }),
+    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.all }),
   });
 }
 
@@ -56,7 +56,7 @@ export function useResumeTask() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: resumeTask,
-    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.list() }),
+    onSuccess: () => client.invalidateQueries({ queryKey: taskKeys.all }),
   });
 }
 

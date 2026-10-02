@@ -1170,6 +1170,47 @@ export function createCoreFixture() {
         const key = body.agent_external_key;
         if (!user.agents.some((agent) => agent.definition.external_key === key))
           fail(404, "agent_not_found", "Agent not found");
+        if (body.text.includes("Ask Concierge to check availability")) {
+          const now = iso(Date.now());
+          const task = {
+            id: randomUUID(),
+            run_id: randomUUID(),
+            title: "Check meeting availability",
+            instruction: body.text,
+            agent_external_key: key,
+            state: "waiting",
+            wait_reason: "clarification",
+            pinned: true,
+            created_at: now,
+            result: {
+              state: "waiting",
+              reason: "clarification",
+              checkpoint: {
+                code: "delegation_consent_required",
+                question: "Review Concierge's requested account access.",
+                delegation_request: {
+                  specialist_agent_key: "concierge",
+                  brief: "Check availability for the requested meeting.",
+                  scope: {
+                    capabilities: [
+                      {
+                        connection_id: "aaaaaaaa-1111-4111-8111-111111111111",
+                        capability_external_key: "calendar.events.write",
+                      },
+                    ],
+                  },
+                  permission_id: null,
+                },
+              },
+            },
+          };
+          user.tasks.push(task);
+          return {
+            conversation_id: body.external_conversation_id,
+            text: "Please review permission for Concierge to help with this task.",
+            task: publicTask(task),
+          };
+        }
         const active = user.skills
           .filter((skill) => skill.installed_version !== null && skill.enabled)
           .filter(

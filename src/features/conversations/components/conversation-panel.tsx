@@ -1,4 +1,8 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
+import { getTask, isTaskTerminal } from "@/features/tasks/api";
+import { taskKeys } from "@/features/tasks/queries";
+import { useAppHref } from "@/components/app-shell/app-paths";
 import { useState, type FormEvent } from "react";
 import { useAgents } from "@/features/agents/queries";
 import { useSelectedAgent } from "@/features/agents/selection";
@@ -21,6 +25,16 @@ function Conversation({
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
   const [task, setTask] = useState<DurableTask | null>(null);
+  const href = useAppHref();
+  const currentTask = useQuery({
+    queryKey: [...taskKeys.all, "conversation", task?.id],
+    enabled: !!task,
+    queryFn: ({ signal }) => getTask(task!.id, signal),
+    initialData: task ?? undefined,
+    refetchInterval: (query) =>
+      query.state.data && !isTaskTerminal(query.state.data) ? 5000 : false,
+  });
+  const displayedTask = currentTask.data ?? task;
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (pending || !text.trim()) return;
@@ -67,15 +81,23 @@ function Conversation({
           </div>
         ))}
       </div>
-      {task ? (
+      {displayedTask ? (
         <div className="rounded-md border border-border-edge p-3">
           <p className="mb-2 text-sm">
-            {task.title} · {task.state}
+            {displayedTask.title} · {displayedTask.state}
           </p>
-          {task.result.checkpoint?.code === "delegation_consent_required" ? (
-            <TaskConsentRequest key={task.id} task={task} />
+          {displayedTask.state === "waiting" &&
+          displayedTask.result.checkpoint?.code ===
+            "delegation_consent_required" ? (
+            <TaskConsentRequest key={displayedTask.id} task={displayedTask} />
           ) : null}
-          <a className="text-sm underline" href="/app/tasks">
+          {currentTask.error ? (
+            <Callout tone="danger" live="assertive">
+              Current task status could not be refreshed. Open saved tasks to
+              retry.
+            </Callout>
+          ) : null}
+          <a className="text-sm underline" href={href("/tasks")}>
             View saved task and current status
           </a>
         </div>
