@@ -3,6 +3,10 @@ begin;
 create role anon;
 create role authenticated;
 create role supabase_auth_admin;
+create role service_role bypassrls;
+-- Simulate broad deployment defaults; migration must remove them explicitly.
+alter default privileges grant all on tables to service_role, supabase_auth_admin;
+alter default privileges grant all on schemas to service_role;
 create schema auth;
 create table auth.sessions (id uuid primary key, user_id uuid not null);
 create table auth.identities (id uuid primary key, user_id uuid not null, provider text not null);
@@ -17,11 +21,17 @@ insert into auth.sessions values
 create function pg_temp.event(method text, session_id text default 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb') returns jsonb language sql as $$
 select jsonb_build_object('user_id', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'authentication_method', method,
  'claims', jsonb_build_object('sub', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'session_id', session_id, 'role', 'authenticated', 'aud', 'authenticated', 'is_anonymous', false,
+ 'amr', jsonb_build_array(jsonb_build_object('method',case when method in ('otp','magiclink','email/signup') then method else 'oauth' end,'timestamp',1700000000)),
  'vox_identity', jsonb_build_object('identity_id','untrusted-preexisting-claim')))
 $$;
 set role supabase_auth_admin;
 do $$ begin
  if vox_auth.custom_access_token_hook(pg_temp.event('oauth'))->'claims'->'vox_identity'->>'identity_id' is distinct from '11111111-1111-4111-8111-111111111111' then raise exception 'fresh OAuth pin missing'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('totp'), '{claims,amr}', '[{"method":"oauth","timestamp":1700000000},{"method":"totp","timestamp":1700000001}]'))->'claims'->'vox_identity' is null then raise exception 'existing OAuth MFA pin rejected'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('totp','cccccccc-cccc-4ccc-8ccc-cccccccccccc'), '{claims,amr}', '[{"method":"oauth"},{"method":"totp"}]'))->'claims' ? 'vox_identity' then raise exception 'MFA bootstrapped pin'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('totp'), '{claims,amr}', '[{"method":"totp"}]'))->'claims' ? 'vox_identity' then raise exception 'MFA without original method accepted'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('token_refresh'), '{claims,amr}', '[{"method":"oauth"},{"method":"otp"}]'))->'claims' ? 'vox_identity' then raise exception 'mixed AMR accepted'; end if;
+ if vox_auth.custom_access_token_hook(pg_temp.event('oauth') #- '{claims,amr}')->'claims' ? 'vox_identity' then raise exception 'missing AMR accepted'; end if;
  if vox_auth.custom_access_token_hook(pg_temp.event('token_refresh'))->'claims'->'vox_identity' is null then raise exception 'valid refresh rejected'; end if;
  if vox_auth.custom_access_token_hook(pg_temp.event('token_refresh', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'))->'claims' ? 'vox_identity' then raise exception 'refresh created pin'; end if;
  if vox_auth.custom_access_token_hook(pg_temp.event('otp', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'))->'claims' ? 'vox_identity' then raise exception 'OTP inherited Google authority'; end if;
@@ -53,11 +63,15 @@ insert into auth.identities values ('44444444-4444-4444-8444-444444444444', 'aaa
 set role supabase_auth_admin;
 do $$ begin
  if vox_auth.custom_access_token_hook(pg_temp.event('otp','dddddddd-dddd-4ddd-8ddd-dddddddddddd'))->'claims'->'vox_identity'->>'provider' is distinct from 'email' then raise exception 'standalone OTP failed'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('totp','dddddddd-dddd-4ddd-8ddd-dddddddddddd'), '{claims,amr}', '[{"method":"otp"},{"method":"totp"}]'))->'claims'->'vox_identity'->>'provider' is distinct from 'email' then raise exception 'existing email MFA pin rejected'; end if;
+ if vox_auth.custom_access_token_hook(jsonb_set(pg_temp.event('token_refresh','dddddddd-dddd-4ddd-8ddd-dddddddddddd'), '{claims,amr}', '[{"method":"oauth"},{"method":"totp"}]'))->'claims' ? 'vox_identity' then raise exception 'wrong provider AMR accepted'; end if;
  if vox_auth.custom_access_token_hook(pg_temp.event('otp','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'))->'claims' ? 'vox_identity' then raise exception 'missing session accepted'; end if;
 end $$;
 reset role;
 do $$ begin
  if has_function_privilege('anon','vox_auth.custom_access_token_hook(jsonb)','EXECUTE') or has_function_privilege('authenticated','vox_auth.custom_access_token_hook(jsonb)','EXECUTE') then raise exception 'public can call hook'; end if;
+ if has_schema_privilege('service_role','vox_auth','USAGE') or has_table_privilege('service_role','vox_auth.session_identity_pins','SELECT') or has_table_privilege('service_role','vox_auth.session_identity_pins','INSERT') or has_table_privilege('service_role','vox_auth.session_identity_pins','UPDATE') or has_table_privilege('service_role','vox_auth.session_identity_pins','DELETE') or has_function_privilege('service_role','vox_auth.custom_access_token_hook(jsonb)','EXECUTE') then raise exception 'service role can access pins/hook'; end if;
+ if has_table_privilege('supabase_auth_admin','vox_auth.session_identity_pins','UPDATE') or has_table_privilege('supabase_auth_admin','vox_auth.session_identity_pins','DELETE') or has_table_privilege('supabase_auth_admin','vox_auth.session_identity_pins','TRUNCATE') then raise exception 'default grants allow mutation'; end if;
  if has_schema_privilege('authenticated','vox_auth','USAGE') then raise exception 'public can read pins'; end if;
 end $$;
 rollback;

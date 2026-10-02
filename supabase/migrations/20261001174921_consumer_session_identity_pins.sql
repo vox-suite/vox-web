@@ -1,6 +1,6 @@
 -- Provider adapter state; never exposed through the public Data API.
 create schema vox_auth;
-revoke all on schema vox_auth from public, anon, authenticated;
+revoke all on schema vox_auth from public, anon, authenticated, service_role;
 grant usage on schema vox_auth to supabase_auth_admin;
 
 create table vox_auth.session_identity_pins (
@@ -12,6 +12,7 @@ create table vox_auth.session_identity_pins (
 );
 alter table vox_auth.session_identity_pins enable row level security;
 -- Only the trusted Auth hook can insert/read. No update/delete grants or public policy.
+revoke all on vox_auth.session_identity_pins from public, anon, authenticated, service_role, supabase_auth_admin;
 grant select, insert on vox_auth.session_identity_pins to supabase_auth_admin;
 create policy auth_hook_read on vox_auth.session_identity_pins
   for select to supabase_auth_admin using (true);
@@ -30,6 +31,7 @@ declare
   identity_ids uuid[];
   providers text[];
   pin vox_auth.session_identity_pins%rowtype;
+  allowed_methods text[];
 begin
   -- Return a valid Supabase token without Vox authority on any policy mismatch.
   if claims->>'sub' is distinct from actor_id::text or
@@ -45,6 +47,22 @@ begin
      providers[1] not in ('email', 'google')
   then return jsonb_build_object('claims', claims); end if;
 
+  allowed_methods := case providers[1]
+    when 'google' then array['oauth']::text[]
+    else array['otp', 'magiclink', 'email/signup']::text[] end;
+  -- Auth supplies AMR from its session record. Require the original supported
+  -- sign-in method; MFA/refresh alone cannot establish provider authority.
+  if jsonb_typeof(claims->'amr') is distinct from 'array' then
+    return jsonb_build_object('claims', claims);
+  end if;
+  if not exists (select 1 from jsonb_array_elements(claims->'amr') a
+                 where a->>'method' = any(allowed_methods)) or
+     exists (select 1 from jsonb_array_elements(claims->'amr') a
+             where jsonb_typeof(a) is distinct from 'object' or
+                   a->>'method' is null or
+                   not (a->>'method' = any(allowed_methods || array['token_refresh', 'totp'])))
+  then return jsonb_build_object('claims', claims); end if;
+
   select p.* into pin from vox_auth.session_identity_pins p where p.session_id = pin_session_id;
   if not found then
     -- A refresh must never create a pin from the current merged user record.
@@ -57,7 +75,7 @@ begin
   end if;
   if pin.user_id is distinct from actor_id or pin.identity_id is distinct from identity_ids[1] or
      pin.provider is distinct from providers[1] or
-     not (method = 'token_refresh' or
+     not (method in ('token_refresh', 'totp') or
           (pin.provider = 'google' and method = 'oauth') or
           (pin.provider = 'email' and method in ('otp', 'magiclink', 'email/signup')))
   then return jsonb_build_object('claims', claims); end if;
@@ -68,7 +86,7 @@ begin
   return jsonb_build_object('claims', claims);
 end;
 $$;
-revoke all on function vox_auth.custom_access_token_hook(jsonb) from public, anon, authenticated;
+revoke all on function vox_auth.custom_access_token_hook(jsonb) from public, anon, authenticated, service_role;
 grant execute on function vox_auth.custom_access_token_hook(jsonb) to supabase_auth_admin;
 -- Auth's existing privileges supply read access to auth.sessions/auth.identities.
 -- There is deliberately no FK to identities: deleting an identity cannot delete
