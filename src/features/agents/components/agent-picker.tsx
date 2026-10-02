@@ -4,16 +4,22 @@ import { Button } from "@/components/ui";
 import { ErrorState } from "@/components/app";
 import { Skeleton } from "@/components/ui";
 import { useAgents } from "../queries";
+import { AgentManager } from "./agent-manager";
 
 /**
- * Returns the agent the user picked, falling back to the first selected agent
+ * Returns the agent the user picked, falling back to the explicit default assistant
  * once the list loads (derived, so no effect is needed to "initialise" it).
  */
 export function resolveAgentKey(
   picked: string | null,
-  agents: ReadonlyArray<{ external_key: string }> | undefined,
+  agents:
+    ReadonlyArray<{ external_key: string; is_default: boolean }> | undefined,
 ) {
-  return agents?.find((agent) => agent.external_key === picked)?.external_key ?? agents?.[0]?.external_key ?? "";
+  return (
+    agents?.find((agent) => agent.external_key === picked)?.external_key ??
+    agents?.find((agent) => agent.is_default)?.external_key ??
+    ""
+  );
 }
 
 export function AgentPicker({
@@ -52,7 +58,7 @@ export function AgentPicker({
       <span className="text-[13px] text-smoke">{label}:</span>
       {agents.data.length === 0 ? (
         <span className="text-[13px] text-smoke">
-          No agents selected for this deployment.
+          Your assistant is unavailable. Try reloading.
         </span>
       ) : (
         agents.data.map((agent) => (
@@ -64,10 +70,12 @@ export function AgentPicker({
             title={agent.purpose}
             onClick={() => onChange(agent.external_key)}
           >
-            {agent.external_key}
+            {agent.display_name}
+            {agent.is_default ? " · Default" : ""}
           </Button>
         ))
       )}
+      <AgentManager agents={agents.data} />
     </div>
   );
 }

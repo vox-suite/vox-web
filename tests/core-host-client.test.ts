@@ -162,3 +162,49 @@ test("consumer authentication fails closed when Core remaps an established accou
     /Core user context does not match the established account/,
   );
 });
+
+test("agent management signs the authenticated account context and carries the edit version", async () => {
+  let captured: { url: string; init: RequestInit } | undefined;
+  const client = new VoxCoreHostClient(
+    {
+      baseUrl: "https://core.vox.test",
+      hostCredential: {
+        credentialId: "11111111-2222-4333-8444-555555555555",
+        audience: "vox-host:test:vox-web",
+        secret: "host-secret-fixture",
+      },
+      identityCredential: {
+        issuer: "https://app.vox.test",
+        audience: "vox-core:test",
+        privateKeyPkcs8Base64: privateKey,
+      },
+      identityAdapterKey: "vox-web-primary",
+    },
+    {
+      fetch: async (input, init) => {
+        captured = { url: String(input), init: init ?? {} };
+        return new Response(null, { status: 204 });
+      },
+      now: () => 1_795_622_400,
+      nonce: () => "99999999-8888-4777-8666-555555555555",
+    },
+  );
+  await client.manageAgent("aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", {
+    operation: "update",
+    agent_key: "owned-specialist",
+    name: "Engineering",
+    instructions: "Review source code",
+    expected_version: 3,
+  });
+  assert.equal(captured?.url, "https://core.vox.test/v1/agents/manage");
+  const body = JSON.parse(String(captured?.init.body));
+  assert.equal(
+    body.host_context.host_user_id,
+    "vox-account:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+  );
+  assert.equal(body.mutation.expected_version, 3);
+  assert.equal(
+    (captured?.init.headers as Record<string, string>)["X-Vox-Host-Credential"],
+    "11111111-2222-4333-8444-555555555555",
+  );
+});

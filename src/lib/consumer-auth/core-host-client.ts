@@ -16,6 +16,21 @@ export type HostContext = {
   organizationExternalKey: string | null;
 };
 
+export type ConnectorSetupConsent = {
+  agent_external_key: string;
+  agent_instruction_version: number;
+  capability_external_keys: string[];
+  enable_bundled_skills: boolean;
+};
+
+export type ConnectorSetupResult = {
+  setup_id: string | null;
+  extension_id: string;
+  external_key: string;
+  state: "authorize" | "complete" | "needs_review" | "account_linked";
+  authorization_url: string | null;
+};
+
 type AssertionClock = {
   issuedAtSeconds: number;
   nonce: string;
@@ -424,8 +439,41 @@ export type PortableExportResponse = {
 };
 
 export type SelectedAgent = {
-  definition: { external_key: string; purpose: string };
+  definition: {
+    id: string;
+    external_key: string;
+    purpose: string;
+    display_name: string;
+    is_default: boolean;
+    instruction_version: number;
+  };
 };
+
+export type AgentMemoryChange =
+  | { operation: "read" }
+  | { operation: "clear" }
+  | { operation: "set_retention"; enabled: boolean };
+export type AgentMemoryView = {
+  retention_enabled: boolean;
+  cleared_at: string;
+  retained: {
+    facts: Record<string, unknown>;
+    commitments: string[];
+    decisions: string[];
+    recent_recaps: string[];
+  };
+};
+
+export type AgentMutation =
+  | { operation: "create"; name: string; instructions: string }
+  | {
+      operation: "update";
+      agent_key: string;
+      name: string;
+      instructions: string;
+      expected_version: number;
+    }
+  | { operation: "archive"; agent_key: string };
 
 export type EffectiveSkill = { id: string };
 
@@ -804,6 +852,34 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
+    });
+  }
+
+  async agentMemory(
+    accountId: string,
+    agentKey: string,
+    change: AgentMemoryChange,
+  ): Promise<AgentMemoryView> {
+    return this.signedPost<AgentMemoryView>(
+      `/v1/agents/${encodeURIComponent(agentKey)}/memory`,
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        change,
+      },
+    );
+  }
+
+  async manageAgent(accountId: string, mutation: AgentMutation): Promise<void> {
+    return this.signedPost<void>("/v1/agents/manage", accountId, {
+      host_context: {
+        host_user_id: `vox-account:${accountId}`,
+        organization_external_key: null,
+      },
+      mutation,
     });
   }
 
@@ -1186,6 +1262,50 @@ export class VoxCoreHostClient {
     );
   }
 
+  async setupConnectorPackage(
+    accountId: string,
+    setup: {
+      external_key: string;
+      version: number;
+      digest: string;
+      redirect_uri: string;
+      consent: ConnectorSetupConsent | null;
+    },
+  ): Promise<ConnectorSetupResult> {
+    return this.signedPost<ConnectorSetupResult>(
+      "/v1/connector-packages/setup",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        setup,
+      },
+    );
+  }
+
+  async completeConnectorSetup(
+    accountId: string,
+    state: string,
+    code: string,
+    issuer?: string | null,
+  ): Promise<ConnectorSetupResult> {
+    return this.signedPost<ConnectorSetupResult>(
+      "/v1/connector-packages/setup/callback",
+      accountId,
+      {
+        host_context: {
+          host_user_id: `vox-account:${accountId}`,
+          organization_external_key: null,
+        },
+        state,
+        code,
+        iss: issuer ?? null,
+      },
+    );
+  }
+
   async removeExtension(
     accountId: string,
     extensionId: string,
@@ -1214,7 +1334,7 @@ export class VoxCoreHostClient {
           host_user_id: `vox-account:${accountId}`,
           organization_external_key: null,
         },
-        agent_external_key: request.agent_external_key ?? "saathi",
+        agent_external_key: request.agent_external_key ?? "general",
         connection_id: request.connection_id,
         capability_external_key:
           (request.include_city ?? true) ? "uber.history" : "uber.history_lite",
@@ -1235,7 +1355,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         asin: handoff.asin,
@@ -1257,7 +1377,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         res_id: handoff.res_id ?? null,
@@ -1278,7 +1398,7 @@ export class VoxCoreHostClient {
         host_user_id: `vox-account:${accountId}`,
         organization_external_key: null,
       },
-      agent_external_key: agentExternalKey ?? "saathi",
+      agent_external_key: agentExternalKey ?? "general",
       connection_id: connectionId,
       handoff: {
         pickup_latitude: handoff.pickup_latitude,

@@ -26,7 +26,6 @@ import {
 } from "../src/features/plugins/api";
 import { pluginKeys } from "../src/features/plugins/queries";
 import type {
-  ConnectedAppsStatus,
   RemoteExtension,
   VoxCoreHostClient,
 } from "../src/lib/consumer-auth/core-host-client";
@@ -92,15 +91,14 @@ function extensionFixture(
   };
 }
 
-const emptyStatus: ConnectedAppsStatus = {
-  configured_hosts: [],
-  connected: [],
-};
-
 function connectRequest(body: unknown, host = "app.voxagent.in") {
   return new NextRequest(`https://${host}/api/account/plugins/connect`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", host },
+    headers: {
+      "Content-Type": "application/json",
+      host,
+      origin: `https://${host}`,
+    },
     body: JSON.stringify(body),
   });
 }
@@ -121,7 +119,13 @@ test("catalog exposes only Core-reviewed packages and installation binds the rev
         {
           version: 2,
           digest,
-          metadata: {schema_version:1,protocol_version:"2025-11-25",auth_mode:"oauth",credential_custody:"platform_held",skills:[]},
+          metadata: {
+            schema_version: 1,
+            protocol_version: "2025-11-25",
+            auth_mode: "oauth",
+            credential_custody: "platform_held",
+            skills: [],
+          },
           manifest: {
             external_key: "custom",
             display_name: "Custom connector",
@@ -143,20 +147,28 @@ test("catalog exposes only Core-reviewed packages and installation binds the rev
         },
       ];
     },
-    async installConnectorPackage(
+    async setupConnectorPackage(
       _: string,
-      key: string,
-      version: number,
-      actualDigest: string,
+      setup: {
+        external_key: string;
+        version: number;
+        digest: string;
+        consent: unknown;
+      },
     ) {
-      calls.push({ key, version, digest: actualDigest });
-      return extensionFixture({ external_key: key });
-    },
-    async connectedAppsStatus() {
-      return emptyStatus;
-    },
-    async authorizeExtension() {
-      return { authorization_url: "https://provider.example/authorize" };
+      calls.push({
+        key: setup.external_key,
+        version: setup.version,
+        digest: setup.digest,
+        consent: setup.consent,
+      });
+      return {
+        setup_id: "setup",
+        extension_id: "extension",
+        external_key: setup.external_key,
+        state: "authorize",
+        authorization_url: "https://provider.example/authorize",
+      };
     },
   } as unknown as VoxCoreHostClient);
   setMockConsumerForTests(null);
@@ -202,14 +214,40 @@ test("catalog exposes only Core-reviewed packages and installation binds the rev
   }
   assert.equal(calls.length, 0);
   const result = await connectRoute(
-    connectRequest({ pluginId: "custom", version: 2, digest }),
+    connectRequest({ pluginId: "custom", version: 2, digest, consent: null }),
   );
   assert.equal(result.status, 200);
   assert.equal(
     (await result.json()).authorizationUrl,
     "https://provider.example/authorize",
   );
-  assert.deepEqual(calls, [{ key: "custom", version: 2, digest }]);
+  assert.deepEqual(calls, [
+    { key: "custom", version: 2, digest, consent: null },
+  ]);
+  const consent = {
+    agent_external_key: "general",
+    agent_instruction_version: 3,
+    capability_external_keys: ["custom.read"],
+    enable_bundled_skills: false,
+  };
+  assert.equal(
+    (
+      await connectRoute(
+        connectRequest({ pluginId: "custom", version: 2, digest, consent }),
+      )
+    ).status,
+    200,
+  );
+  assert.deepEqual(calls[1], { key: "custom", version: 2, digest, consent });
+  const crossOrigin = connectRequest({
+    pluginId: "custom",
+    version: 2,
+    digest,
+    consent,
+  });
+  crossOrigin.headers.set("origin", "https://attacker.example");
+  assert.equal((await connectRoute(crossOrigin)).status, 403);
+  assert.equal(calls.length, 2);
   setMockConsumerForTests(undefined);
   resetConsumerAuthRuntimeForTests();
 });
@@ -228,7 +266,7 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
   }[] = [];
   let failWith: string | null = null;
   setCoreHostClientForTests({
-    async completeConnection(
+    async completeConnectorSetup(
       _: string,
       state: string,
       code: string,
@@ -242,7 +280,13 @@ test("GET /apps/oauth/callback completes the connection and returns to the apps 
         );
       }
       completions.push({ state, code, issuer });
-      return extensionFixture({ lifecycle_state: "active" });
+      return {
+        setup_id: "setup",
+        extension_id: "extension",
+        external_key: "notion",
+        state: "complete",
+        authorization_url: null,
+      };
     },
   } as unknown as VoxCoreHostClient);
   const callback = async (query: string) => {
@@ -445,7 +489,7 @@ test("client api functions call the plugin routes", async () => {
       });
     };
     assert.equal(
-      (await connectPlugin("notion", 1, "a".repeat(64))).status,
+      (await connectPlugin("notion", 1, "a".repeat(64), null)).status,
       "authorize",
     );
 

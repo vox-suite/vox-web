@@ -90,8 +90,10 @@ function nextLocalMorning(now, hourUtc = 2, minuteUtc = 30) {
 const AGENTS = [
   {
     definition: {
-      external_key: "saathi",
-      display_name: "Saathi",
+      external_key: "general",
+      is_default: true,
+      instruction_version: 1,
+      display_name: "Personal Assistant",
       purpose:
         "Everyday personal assistant: reminders, calendar, rides and small errands.",
       version: 3,
@@ -102,6 +104,8 @@ const AGENTS = [
   {
     definition: {
       external_key: "concierge",
+      is_default: false,
+      instruction_version: 1,
       display_name: "Concierge",
       purpose:
         "Travel and stays: searches lodging, prepares bookings for your explicit approval.",
@@ -172,14 +176,14 @@ function seedUser(hostUserId) {
 
   const grants = [
     {
-      id: "grant_saathi_gcal_read",
-      agent_external_key: "saathi",
+      id: "grant_general_gcal_read",
+      agent_external_key: "general",
       connection_id: "conn_gcal_primary",
       capability_external_key: "calendar.events.read",
     },
     {
-      id: "grant_saathi_uber_trips",
-      agent_external_key: "saathi",
+      id: "grant_general_uber_trips",
+      agent_external_key: "general",
       connection_id: "conn_uber_rides",
       capability_external_key: "uber.history",
     },
@@ -534,7 +538,7 @@ function seedUser(hostUserId) {
       id: "task_seed_calendar_digest",
       title: "Summarise next week",
       instruction: "Summarise my calendar for next week and flag conflicts.",
-      agent_external_key: "saathi",
+      agent_external_key: "general",
       state: "completed",
       run_id: "run_seed_calendar_digest",
       wait_reason: null,
@@ -635,13 +639,16 @@ function seedUser(hostUserId) {
     dropoff_longitude: to[1],
   }));
 
-
   return {
     hostUserId,
     userContextId,
     connections,
     grants,
-    agentSkillDisabled: { saathi: [], concierge: ["skill_morning_brief"] },
+    agents: structuredClone(AGENTS).map((a) => ({
+      ...a,
+      definition: { ...a.definition, id: randomUUID() },
+    })),
+    agentSkillDisabled: { general: [], concierge: ["skill_morning_brief"] },
     skills,
     extensions,
     reminders,
@@ -825,6 +832,43 @@ export function createCoreFixture() {
       }),
     ],
 
+    [
+      "POST",
+      /^\/v1\/agents\/([^/]+)\/memory$/,
+      (user, [, agentKey], body) => {
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
+          fail(404, "not_found", "Assistant not found");
+        user.agentMemories ??= {};
+        const view = (user.agentMemories[agentKey] ??= {
+          retention_enabled: true,
+          cleared_at: "1970-01-01T00:00:00Z",
+          retained: {
+            facts: { focus: "Private assistant note" },
+            commitments: [],
+            decisions: [],
+            recent_recaps: [],
+          },
+        });
+        const change = body.change;
+        if (
+          change.operation === "clear" ||
+          (change.operation === "set_retention" &&
+            change.enabled !== view.retention_enabled)
+        ) {
+          view.retained = {
+            facts: {},
+            commitments: [],
+            decisions: [],
+            recent_recaps: [],
+          };
+          view.cleared_at = iso(Date.now());
+        }
+        if (change.operation === "set_retention")
+          view.retention_enabled = change.enabled;
+        return view;
+      },
+    ],
+
     // Connections
     ["POST", /^\/v1\/connections\/list$/, (user) => user.connections],
     [
@@ -877,7 +921,48 @@ export function createCoreFixture() {
     ],
 
     // Agents + grants
-    ["POST", /^\/v1\/agents\/selected$/, () => AGENTS],
+    ["POST", /^\/v1\/agents\/selected$/, (user) => user.agents],
+    [
+      "POST",
+      /^\/v1\/agents\/manage$/,
+      (user, _m, body) => {
+        const m = body.mutation;
+        if (m.operation === "create") {
+          user.agents.push({
+            definition: {
+              id: randomUUID(),
+              external_key: randomUUID(),
+              display_name: m.name,
+              purpose: m.instructions,
+              is_default: false,
+              instruction_version: 1,
+            },
+          });
+        } else {
+          const a = user.agents.find(
+            (a) => a.definition.external_key === m.agent_key,
+          );
+          if (!a) fail(404, "not_found", "Agent not found");
+          if (m.operation === "update") {
+            if (a.definition.instruction_version !== m.expected_version)
+              fail(409, "conflict", "Agent changed");
+            Object.assign(a.definition, {
+              display_name: m.name,
+              purpose: m.instructions,
+              instruction_version: m.expected_version + 1,
+            });
+          } else if (m.operation === "archive" && !a.definition.is_default) {
+            user.agents = user.agents.filter(
+              (a) => a.definition.external_key !== m.agent_key,
+            );
+            user.grants = user.grants.filter(
+              (g) => g.agent_external_key !== m.agent_key,
+            );
+          } else fail(400, "invalid", "Cannot archive default");
+        }
+        return null;
+      },
+    ],
     [
       "POST",
       /^\/v1\/agents\/([^/]+)\/effective-capability-grants$/,
@@ -890,7 +975,7 @@ export function createCoreFixture() {
       (user, _m, body) => {
         const grant = body.grant ?? {};
         if (
-          !AGENTS.some(
+          !user.agents.some(
             (a) => a.definition.external_key === grant.agent_external_key,
           )
         )
@@ -1047,7 +1132,7 @@ export function createCoreFixture() {
         }
         skill.installed_version = skill.latest_version;
         skill.enabled = true;
-        for (const agent of AGENTS) {
+        for (const agent of user.agents) {
           const key = agent.definition.external_key;
           const disabled = new Set(user.agentSkillDisabled[key] ?? []);
           if (key === body.agent_external_key) disabled.delete(skill.id);
@@ -1062,7 +1147,7 @@ export function createCoreFixture() {
       /^\/v1\/conversations\/respond$/,
       (user, _m, body) => {
         const key = body.agent_external_key;
-        if (!AGENTS.some((agent) => agent.definition.external_key === key))
+        if (!user.agents.some((agent) => agent.definition.external_key === key))
           fail(404, "agent_not_found", "Agent not found");
         const active = user.skills
           .filter((skill) => skill.installed_version !== null && skill.enabled)
@@ -1090,7 +1175,7 @@ export function createCoreFixture() {
       "POST",
       /^\/v1\/agents\/([^/]+)\/effective-skills$/,
       (user, [, agentKey]) => {
-        if (!AGENTS.some((a) => a.definition.external_key === agentKey))
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
           fail(404, "not_found", "Agent not found");
         const disabled = user.agentSkillDisabled[agentKey] ?? [];
         return user.skills
@@ -1103,7 +1188,7 @@ export function createCoreFixture() {
       "POST",
       /^\/v1\/agents\/([^/]+)\/skills\/([^/]+)\/enable$/,
       (user, [, agentKey, skillId], body) => {
-        if (!AGENTS.some((a) => a.definition.external_key === agentKey))
+        if (!user.agents.some((a) => a.definition.external_key === agentKey))
           fail(404, "not_found", "Agent not found");
         const skill = find(user.skills, (s) => s.id === skillId, "Skill");
         if (skill.installed_version === null)
@@ -1119,6 +1204,120 @@ export function createCoreFixture() {
     // Reviewed packages and mock provider OAuth. These simulate browser flow,
     // not the protocol or credential-security contract tested in Rust.
     ["POST", /^\/v1\/connector-packages\/list$/, () => [REVIEWED_PACKAGE]],
+    [
+      "POST",
+      /^\/v1\/connector-packages\/setup$/,
+      (user, _m, body) => {
+        const setup = body.setup;
+        if (
+          setup.external_key !== REVIEWED_PACKAGE.manifest.external_key ||
+          setup.version !== 1 ||
+          setup.digest !== REVIEWED_PACKAGE.digest
+        )
+          fail(409, "package_conflict", "Review the current package");
+        if (
+          setup.consent &&
+          !user.agents.some(
+            (a) =>
+              a.definition.external_key === setup.consent.agent_external_key &&
+              a.definition.instruction_version ===
+                setup.consent.agent_instruction_version,
+          )
+        )
+          fail(409, "setup_needs_review", "Review assistant access");
+        let extension = user.extensions.find(
+          (e) =>
+            e.external_key === setup.external_key &&
+            e.lifecycle_state !== "removed",
+        );
+        if (!extension) {
+          extension = {
+            ...structuredClone(REVIEWED_PACKAGE.manifest),
+            id: randomUUID(),
+            current_version: 1,
+            conformance_status: "passed",
+            operator_enabled: true,
+            consent_status: "consented",
+            lifecycle_state: "active",
+            created_at: iso(Date.now()),
+            updated_at: iso(Date.now()),
+          };
+          user.extensions.push(extension);
+        }
+        const state = randomUUID();
+        user.mockOAuth = {
+          state,
+          extensionId: extension.id,
+          setupId: randomUUID(),
+          consent: setup.consent,
+        };
+        const redirect = new URL(setup.redirect_uri);
+        redirect.searchParams.set("state", state);
+        redirect.searchParams.set("code", "fixture-provider-code");
+        return {
+          setup_id: user.mockOAuth.setupId,
+          extension_id: extension.id,
+          external_key: extension.external_key,
+          state: "authorize",
+          authorization_url: redirect.toString(),
+        };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/connector-packages\/setup\/callback$/,
+      (user, _m, body) => {
+        const pending = user.mockOAuth;
+        if (
+          !pending ||
+          pending.state !== body.state ||
+          body.code !== "fixture-provider-code"
+        )
+          fail(400, "authorization_expired", "Invalid mock OAuth state");
+        const extension = find(
+          user.extensions,
+          (e) => e.id === pending.extensionId,
+          "Extension",
+        );
+        extension.mockAccountLinked = true;
+        const consent = pending.consent;
+        const valid =
+          !consent ||
+          user.agents.some(
+            (a) =>
+              a.definition.external_key === consent.agent_external_key &&
+              a.definition.instruction_version ===
+                consent.agent_instruction_version,
+          );
+        if (consent && valid)
+          for (const key of consent.capability_external_keys) {
+            if (!extension.capabilities.some((cap) => cap.external_key === key))
+              fail(409, "setup_needs_review", "Unknown capability");
+            if (
+              !user.grants.some(
+                (g) =>
+                  g.agent_external_key === consent.agent_external_key &&
+                  g.connection_id === extension.id &&
+                  g.capability_external_key === key,
+              )
+            )
+              user.grants.push({
+                id: randomUUID(),
+                agent_external_key: consent.agent_external_key,
+                connection_id: extension.id,
+                capability_external_key: key,
+              });
+          }
+        delete user.mockOAuth;
+        return {
+          setup_id: pending.setupId,
+          extension_id: extension.id,
+          external_key: extension.external_key,
+          state: valid ? "complete" : "needs_review",
+          authorization_url: null,
+        };
+      },
+    ],
     [
       "POST",
       /^\/v1\/connector-packages\/install$/,
@@ -1344,7 +1543,7 @@ export function createCoreFixture() {
           fail(400, "invalid_request", "title and instruction are required");
         if (
           task.agent_external_key &&
-          !AGENTS.some(
+          !user.agents.some(
             (a) => a.definition.external_key === task.agent_external_key,
           )
         ) {
@@ -1483,7 +1682,7 @@ export function createCoreFixture() {
           fail(403, "capability_unavailable", "This read is unavailable");
         requireGrant(
           user,
-          body.agent_external_key ?? "saathi",
+          body.agent_external_key ?? "general",
           body.connection_id,
           capability,
         );
@@ -1759,7 +1958,7 @@ export function createCoreFixture() {
           }));
         if (categories.includes("config"))
           payload.config = {
-            agents: AGENTS.map((a) => a.definition.external_key),
+            agents: user.agents.map((a) => a.definition.external_key),
             skills: user.skills
               .filter((s) => s.installed_version !== null)
               .map((s) => ({

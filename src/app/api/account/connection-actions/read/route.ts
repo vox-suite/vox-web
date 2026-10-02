@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const history = await core.readUberHistory(account.accountId, {
       connection_id: body.connection_id,
-      agent_external_key: body.agent_external_key || "saathi",
+      agent_external_key: body.agent_external_key || "general",
       offset: body.offset ?? 0,
       limit: body.limit ?? 10,
       include_city: body.include_city ?? true,

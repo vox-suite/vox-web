@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
-import { CoreHostRequestError } from "@/lib/consumer-auth/core-host-client";
+import {
+  CoreHostRequestError,
+  type ConnectorSetupConsent,
+} from "@/lib/consumer-auth/core-host-client";
 import {
   connectErrorMessage,
   connectedAppsRedirectUri,
@@ -12,6 +15,20 @@ export async function POST(request: NextRequest) {
   const account = await currentConsumer(request.headers);
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let sameOrigin = false;
+  try {
+    const origin = new URL(request.headers.get("origin") ?? "");
+    sameOrigin =
+      ["http:", "https:"].includes(origin.protocol) &&
+      origin.host === request.headers.get("host");
+  } catch {
+    /* Missing origins cannot enable capabilities. */
+  }
+  if (!sameOrigin)
+    return NextResponse.json(
+      { error: "Invalid request origin" },
+      { status: 403 },
+    );
   let input: unknown;
   try {
     input = await request.json();
@@ -28,6 +45,7 @@ export async function POST(request: NextRequest) {
     pluginId?: unknown;
     version?: unknown;
     digest?: unknown;
+    consent?: unknown;
   };
   if (
     typeof body.pluginId !== "string" ||
@@ -43,6 +61,34 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  const consent = body.consent;
+  if (
+    consent !== null &&
+    (!consent ||
+      typeof consent !== "object" ||
+      Array.isArray(consent) ||
+      typeof (consent as ConnectorSetupConsent).agent_external_key !==
+        "string" ||
+      !(consent as ConnectorSetupConsent).agent_external_key ||
+      (consent as ConnectorSetupConsent).agent_external_key.length > 255 ||
+      !Number.isSafeInteger(
+        (consent as ConnectorSetupConsent).agent_instruction_version,
+      ) ||
+      (consent as ConnectorSetupConsent).agent_instruction_version < 1 ||
+      !Array.isArray(
+        (consent as ConnectorSetupConsent).capability_external_keys,
+      ) ||
+      (consent as ConnectorSetupConsent).capability_external_keys.length > 64 ||
+      (consent as ConnectorSetupConsent).capability_external_keys.some(
+        (key) => typeof key !== "string" || !key || key.length > 511,
+      ) ||
+      typeof (consent as ConnectorSetupConsent).enable_bundled_skills !==
+        "boolean")
+  )
+    return NextResponse.json(
+      { error: "Review assistant access before connecting" },
+      { status: 400 },
+    );
   const core = getCoreHostClient();
   if (!core)
     return NextResponse.json(
@@ -50,32 +96,19 @@ export async function POST(request: NextRequest) {
       { status: 503 },
     );
   try {
-    const extension = await core.installConnectorPackage(
-      account.accountId,
-      body.pluginId,
-      body.version as number,
-      body.digest,
-    );
-    const status = await core.connectedAppsStatus(account.accountId);
-    if (status.connected.some((c) => c.extension_id === extension.id)) {
-      return NextResponse.json({ status: "authorized", extension });
-    }
-    const packages = await core.listConnectorPackages(account.accountId);
-    const reviewed = packages.find((candidate) => candidate.manifest.external_key === body.pluginId && candidate.version === body.version && candidate.digest === body.digest);
-    if (!reviewed) return NextResponse.json({error: "Package changed; review it again"}, {status: 409});
-    if (reviewed.metadata.auth_mode === "none") {
-      await core.connectPublicExtension(account.accountId, extension.id);
-      return NextResponse.json({status: "authorized", extension});
-    }
-    const start = await core.authorizeExtension(
-      account.accountId,
-      extension.id,
-      connectedAppsRedirectUri(request),
-    );
+    const setup = await core.setupConnectorPackage(account.accountId, {
+      external_key: body.pluginId,
+      version: body.version as number,
+      digest: body.digest,
+      redirect_uri: connectedAppsRedirectUri(request),
+      consent: consent as ConnectorSetupConsent | null,
+    });
     return NextResponse.json({
-      status: "authorize",
-      extension,
-      authorizationUrl: start.authorization_url,
+      status: setup.state === "complete" ? "authorized" : setup.state,
+      setup,
+      ...(setup.authorization_url
+        ? { authorizationUrl: setup.authorization_url }
+        : {}),
     });
   } catch (error) {
     const code = error instanceof CoreHostRequestError ? error.code : undefined;

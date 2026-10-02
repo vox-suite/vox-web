@@ -49,13 +49,16 @@ export async function GET(request: NextRequest) {
     return back({ connect_error: "not_configured" });
   }
   try {
-    const extension = await core.completeConnection(
+    const setup = await core.completeConnectorSetup(
       account.accountId,
       state,
       code,
       params.get("iss"),
     );
-    return back({ authorization_complete: extension.external_key });
+    return back({
+      authorization_complete: setup.external_key,
+      setup_result: setup.state,
+    });
   } catch (error) {
     const reason =
       error instanceof CoreHostRequestError && error.code

@@ -5,20 +5,21 @@ import { Button, Field, TextArea } from "@/components/ui";
 import { Callout } from "@/components/app";
 import { errorMessage } from "@/lib/api/http";
 import { useStartTask } from "../queries";
-
-/** Tasks from this surface run on the account's primary agent. */
-const TASK_AGENT_KEY = "saathi";
+import { useAgents } from "@/features/agents/queries";
+import { resolveAgentKey } from "@/features/agents/components/agent-picker";
 
 export function StartTaskForm() {
   const [title, setTitle] = useState("");
   const [instruction, setInstruction] = useState("");
   const startTask = useStartTask();
+  const agents = useAgents();
+  const agentKey = resolveAgentKey(null, agents.data);
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!title.trim() || !instruction.trim()) return;
+    if (!title.trim() || !instruction.trim() || !agentKey) return;
     startTask.mutate(
-      { title, instruction, agent_external_key: TASK_AGENT_KEY },
+      { title, instruction, agent_external_key: agentKey },
       {
         onSuccess: () => {
           setTitle("");
@@ -49,7 +50,7 @@ export function StartTaskForm() {
         onChange={(event) => setInstruction(event.target.value)}
         required
       />
-      <Button type="submit" disabled={startTask.isPending}>
+      <Button type="submit" disabled={startTask.isPending || !agentKey}>
         {startTask.isPending ? "Submitting to Core…" : "Submit durable task"}
       </Button>
       {startTask.isError ? (

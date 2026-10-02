@@ -5,9 +5,14 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import type { RemoteExtension } from "@/lib/consumer-auth/core-host-client";
+import type {
+  RemoteExtension,
+  ConnectorSetupConsent,
+} from "@/lib/consumer-auth/core-host-client";
 import type { CatalogPlugin } from "./catalog";
 import { extensionKeys } from "@/features/extensions/queries";
+import { grantKeys } from "@/features/grants/queries";
+import { skillKeys } from "@/features/skills/queries";
 import {
   connectPlugin,
   getConnectedApps,
@@ -53,7 +58,13 @@ export function useConnectPlugin() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: pluginKeys.connect(),
-    mutationFn: async (plugin: CatalogPlugin) => {
+    mutationFn: async ({
+      plugin,
+      consent,
+    }: {
+      plugin: CatalogPlugin;
+      consent: ConnectorSetupConsent | null;
+    }) => {
       if (plugin.packageVersion === undefined || !plugin.packageDigest) {
         throw new Error(
           "Select a reviewed connector version from the catalog.",
@@ -63,6 +74,7 @@ export function useConnectPlugin() {
         plugin.id,
         plugin.packageVersion,
         plugin.packageDigest,
+        consent,
       );
     },
     onSuccess: (data: ConnectPluginResponse) => {
@@ -72,6 +84,8 @@ export function useConnectPlugin() {
       }
       queryClient.invalidateQueries({ queryKey: extensionKeys.all });
       queryClient.invalidateQueries({ queryKey: pluginKeys.connected() });
+      queryClient.invalidateQueries({ queryKey: grantKeys.all });
+      queryClient.invalidateQueries({ queryKey: skillKeys.all });
     },
     onError: () => {
       queryClient.invalidateQueries({ queryKey: extensionKeys.all });
@@ -95,7 +109,8 @@ export function useIsConnectingPlugin(pluginId: string) {
   });
   return states.some(
     (s) =>
-      (s.variables as CatalogPlugin | undefined)?.id === pluginId &&
+      (s.variables as { plugin: CatalogPlugin } | undefined)?.plugin.id ===
+        pluginId &&
       (s.status === "pending" ||
         (s.status === "success" && s.data?.status === "authorize")),
   );

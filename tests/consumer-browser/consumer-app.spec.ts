@@ -76,7 +76,7 @@ test("plugin library keeps registration and skills reachable", async ({
   await expect(
     page.getByRole("heading", { name: "Apps", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Personal" }).click();
+  await page.getByRole("button", { name: "Personal", exact: true }).click();
   await page.getByRole("button", { name: "Add server" }).click();
   await expect(
     page.getByRole("form", { name: "Add MCP server" }),
@@ -93,7 +93,7 @@ test("plugin library keeps registration and skills reachable", async ({
   ).toBeVisible();
 });
 
-test("manifest-only connector installs and returns from OAuth to agent access", async ({
+test("reviewed connector preserves chosen assistant access through OAuth", async ({
   page,
 }) => {
   await signIn(page);
@@ -104,11 +104,22 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
   await card
     .getByRole("button", { name: "Connect Team Notes", exact: true })
     .click();
+  const setup = page.getByRole("region", { name: "Assistant access" });
+  await expect(setup.getByRole("combobox")).toHaveValue("general");
+  await expect(
+    setup.getByRole("checkbox", { name: "Read notes", exact: true }),
+  ).toBeChecked();
+  await setup
+    .getByRole("button", {
+      name: "Connect and enable for Personal Assistant",
+      exact: true,
+    })
+    .click();
   await expect(
     page.getByText("Team Notes account linked", { exact: true }),
   ).toBeVisible({ timeout: 30_000 });
   await expect(
-    page.getByText(/Select an agent and grant the reviewed/),
+    page.getByText(/Setup completed with your chosen assistant access/),
   ).toBeVisible();
   await expect(page.getByTestId("connected-badge-team-notes")).toBeVisible();
   await expect(
@@ -116,18 +127,40 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
   ).toBeVisible();
 });
 
-test("a default skill installs for the selected agent and is available in conversation", async ({ page }) => {
+test("a default skill installs for the selected agent and is available in conversation", async ({
+  page,
+}) => {
   await signIn(page);
   await page.goto("/app/apps");
   await page.getByRole("button", { name: "Skills", exact: true }).click();
-  const skill = page.getByRole("article", { name: "Summarize and extract actions" });
+  const skill = page.getByRole("article", {
+    name: "Summarize and extract actions",
+  });
+  // Wait for the version response, including a cold Next.js route compile,
+  // before asserting the review UI. A failed response still fails this gate.
+  const versionResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+      "/api/account/skills/skill_summarize_actions/versions/1",
+  );
   await skill.getByRole("button", { name: "Review and install" }).click();
-  await expect(page.getByRole("heading", { name: "Review Summarize and extract actions v1" })).toBeVisible();
+  expect((await versionResponse).ok()).toBeTruthy();
+  await expect(
+    page.getByRole("heading", {
+      name: "Review Summarize and extract actions v1",
+    }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Install and enable v1" }).click();
-  await expect(page.getByText(/Summarize and extract actions is installed and available/)).toBeVisible();
+  await expect(
+    page.getByText(/Summarize and extract actions is installed and available/),
+  ).toBeVisible();
   await page.getByLabel(/^Ask /).fill("Summarize my notes");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByText("I can use Summarize and extract actions. Paste the text to summarize.")).toBeVisible();
+  await expect(
+    page.getByText(
+      "I can use Summarize and extract actions. Paste the text to summarize.",
+    ),
+  ).toBeVisible();
 });
 
 test("connected accounts offer only what each connection allows", async ({
@@ -152,4 +185,104 @@ test("connected accounts offer only what each connection allows", async ({
   // Old bookmarks land on Apps & skills.
   await page.goto("/app/journeys");
   await expect(page).toHaveURL(/\/app\/apps$/);
+});
+
+test("create, edit and archive a specialist without changing the default", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page.getByLabel("Assistant name").fill("Engineering");
+  await page
+    .getByLabel("Instructions", { exact: true })
+    .fill("Review code and cite files.");
+  await page
+    .getByRole("button", { name: "Create assistant", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Engineering", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Engineering", exact: true }).click();
+  await expect(
+    page.getByLabel("Ask Engineering", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Engineering", exact: true })
+    .click();
+  await page.getByLabel("Assistant name").fill("Code Reviewer");
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Code Reviewer", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Code Reviewer", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Archive assistant", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Code Reviewer", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /Personal Assistant · Default/ }),
+  ).toBeVisible();
+});
+
+test("inspect, clear and disable memory separately for an assistant", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/apps");
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Personal Assistant", exact: true })
+    .click();
+  const memory = page.getByRole("region", {
+    name: "Personal Assistant memory",
+  });
+  await expect(
+    memory.getByText("Private assistant note", { exact: true }),
+  ).toBeVisible();
+  await memory
+    .getByRole("button", { name: "Clear memory", exact: true })
+    .click();
+  await memory
+    .getByRole("button", { name: "Confirm clear memory", exact: true })
+    .click();
+  await expect(
+    memory.getByText("No retained memory.", { exact: true }),
+  ).toBeVisible();
+  await memory.getByLabel("Retain memory for this assistant").uncheck();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).not.toBeChecked();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).toBeEnabled();
+  await page.reload();
+  await page.getByRole("button", { name: "Manage assistants" }).first().click();
+  await page
+    .getByRole("button", { name: "Edit Personal Assistant", exact: true })
+    .click();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).not.toBeChecked();
+  await memory.getByLabel("Retain memory for this assistant").check();
+  await expect(
+    memory.getByLabel("Retain memory for this assistant"),
+  ).toBeEnabled();
+  await expect(
+    memory.getByText("No retained memory.", { exact: true }),
+  ).toBeVisible();
+  const rejected = await page.request.post(
+    "/api/account/agents/general/memory",
+    {
+      data: { operation: "clear" },
+      headers: { Origin: "https://foreign.example" },
+    },
+  );
+  expect(rejected.status()).toBe(403);
 });
