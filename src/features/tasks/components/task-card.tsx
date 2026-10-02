@@ -1,5 +1,6 @@
 "use client";
 
+import { TaskConsentRequest } from "@/features/delegation/components/task-consent-request";
 import { useState } from "react";
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -13,8 +14,12 @@ export function TaskCard({
   task,
   isFetching,
   onRefresh,
+  assistantName,
+  lineage,
 }: {
   task: DurableTask;
+  assistantName: string;
+  lineage: string;
   isFetching: boolean;
   onRefresh: () => void;
 }) {
@@ -23,12 +28,16 @@ export function TaskCard({
   const [reply, setReply] = useState("");
 
   const failure = cancel.error ?? resume.error;
+  const needsDelegationConsent =
+    task.state === "waiting" &&
+    task.result.checkpoint?.code === "delegation_consent_required" &&
+    !!task.result.checkpoint.delegation_request;
 
   return (
     <ItemCard
       testId={`task-${task.id}`}
       title={task.title}
-      subtitle={task.result.summary ?? `Run ${task.run_id}`}
+      subtitle={task.result.summary ?? "Saved task"}
       badges={<Tag label={`Task status: ${task.state}`}>{task.state}</Tag>}
       actions={
         <>
@@ -45,7 +54,9 @@ export function TaskCard({
             />
             {isFetching ? "Checking…" : "Refresh status"}
           </Button>
-          {task.state === "waiting" && task.wait_reason !== "budget" ? (
+          {task.state === "waiting" &&
+          task.wait_reason !== "budget" &&
+          !needsDelegationConsent ? (
             <Button
               variant="secondary"
               size="sm"
@@ -80,14 +91,16 @@ export function TaskCard({
       }
       footer={
         <span>
-          Assistant: {task.agent_external_key || "None"}
+          {lineage} · Assistant: {assistantName}
           {task.instruction_version !== null
             ? ` · instructions v${task.instruction_version}`
             : ""}
         </span>
       }
     >
-      {task.state === "waiting" && task.wait_reason === "clarification" ? (
+      {task.state === "waiting" &&
+      task.wait_reason === "clarification" &&
+      !needsDelegationConsent ? (
         <label>
           Answer this assistant
           <textarea
@@ -98,9 +111,15 @@ export function TaskCard({
           />
         </label>
       ) : null}
+      {needsDelegationConsent ? <TaskConsentRequest task={task} /> : null}
       {task.wait_reason ? (
         <Callout tone="warning" title="Waiting">
-          <p>{task.result.checkpoint?.question ?? task.wait_reason}</p>
+          <p>
+            {task.result.checkpoint?.question ??
+              (task.wait_reason === "specialist"
+                ? "Waiting for the specialist’s relevant result."
+                : task.wait_reason)}
+          </p>
           {task.result.checkpoint?.proposal_id ? (
             <p>Review the exact action in Approvals before continuing.</p>
           ) : null}

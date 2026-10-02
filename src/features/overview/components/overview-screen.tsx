@@ -1,5 +1,6 @@
 "use client";
 
+import { PersonalAssistantConversationPanel } from "@/features/conversations/components/conversation-panel";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
@@ -21,6 +22,7 @@ export function OverviewScreen() {
         title={`Welcome${account.name ? `, ${account.name}` : ""}.`}
         description={account.email}
       />
+      <PersonalAssistantConversationPanel />
       <section aria-labelledby="overview-areas" className="space-y-3">
         <h2 id="overview-areas" className="text-sm font-medium text-mist">
           Your account
