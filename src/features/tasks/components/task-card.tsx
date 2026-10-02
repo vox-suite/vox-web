@@ -1,5 +1,6 @@
 "use client";
 
+import { TaskConsentRequest } from "@/features/delegation/components/task-consent-request";
 import { useState } from "react";
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -27,6 +28,10 @@ export function TaskCard({
   const [reply, setReply] = useState("");
 
   const failure = cancel.error ?? resume.error;
+  const needsDelegationConsent =
+    task.state === "waiting" &&
+    task.result.checkpoint?.code === "delegation_consent_required" &&
+    !!task.result.checkpoint.delegation_request;
 
   return (
     <ItemCard
@@ -49,7 +54,9 @@ export function TaskCard({
             />
             {isFetching ? "Checking…" : "Refresh status"}
           </Button>
-          {task.state === "waiting" && task.wait_reason !== "budget" ? (
+          {task.state === "waiting" &&
+          task.wait_reason !== "budget" &&
+          !needsDelegationConsent ? (
             <Button
               variant="secondary"
               size="sm"
@@ -91,7 +98,9 @@ export function TaskCard({
         </span>
       }
     >
-      {task.state === "waiting" && task.wait_reason === "clarification" ? (
+      {task.state === "waiting" &&
+      task.wait_reason === "clarification" &&
+      !needsDelegationConsent ? (
         <label>
           Answer this assistant
           <textarea
@@ -102,6 +111,7 @@ export function TaskCard({
           />
         </label>
       ) : null}
+      {needsDelegationConsent ? <TaskConsentRequest task={task} /> : null}
       {task.wait_reason ? (
         <Callout tone="warning" title="Waiting">
           <p>

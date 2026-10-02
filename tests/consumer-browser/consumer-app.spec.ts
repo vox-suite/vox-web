@@ -619,3 +619,84 @@ test("specialist lineage is visible and Stop all stops future parent and child w
     "Completed actions have not been undone.",
   );
 });
+
+test("a persisted specialist consent request binds permission and continuation to the same paused task", async ({
+  page,
+}) => {
+  await signIn(page);
+  const response = await page.request.post("/api/account/tasks", {
+    headers: { Origin: "http://127.0.0.1:3200" },
+    data: {
+      title: "Arrange a meeting",
+      instruction: "Ask Concierge to check my calendar",
+      agent_external_key: "general",
+    },
+  });
+  const task = (await response.json()).task;
+  await page.request.post(
+    `http://127.0.0.1:3201/__fixture/tasks/${task.id}/state`,
+    {
+      data: {
+        state: "waiting",
+        wait_reason: "clarification",
+        result: {
+          state: "waiting",
+          reason: "clarification",
+          checkpoint: {
+            code: "delegation_consent_required",
+            question: "Review the specialist's account access.",
+            delegation_request: {
+              specialist_agent_key: "concierge",
+              brief: "Check availability for the requested meeting.",
+              scope: {
+                capabilities: [
+                  {
+                    connection_id: "aaaaaaaa-1111-4111-8111-111111111111",
+                    capability_external_key: "calendar.events.write",
+                  },
+                ],
+              },
+              permission_id: null,
+            },
+          },
+        },
+      },
+    },
+  );
+  await page.goto("/app/tasks");
+  const card = page.getByTestId(`task-${task.id}`);
+  await expect(card).toContainText(
+    "Personal Assistant wants help from Concierge.",
+  );
+  await expect(card).toContainText("Once for: Arrange a meeting");
+  await expect(card.getByLabel("Task for one-time permission")).toHaveCount(0);
+  await expect(
+    card.getByLabel(
+      "Create calendar events · Google Calendar · asha.raman@example.test",
+      { exact: true },
+    ),
+  ).toBeChecked();
+  await expect(
+    card.getByLabel("Answer for task: Arrange a meeting"),
+  ).toHaveCount(0);
+  const permission = page.waitForRequest(
+    (request) =>
+      request.url().endsWith("/api/account/delegation") &&
+      request.method() === "POST",
+  );
+  const continued = page.waitForRequest(
+    (request) =>
+      request.url().endsWith(`/api/account/tasks/${task.id}/resume`) &&
+      request.method() === "POST",
+  );
+  await card
+    .getByRole("button", { name: "Allow and continue task", exact: true })
+    .click();
+  expect((await permission).postDataJSON().parent_run_id).toBe(task.run_id);
+  expect((await continued).postDataJSON()).toEqual({
+    reply: "Continue with the specialist permission I saved.",
+  });
+  await expect(
+    card.getByRole("button", { name: "Allow and continue task", exact: true }),
+  ).toHaveCount(0);
+});

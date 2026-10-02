@@ -144,7 +144,17 @@ export type DurableTask = {
     summary?: string;
     reason?: TaskWaitReason;
     code?: string;
-    checkpoint?: { code?: string; question?: string; proposal_id?: string };
+    checkpoint?: {
+      code?: string;
+      question?: string;
+      proposal_id?: string;
+      delegation_request?: {
+        specialist_agent_key: string;
+        brief: string;
+        scope: { capabilities: DelegationCapability[] };
+        permission_id: string | null;
+      };
+    };
   };
 };
 export type DurableTaskPage = {
@@ -689,7 +699,7 @@ export class VoxCoreHostClient {
     agentKey: string,
     conversationId: string,
     text: string,
-  ): Promise<{ conversation_id: string; text: string }> {
+  ): Promise<{ conversation_id: string; text: string; task?: DurableTask }> {
     return this.signedPost("/v1/conversations/respond", accountId, {
       host_context: {
         host_user_id: `vox-account:${accountId}`,

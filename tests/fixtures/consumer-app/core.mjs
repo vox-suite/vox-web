@@ -2261,6 +2261,7 @@ export function createCoreFixture() {
           if (task) {
             task.state = body.state ?? task.state;
             task.wait_reason = body.wait_reason ?? null;
+            if (body.result) task.result = body.result;
             if (body.parent_task_id) {
               const parent = user.tasks.find(
                 (candidate) => candidate.id === body.parent_task_id,

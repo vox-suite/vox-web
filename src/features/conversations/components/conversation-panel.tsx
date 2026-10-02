@@ -5,6 +5,8 @@ import { useSelectedAgent } from "@/features/agents/selection";
 import { Button, TextArea } from "@/components/ui";
 import { Panel, Callout } from "@/components/app";
 import { apiRequest, errorMessage } from "@/lib/api/http";
+import { TaskConsentRequest } from "@/features/delegation/components/task-consent-request";
+import type { DurableTask } from "@/lib/consumer-auth/core-host-client";
 type Message = { role: "user" | "assistant"; text: string };
 function Conversation({
   agentKey,
@@ -18,6 +20,7 @@ function Conversation({
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
+  const [task, setTask] = useState<DurableTask | null>(null);
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (pending || !text.trim()) return;
@@ -27,7 +30,7 @@ function Conversation({
     setMessages((current) => [...current, { role: "user", text: message }]);
     setText("");
     try {
-      const response = await apiRequest<{ text: string }>(
+      const response = await apiRequest<{ text: string; task?: DurableTask }>(
         "/api/account/conversations",
         {
           method: "POST",
@@ -39,6 +42,7 @@ function Conversation({
         ...current,
         { role: "assistant", text: response.text },
       ]);
+      if (response.task) setTask(response.task);
     } catch (error) {
       setFailure(error);
     } finally {
@@ -63,6 +67,19 @@ function Conversation({
           </div>
         ))}
       </div>
+      {task ? (
+        <div className="rounded-md border border-border-edge p-3">
+          <p className="mb-2 text-sm">
+            {task.title} · {task.state}
+          </p>
+          {task.result.checkpoint?.code === "delegation_consent_required" ? (
+            <TaskConsentRequest key={task.id} task={task} />
+          ) : null}
+          <a className="text-sm underline" href="/app/tasks">
+            View saved task and current status
+          </a>
+        </div>
+      ) : null}
       <form onSubmit={submit} className="space-y-3">
         <TextArea
           id="library-message"

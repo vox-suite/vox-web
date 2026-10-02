@@ -8,6 +8,7 @@ import { errorMessage } from "@/lib/api/http";
 import type {
   DurableTask,
   DelegationPermission,
+  DelegationCapability,
 } from "@/lib/consumer-auth/core-host-client";
 import { isTaskTerminal } from "@/features/tasks/api";
 import {
@@ -113,20 +114,32 @@ function PermissionCard({ permission }: { permission: DelegationPermission }) {
     </section>
   );
 }
-function PermissionForm({
+export function DelegationConsentForm({
   requester,
   specialist,
   tasks,
+  boundTask,
+  requested,
+  onSaved,
+  continuing,
 }: {
   requester: string;
   specialist: string;
   tasks: DurableTask[];
+  boundTask?: DurableTask;
+  requested?: DelegationCapability[];
+  onSaved?: () => void;
+  continuing?: boolean;
 }) {
   const scopes = useScopes(requester, specialist);
   const create = useCreatePermission();
   const [mode, setMode] = useState<"once" | "remembered">("once");
-  const [taskId, setTaskId] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [taskId, setTaskId] = useState(boundTask?.id ?? "");
+  const [selected, setSelected] = useState<string[]>(
+    requested?.map(
+      (cap) => `${cap.connection_id}:${cap.capability_external_key}`,
+    ) ?? [],
+  );
   const [preferences, setPreferences] = useState<string[]>([]);
   const eligibleTasks = tasks.filter(
     (task) =>
@@ -135,7 +148,15 @@ function PermissionForm({
       !isTaskTerminal(task),
   );
   const task = eligibleTasks.find((task) => task.id === taskId);
-  const capabilities = scopes.data?.capabilities ?? [];
+  const capabilities = (scopes.data?.capabilities ?? []).filter(
+    (cap) =>
+      !requested ||
+      requested.some(
+        (reference) =>
+          reference.connection_id === cap.connection_id &&
+          reference.capability_external_key === cap.capability_external_key,
+      ),
+  );
   const selectedCapabilities = capabilities.filter((cap) =>
     selected.includes(`${cap.connection_id}:${cap.capability_external_key}`),
   );
@@ -175,6 +196,7 @@ function PermissionForm({
             onSuccess: () => {
               setSelected([]);
               setPreferences([]);
+              onSaved?.();
             },
           },
         );
@@ -201,7 +223,9 @@ function PermissionForm({
           Remember for future tasks
         </label>
       </fieldset>
-      {mode === "once" ? (
+      {mode === "once" && boundTask ? (
+        <p>Once for: {boundTask.title}</p>
+      ) : mode === "once" ? (
         <Select
           id="delegation-task"
           label="Task for one-time permission"
@@ -228,6 +252,7 @@ function PermissionForm({
               <input
                 type="checkbox"
                 checked={selected.includes(key)}
+                disabled={!selected.includes(key) && selected.length >= 32}
                 onChange={() => toggle(key, selected, setSelected)}
               />{" "}
               {cap.tool_name} · {cap.integration_name} ·{" "}
@@ -267,11 +292,18 @@ function PermissionForm({
         type="submit"
         disabled={
           create.isPending ||
+          continuing ||
           !selectedCapabilities.length ||
           (mode === "once" && !task)
         }
       >
-        {create.isPending ? "Saving…" : "Allow specialist work"}
+        {create.isPending
+          ? "Saving…"
+          : continuing
+            ? "Continuing…"
+            : boundTask
+              ? "Allow and continue task"
+              : "Allow specialist work"}
       </Button>
       {create.isSuccess ? (
         <Callout live="polite" title="Specialist permission saved">
@@ -336,7 +368,7 @@ export function DelegationPanel({ tasks }: { tasks: DurableTask[] }) {
             ))}
         </Select>
         {selectedSpecialist ? (
-          <PermissionForm
+          <DelegationConsentForm
             key={`${requester}:${selectedSpecialist}`}
             requester={requester}
             specialist={selectedSpecialist}
