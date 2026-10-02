@@ -12,7 +12,7 @@ import {
 
 /** Core serializes package installation across hosts; this route holds no process-local lock. */
 export async function POST(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   let sameOrigin = false;

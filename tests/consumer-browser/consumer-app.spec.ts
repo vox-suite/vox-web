@@ -27,6 +27,59 @@ test("signed-out visitors are sent to sign-in", async ({ page }) => {
   await expect(page).toHaveURL(/\/app\/sign-in/);
 });
 
+test("email verification, reload and sign-out use the Supabase session boundary", async ({
+  page,
+}) => {
+  const email = `otp${Date.now()}@example.test`;
+  await page.goto("/app/sign-in");
+  await page.getByLabel("Email address").fill(email);
+  await page.getByRole("button", { name: "Continue with email" }).click();
+  await page.getByLabel("Verification code").fill("000000");
+  await page.getByRole("button", { name: "Verify and sign in" }).click();
+  await expect(
+    page.getByText(
+      "That code is invalid or expired. Request a new code and try again.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+  await page.getByLabel("Verification code").fill("123456");
+  await page.getByRole("button", { name: "Verify and sign in" }).click();
+  await expect(page).toHaveURL(/\/app$/);
+  await page.goto("/app/account");
+  await expect(
+    page.getByRole("main").getByText(email, { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Email recovery is enabled")).toHaveCount(0);
+  await page.reload();
+  expect((await page.request.get("/api/account/agents")).status()).toBe(200);
+  await page.getByRole("button", { name: "Sign out everywhere" }).click();
+  await expect(page).toHaveURL(/\/app\/sign-in$/);
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+});
+
+test("verified but unpinned sessions fail closed and identity joining stays unavailable", async ({
+  page,
+}) => {
+  const cookies = playwrightCookies({
+    email: `unpinned${Date.now()}@example.test`,
+    includePin: false,
+  }) as Parameters<BrowserContext["addCookies"]>[0];
+  await page.context().addCookies(cookies);
+  expect((await page.request.get("/api/account/agents")).status()).toBe(401);
+  await page.goto("/app/account");
+  await expect(page).toHaveURL(/\/app\/sign-in/);
+  await page.context().clearCookies();
+  await signIn(page);
+  await page.goto("/app/account");
+  await expect(
+    page.getByText("Identity linking is not available yet", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Link a verified Google identity" }),
+  ).toHaveCount(0);
+});
+
 test("every area loads for a signed-in user", async ({ page }) => {
   const email = await signIn(page);
   await page.goto("/app");
@@ -62,6 +115,87 @@ test("start a durable task", async ({ page }) => {
   await expect(
     page.getByRole("article", { name: "Plan the week" }),
   ).toBeVisible();
+});
+
+test("saved tasks survive reload and stop rejects foreign-origin requests", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/app/tasks");
+  await page.getByLabel("Task title").fill("Retain this task");
+  await page
+    .getByLabel("Instruction")
+    .fill("Find choices, then ask me to book");
+  await page.getByRole("button", { name: "Submit durable task" }).click();
+  const card = page.getByRole("article", { name: "Retain this task" });
+  await expect(card).toBeVisible();
+  await page.reload();
+  await expect(card).toBeVisible();
+  const id = (await card.getAttribute("data-testid"))!.slice(5);
+  const denied = await page.request.post(`/api/account/tasks/${id}/cancel`, {
+    headers: { origin: "https://foreign.example" },
+  });
+  expect(denied.status()).toBe(403);
+  await card
+    .getByRole("button", { name: "Cancel task: Retain this task" })
+    .click();
+  await expect(
+    card.getByText(
+      "Future work stopped. Completed actions have not been undone.",
+    ),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    card.getByText(
+      "Future work stopped. Completed actions have not been undone.",
+    ),
+  ).toBeVisible();
+  const approvalTask = page.getByRole("article", {
+    name: "Plan a Goa weekend",
+  });
+  await approvalTask
+    .getByRole("button", { name: "Check and continue" })
+    .click();
+  await expect(
+    approvalTask.getByText(
+      "Task cannot continue yet. Resolve its current wait and refresh status.",
+    ),
+  ).toBeVisible();
+});
+
+test("clarification answers stay bound to the waiting task", async ({
+  page,
+  request,
+}) => {
+  await signIn(page);
+  await page.goto("/app/tasks");
+  await page.getByLabel("Task title").fill("Clarify trip");
+  await page.getByLabel("Instruction").fill("Suggest trip options");
+  await page.getByRole("button", { name: "Submit durable task" }).click();
+  const card = page.getByRole("article", { name: "Clarify trip" });
+  await expect(card).toBeVisible();
+  const id = (await card.getAttribute("data-testid"))!.slice(5);
+  await request.post(`http://127.0.0.1:3201/__fixture/tasks/${id}/state`, {
+    data: { state: "waiting", wait_reason: "clarification", pinned: true },
+  });
+  await card
+    .getByRole("button", {
+      name: "Check authoritative status for task: Clarify trip",
+    })
+    .click();
+  const answer = card.getByLabel("Answer for task: Clarify trip");
+  await expect(answer).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "Check and continue" }),
+  ).toBeDisabled();
+  const tooLong = await page.request.post(`/api/account/tasks/${id}/resume`, {
+    headers: { origin: "http://127.0.0.1:3200" },
+    data: { reply: "😀".repeat(2049) },
+  });
+  expect(tooLong.status()).toBe(400);
+  await answer.fill("A weekend in October");
+  await card.getByRole("button", { name: "Check and continue" }).click();
+  await expect(answer).toHaveCount(0);
 });
 
 test("plugin library keeps registration and skills reachable", async ({

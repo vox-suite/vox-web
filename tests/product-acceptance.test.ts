@@ -18,9 +18,6 @@ import {
   getAccessibleStatusIndicator,
 } from "../src/lib/global-formatting";
 
-const privateKey =
-  "MC4CAQAwBQYDK2VwBCIEIBERERERERERERERERERERERERERERERERERERERERER";
-
 const testConfig = {
   baseUrl: "https://core.vox.test",
   hostCredential: {
@@ -28,12 +25,6 @@ const testConfig = {
     audience: "vox-host:test:vox-web",
     secret: "host-secret-fixture",
   },
-  identityCredential: {
-    issuer: "https://app.vox.test",
-    audience: "vox-core:test",
-    privateKeyPkcs8Base64: privateKey,
-  },
-  identityAdapterKey: "vox-web-primary",
 };
 
 // ==============================================================================

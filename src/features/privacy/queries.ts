@@ -6,8 +6,7 @@ export function useDeleteTaskHistory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteTaskHistory,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: taskKeys.details() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: taskKeys.all }),
   });
 }
 

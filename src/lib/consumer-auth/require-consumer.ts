@@ -11,7 +11,7 @@ import { currentConsumer } from "./session";
 export async function requireConsumerPage() {
   const requestHeaders = await headers();
   const host = requestHeaders.get("host");
-  const account = await currentConsumer(requestHeaders);
+  const account = await currentConsumer();
   if (!account) redirect(`${consumerHref(host, "/sign-in")}?reason=session`);
   return { account, basePath: consumerBasePath(host) };
 }

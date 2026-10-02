@@ -522,20 +522,20 @@ function seedUser(hostUserId) {
 
   const tasks = [
     {
-      id: "task_seed_weekend_plan",
+      id: "11111111-1111-4111-8111-111111111111",
       title: "Plan a Goa weekend",
       instruction:
         "Find two refundable stays in North Goa for 10-12 October under Rs 9,000 a night.",
       agent_external_key: "concierge",
-      state: "waiting_for_approval",
+      state: "waiting",
       run_id: "run_seed_weekend_plan",
-      wait_reason: "Approve the proposed stay at Tamarind Courtyard Stay.",
+      wait_reason: "approval",
       created_at: t(-3 * HOUR),
       updated_at: t(-2 * HOUR),
       pinned: true,
     },
     {
-      id: "task_seed_calendar_digest",
+      id: "22222222-2222-4222-8222-222222222222",
       title: "Summarise next week",
       instruction: "Summarise my calendar for next week and flag conflicts.",
       agent_external_key: "general",
@@ -681,6 +681,18 @@ const skillListing = (s) => ({
 const publicTask = (task) => {
   const copy = { ...task };
   delete copy.pinned;
+  delete copy.instruction;
+  delete copy.created_at;
+  delete copy.updated_at;
+  copy.instruction_version = task.instruction_version ?? 1;
+  copy.result =
+    task.result ??
+    (task.state === "completed"
+      ? {
+          state: "completed",
+          summary: "Task finished in the isolated fixture.",
+        }
+      : {});
   return copy;
 };
 
@@ -706,15 +718,15 @@ function advanceTask(task) {
   if (age >= 2_000) state = "running";
   if (age >= 8_000) {
     if (needsApproval) {
-      state = "waiting_for_approval";
-      wait = "This task needs your explicit approval before Vox acts.";
+      state = "waiting";
+      wait = "approval";
     } else state = "completed";
   }
   if (state !== task.state) {
     task.state = state;
     task.wait_reason = wait;
     task.updated_at = iso(Date.now());
-    if (state === "waiting_for_approval") task.pinned = true;
+    if (state === "waiting") task.pinned = true;
   }
   return task;
 }
@@ -1551,7 +1563,7 @@ export function createCoreFixture() {
         }
         const now = iso(Date.now());
         const created = {
-          id: `task_${randomUUID().slice(0, 12)}`,
+          id: randomUUID(),
           title: task.title,
           instruction: task.instruction,
           agent_external_key: task.agent_external_key ?? null,
@@ -1563,6 +1575,47 @@ export function createCoreFixture() {
         };
         user.tasks.push(created);
         return publicTask(created);
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/durable-tasks\/query$/,
+      (user, _m, body) => {
+        const limit = body.limit ?? 20;
+        const tasks = [...user.tasks]
+          .sort((a, b) => b.id.localeCompare(a.id))
+          .filter((task) => !body.cursor || task.id < body.cursor);
+        const selected = tasks.slice(0, limit);
+        return {
+          tasks: selected.map((task) => publicTask(advanceTask(task))),
+          next_cursor: tasks.length > limit ? selected.at(-1).id : null,
+        };
+      },
+    ],
+    [
+      "POST",
+      /^\/v1\/durable-tasks\/([^/]+)\/resume$/,
+      (user, [, id], body) => {
+        const task = find(user.tasks, (x) => x.id === id, "Task");
+        if (
+          task.state !== "waiting" ||
+          ["approval", "budget"].includes(task.wait_reason)
+        )
+          fail(409, "task_waiting", "Resolve the current wait first");
+        if (
+          task.wait_reason === "clarification"
+            ? typeof body.reply !== "string" ||
+              !body.reply.trim() ||
+              Buffer.byteLength(body.reply) > 8192
+            : body.reply !== undefined
+        )
+          fail(400, "invalid_reply", "Answer the current question only");
+        task.state = "queued";
+        task.wait_reason = null;
+        task.result = {};
+        task.pinned = false;
+        task.created_at = iso(Date.now());
+        return publicTask(task);
       },
     ],
     [
@@ -1655,7 +1708,7 @@ export function createCoreFixture() {
         proposal.state = "approved";
         proposal.approval_id = `appr_${randomUUID().slice(0, 12)}`;
         const task = user.tasks.find((x) => x.run_id === proposal.task_run_id);
-        if (task && task.state === "waiting_for_approval") {
+        if (task && task.state === "waiting") {
           task.state = "running";
           task.wait_reason = null;
           task.updated_at = iso(Date.now());

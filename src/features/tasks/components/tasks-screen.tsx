@@ -1,12 +1,15 @@
 "use client";
 
-import { EmptyMessage, PageHeader, Panel } from "@/components/app";
-import { useStartedTaskIds } from "../queries";
+import { Button } from "@/components/ui";
+import { errorMessage } from "@/lib/api/http";
+import { Callout, EmptyMessage, PageHeader, Panel } from "@/components/app";
+import { useTasks } from "../queries";
 import { StartTaskForm } from "./start-task-form";
 import { TaskCard } from "./task-card";
 
 export function TasksScreen() {
-  const taskIds = useStartedTaskIds();
+  const query = useTasks();
+  const tasks = query.data?.pages.flatMap((page) => page.tasks) ?? [];
 
   return (
     <div className="space-y-6">
@@ -19,21 +22,49 @@ export function TasksScreen() {
           <StartTaskForm />
         </Panel>
         <Panel
-          title="Tasks in this session"
-          description="Refresh a task to read its authoritative state from Core."
+          title="Saved tasks"
+          description="Read current state from Core, including tasks started before this browser opened."
           className="xl:order-1"
         >
-          {taskIds.length === 0 ? (
-            <EmptyMessage title="No active tasks">
-              Submit an instruction to begin a durable execution.
+          <Button
+            variant="secondary"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
+            {query.isFetching ? "Checking…" : "Refresh tasks"}
+          </Button>
+          {query.error ? (
+            <Callout tone="danger" live="assertive">
+              <p>{errorMessage(query.error)}</p>
+            </Callout>
+          ) : null}
+          {query.isPending ? (
+            <p>Loading saved tasks…</p>
+          ) : !query.error && tasks.length === 0 ? (
+            <EmptyMessage title="No saved tasks">
+              Submit an instruction to begin a task.
             </EmptyMessage>
           ) : (
             <div className="space-y-3">
-              {taskIds.map((id) => (
-                <TaskCard key={id} taskId={id} />
+              {tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  isFetching={query.isFetching}
+                  onRefresh={() => void query.refetch()}
+                />
               ))}
             </div>
           )}
+          {query.hasNextPage ? (
+            <Button
+              variant="secondary"
+              disabled={query.isFetchingNextPage}
+              onClick={() => void query.fetchNextPage()}
+            >
+              {query.isFetchingNextPage ? "Loading…" : "Load more tasks"}
+            </Button>
+          ) : null}
         </Panel>
       </div>
     </div>

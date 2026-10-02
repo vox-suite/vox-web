@@ -39,7 +39,7 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/features/<domain>`: consumer features. `api.ts` holds typed calls to `/api/account/*`, `queries.ts` holds TanStack Query keys, queries and mutations, and `components/` holds the UI.
 - `src/components/app`, `src/components/app-shell`: consumer app primitives and the responsive sidebar shell. They are kept separate from `src/components/ui`, which the public website also uses.
 - `src/lib/api/http.ts`, `src/lib/query`: the single HTTP client (error normalization) and the QueryClient defaults (a 401 returns the user to sign-in).
-- `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
+- `src/lib/consumer-auth`: the verified Supabase consumer session and signed Core host boundary.
 - `src/lib/admin-modules.ts`: management navigation registry.
 - `src/lib/auth.ts`: Google authentication and per-request superuser authorization.
 - `src/lib/core-admin.ts`: server-only connection to the protected Core admin API.

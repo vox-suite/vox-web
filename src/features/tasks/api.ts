@@ -1,6 +1,7 @@
 import { apiRequest } from "@/lib/api/http";
 import type {
   DurableTask,
+  DurableTaskPage,
   StartTaskRequest,
 } from "@/lib/consumer-auth/core-host-client";
 
@@ -12,6 +13,14 @@ export async function startTask(input: StartTaskRequest) {
   return task;
 }
 
+export function listTasks(cursor?: string, signal?: AbortSignal) {
+  return apiRequest<DurableTaskPage>("/api/account/tasks", {
+    query: { cursor, limit: 20 },
+    signal,
+    fallbackError: "Failed to fetch saved tasks",
+  });
+}
+
 export async function getTask(taskId: string, signal?: AbortSignal) {
   const { task } = await apiRequest<{ task: DurableTask }>(
     "/api/account/tasks",
@@ -19,6 +28,24 @@ export async function getTask(taskId: string, signal?: AbortSignal) {
       query: { taskId },
       signal,
       fallbackError: "Failed to fetch authoritative task state",
+    },
+  );
+  return task;
+}
+
+export async function resumeTask({
+  taskId,
+  reply,
+}: {
+  taskId: string;
+  reply?: string;
+}) {
+  const { task } = await apiRequest<{ task: DurableTask }>(
+    `/api/account/tasks/${encodeURIComponent(taskId)}/resume`,
+    {
+      method: "POST",
+      body: reply === undefined ? undefined : { reply },
+      fallbackError: "Task cannot continue yet",
     },
   );
   return task;

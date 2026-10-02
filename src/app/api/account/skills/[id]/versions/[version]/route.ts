@@ -6,7 +6,7 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string; version: string }> },
 ) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();

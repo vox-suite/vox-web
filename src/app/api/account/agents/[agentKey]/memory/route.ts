@@ -9,7 +9,7 @@ async function handle(
   context: RouteContext,
   change: AgentMemoryChange,
 ) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();

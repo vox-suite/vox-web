@@ -98,7 +98,7 @@ The existing `playwright.config.ts` targets port 3100 and the older fixtures. Fo
 | Preferences        | `seat_preference`, `favourite_cuisines`, `reminder_channel`, and the sensitive, confirmed `allergies`                                                                                                                                                                  |
 | Skills             | `skill_morning_brief` curated, installed v2, enabled; `skill_trip_planner` curated, installed v2 with v3 available; `skill_private_grocery` private, available (not installed). The concierge agent has morning-brief turned off                                       |
 | Extensions         | `ext_notion_workspace` active, conformance passed, consented; `ext_splitwise_direct` quarantined, consent_required, conformance pending                                                                                                                                |
-| Tasks              | `task_seed_weekend_plan` waiting_for_approval; `task_seed_calendar_digest` completed. New tasks move from queued to running after 2 s, then to completed after 8 s. If the instruction mentions book, buy, pay or order, the task goes to waiting_for_approval instead |
+| Tasks              | Goa-weekend seed waiting for approval; calendar-digest seed completed. New tasks move from queued to running after 2 s, then to completed after 8 s. If the instruction mentions book, buy, pay or order, the task goes to waiting with reason approval instead |
 | Proposals          | `prop_seed_goa_stay` pending. Approval must echo the exact `details`, otherwise it returns 409                                                                                                                                                                         |
 | Connected accounts | 6 Uber trips                                                                                                                                                                                                                                              |
 
@@ -114,10 +114,6 @@ curl -X POST -d '{"state":"failed","wait_reason":null}' http://127.0.0.1:3201/__
 
 ## Limitations
 
-- **No Postgres.** `VOX_WEB_DATABASE_URL` points at `127.0.0.1:1`. The runtime constructs the `pg` Pool and Better Auth, but the pool connects lazily and no Core-backed `/api/account/*` route queries it. You will see one harmless log line at startup: `[Better Auth]: Could not validate the database schema`. These routes need the database and will fail:
-  - `/api/account/recovery/start` and `/api/account/recovery/confirm`
-  - `/api/account/auth/[...all]` (Better Auth)
-  - anything that calls `ConsumerAccountAuthority`
 - **Host assertions are not verified.** The mock Core only requires the `X-Vox-Host-Credential` header plus a `vox-account:` host user id. It does not check the HMAC signature or the federated proof.
 - **Uber reads need a grant.** Reads require the uber connection **and** a `uber.history` or `uber.history_lite` grant for the agent; `history_lite` drops the start city.
 - **Connection setup never completes.** Starting a connection (`POST /api/account/connections`) creates a `pending` connection with a fake authorization URL. The app's callback route returns 503 by design.

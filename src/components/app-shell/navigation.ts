@@ -88,7 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         path: "/account",
         label: "Account",
-        description: "Email recovery, linked identities, and sessions.",
+        description: "Linked identities and sessions.",
         icon: UserRound,
       },
     ],

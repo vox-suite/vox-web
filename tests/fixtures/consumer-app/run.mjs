@@ -12,7 +12,6 @@
 //                CONSUMER_FIXTURE_CORE_PORT, CONSUMER_FIXTURE_QUIET=1
 
 import { spawn } from "node:child_process";
-import { generateKeyPairSync } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startCore } from "./core.mjs";
@@ -34,38 +33,16 @@ const appOrigin = `http://127.0.0.1:${appPort}`;
 const supabaseUrl = `http://127.0.0.1:${authPort}`;
 const coreUrl = `http://127.0.0.1:${corePort}`;
 
-// Fresh Ed25519 identity key per run (config.ts requires a valid PKCS#8 key).
-const identityKey = generateKeyPairSync("ed25519")
-  .privateKey.export({ format: "der", type: "pkcs8" })
-  .toString("base64");
-
 export const fixtureEnv = {
   NEXT_TELEMETRY_DISABLED: "1",
   // Supabase (read by src/lib/supabase/{server,client}.ts)
   NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: FIXTURE_ANON_KEY,
-  // Consumer auth (src/lib/consumer-auth/config.ts)
-  VOX_CONSUMER_AUTH_ENABLED: "true",
-  VOX_IDENTITY_ISSUER: appOrigin,
-  // The pg Pool is constructed but only connects on first query. Core-backed
-  // /api/account routes never query it. Port 1 makes any accidental use fail
-  // fast (ECONNREFUSED) instead of hanging.
-  VOX_WEB_DATABASE_URL:
-    "postgresql://consumer_fixture:consumer_fixture@127.0.0.1:1/vox_web_consumer_fixture",
-  VOX_CONSUMER_AUTH_SECRET: "consumer-fixture-auth-secret-0123456789abcdef",
-  VOX_GOOGLE_CLIENT_ID: "consumer-fixture-google-client",
-  VOX_GOOGLE_CLIENT_SECRET: "consumer-fixture-google-secret",
-  VOX_AUTH_OTP_PEPPER: "consumer-fixture-otp-pepper-0123456789abcdef",
-  VOX_AUTH_SMTP_URL: "smtp://127.0.0.1:1",
-  VOX_AUTH_EMAIL_FROM: "Vox <hello@example.test>",
   VOX_CORE_URL: coreUrl,
   VOX_CONNECTED_APPS_REDIRECT_URI: `${appOrigin}/app/apps/oauth/callback`,
   VOX_HOST_CREDENTIAL_ID: "consumer-fixture-host-credential",
   VOX_HOST_AUDIENCE: "vox-host:fixture:vox-web",
   VOX_HOST_SECRET: "consumer-fixture-host-secret-0123456789abcdef",
-  VOX_IDENTITY_ADAPTER_KEY: "vox-web-consumer-fixture",
-  VOX_IDENTITY_AUDIENCE: "vox-core:fixture",
-  VOX_IDENTITY_SIGNING_PRIVATE_KEY: identityKey,
   // Keep the proxy rate limiter out of the way during UI work.
   RATE_LIMIT_MAX: "100000",
 };

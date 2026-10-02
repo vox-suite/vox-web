@@ -11,9 +11,6 @@ function get(obj: unknown, path: string): unknown {
     );
 }
 
-const privateKey =
-  "MC4CAQAwBQYDK2VwBCIEIBERERERERERERERERERERERERERERERERERERERERER";
-
 const testConfig = {
   baseUrl: "https://core.vox.test",
   hostCredential: {
@@ -21,12 +18,6 @@ const testConfig = {
     audience: "vox-host:test:vox-web",
     secret: "host-secret-fixture",
   },
-  identityCredential: {
-    issuer: "https://app.vox.test",
-    audience: "vox-core:test",
-    privateKeyPkcs8Base64: privateKey,
-  },
-  identityAdapterKey: "vox-web-primary",
 };
 
 test("listConnections posts signed host context and parses connection list", async () => {
@@ -243,7 +234,7 @@ test("durable task start, get, and cancel call Core endpoints", async () => {
         title: "Book dinner",
         instruction: "Table for 2",
         agent_external_key: "saathi",
-        state: "waiting_for_approval",
+        state: "waiting",
         run_id: "run-1",
         wait_reason: "User confirmation required for dinner booking",
         created_at: "2026-09-23T00:00:00Z",
@@ -268,7 +259,7 @@ test("durable task start, get, and cancel call Core endpoints", async () => {
     capturedGetUrl,
     "https://core.vox.test/v1/durable-tasks/task-999",
   );
-  assert.equal(polled.state, "waiting_for_approval");
+  assert.equal(polled.state, "waiting");
   assert.equal(
     polled.wait_reason,
     "User confirmation required for dinner booking",
@@ -358,4 +349,52 @@ test("action proposal creation and exact-match approval call Core endpoints", as
   assert.equal(approved.state, "approved");
   assert.equal(approved.approval_id, "appr-456");
   assert.deepEqual(get(capturedApproveBody, "details"), proposal.details);
+});
+
+test("saved task queries bind pagination to the signed account context", async () => {
+  let captured: { url: string; body: Record<string, unknown> } | undefined;
+  const client = new VoxCoreHostClient(testConfig, {
+    fetch: async (input, init) => {
+      captured = { url: String(input), body: JSON.parse(String(init?.body)) };
+      return Response.json({ tasks: [], next_cursor: null });
+    },
+    now: () => 1795622400,
+    nonce: () => "task-page-nonce",
+  });
+  assert.deepEqual(
+    await client.queryTasks("user-1", {
+      cursor: "11111111-1111-4111-8111-111111111111",
+      limit: 20,
+    }),
+    { tasks: [], next_cursor: null },
+  );
+  assert.equal(captured?.url, "https://core.vox.test/v1/durable-tasks/query");
+  assert.deepEqual(captured?.body, {
+    host_context: {
+      host_user_id: "vox-account:user-1",
+      organization_external_key: null,
+    },
+    cursor: "11111111-1111-4111-8111-111111111111",
+    limit: 20,
+  });
+});
+
+test("clarification resume signs the account and passes only the explicit reply", async () => {
+  let captured: Record<string, unknown> | undefined;
+  const client = new VoxCoreHostClient(testConfig, {
+    fetch: async (_input, init) => {
+      captured = JSON.parse(String(init?.body));
+      return Response.json({});
+    },
+    now: () => 1795622400,
+    nonce: () => "reply-nonce",
+  });
+  await client.resumeTask("user-1", "task-id", "October weekend");
+  assert.deepEqual(captured, {
+    host_context: {
+      host_user_id: "vox-account:user-1",
+      organization_external_key: null,
+    },
+    reply: "October weekend",
+  });
 });

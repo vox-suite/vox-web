@@ -3,8 +3,11 @@ import { currentConsumer } from "@/lib/consumer-auth/session";
 import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 import type { AgentMutation } from "@/lib/consumer-auth/core-host-client";
 
-export async function GET(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+export async function GET(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Supabase reads the request cookie store.
+  request: NextRequest,
+) {
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const core = getCoreHostClient();
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   let sameOrigin = false;

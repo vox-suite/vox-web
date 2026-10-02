@@ -4,7 +4,7 @@ import { getCoreHostClient } from "@/lib/consumer-auth/runtime";
 import { DELETION_DISCLOSURE } from "@/lib/consumer-auth/constants";
 
 export async function DELETE(request: NextRequest) {
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     return response;
   };
 
-  const account = await currentConsumer(request.headers);
+  const account = await currentConsumer();
   if (!account) {
     const login = new URL(consumerHref(host, "/"), canonical.origin);
     return NextResponse.redirect(login);
