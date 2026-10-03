@@ -40,6 +40,16 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 - `src/lib/consumer-auth`: the server-only consumer auth, Core host, account authority, email, and session boundary.
 - `src/proxy.ts`: consumer host routing, rate limiting and private/no-store response headers. It is not the authorization boundary.
 
+## Connect PlayStation
+
+Open [Vox Apps](https://app.voxagent.in/apps), sign in, and expand **Connected accounts and agent access → Connect PlayStation**. In local development, use `/app/apps`. The dedicated production host serves `/apps` without the `/app` prefix; logged-out users are redirected to `/sign-in`.
+
+Sign in to Sony using the link in the form, then open Sony's session page in the same browser and copy the `npsso` value into the protected Sony session token field. Keep the token private. Vox exchanges it with Sony and does not retain it. This is a community PSN integration for PS5 and PS4 activity.
+
+Enable capture to check new playtime once a day, or use **Refresh** to check sooner. The first refresh establishes a baseline; subsequent playtime increases appear as gaming spans. Sony reports cumulative playtime and last-played timestamps, so exact gaming session boundaries remain unknown. The panel also provides capture pause/resume and disconnect controls.
+
+Web authenticates each PlayStation request and forwards it to signed Core APIs. Core API and Worker must include the PlayStation migration and share `VOX_CREDENTIAL_KEY`; the browser never receives that key or stored Sony access/refresh credentials. Deploying Web alone does not activate backend capture. See [Core's setup contract](https://github.com/vox-suite/vox-core/blob/main/docs/playstation.md).
+
 ## Production activation
 
 See `docs/deployment.md` for exact Google callback, domain mapping and backend routing. This source change alone does not provision a domain or enable production sign-in.
