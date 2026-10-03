@@ -98,9 +98,9 @@ export function PlayStationLink() {
             checked={capture}
             onChange={(event) => setCapture(event.target.checked)}
           />
-          Capture new gaming activity automatically. The first sync records a
-          baseline; later changes appear as activity over an observation window.
-          Exact session times are unknown.
+          Capture new gaming activity once a day. Use Refresh to check sooner.
+          The first refresh records a baseline; later changes appear as activity
+          over an observation window. Exact session times are unknown.
         </label>
         <Button type="submit" disabled={link.isPending}>
           {link.isPending ? "Verifying account…" : "Connect PlayStation"}
@@ -168,10 +168,10 @@ export function PlayStationCapture({ connectionId }: { connectionId: string }) {
                 : "Paused",
           },
           {
-            label: "Last sync",
+            label: "Last refresh",
             value: status.data?.last_synced_at
               ? new Date(status.data.last_synced_at).toLocaleString()
-              : "Awaiting first sync",
+              : "Awaiting first refresh",
           },
           {
             label: "Games tracked",
@@ -205,7 +205,7 @@ export function PlayStationCapture({ connectionId }: { connectionId: string }) {
           }
           onClick={() => sync.mutate()}
         >
-          {sync.isPending ? "Syncing…" : "Sync now"}
+          {sync.isPending ? "Refreshing…" : "Refresh"}
         </Button>
       </div>
       {status.data?.failure_code ? (
