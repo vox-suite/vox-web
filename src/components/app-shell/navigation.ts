@@ -9,12 +9,9 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
-import { agentQueries } from "@/features/agents/queries";
 import { connectionQueries } from "@/features/connections/queries";
-import { extensionQueries } from "@/features/extensions/queries";
 import { preferenceQueries } from "@/features/preferences/queries";
 import { reminderQueries } from "@/features/reminders/queries";
-import { skillQueries } from "@/features/skills/queries";
 
 export type NavItem = {
   path: string;
@@ -66,15 +63,12 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         path: "/apps",
-        label: "Library",
+        label: "Connectors",
         description:
-          "Connected accounts, apps you added, agent access, and skills.",
+          "Connect accounts, capture activity, and manage agent access.",
         icon: Blocks,
         prefetch: (qc) => {
           void qc.prefetchQuery(connectionQueries.list());
-          void qc.prefetchQuery(extensionQueries.list());
-          void qc.prefetchQuery(agentQueries.selected());
-          void qc.prefetchQuery(skillQueries.list());
         },
       },
       {

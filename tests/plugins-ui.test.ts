@@ -5,12 +5,10 @@ import { connectionFor } from "../src/features/plugins/connection-state";
 import {
   PluginLogo,
   PluginCard,
-  InstalledPluginsDock,
   PluginInspectorModal,
   PluginCatalogGrid,
 } from "../src/features/plugins/components";
 import { AppsScreen } from "../src/features/apps/components/apps-screen";
-import { ExtensionsPanel } from "../src/features/extensions/components/extensions-panel";
 import type { RemoteExtension } from "../src/lib/consumer-auth/core-host-client";
 
 function extension(overrides: Partial<RemoteExtension>): RemoteExtension {
@@ -36,11 +34,9 @@ test("apps UI components are exported React components", () => {
   for (const component of [
     PluginLogo,
     PluginCard,
-    InstalledPluginsDock,
     PluginInspectorModal,
     PluginCatalogGrid,
     AppsScreen,
-    ExtensionsPanel,
   ]) {
     assert.equal(typeof component, "function");
   }

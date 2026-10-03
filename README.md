@@ -42,7 +42,7 @@ Browser tests start isolated servers on 3100 and 3101 with synthetic identities 
 
 ## Connect PlayStation
 
-Open [Vox Apps](https://app.voxagent.in/apps), sign in, and expand **Connected accounts and agent access → Connect PlayStation**. In local development, use `/app/apps`. The dedicated production host serves `/apps` without the `/app` prefix; logged-out users are redirected to `/sign-in`.
+Open [Vox Apps](https://app.voxagent.in/apps), sign in, and choose **Connectors → Connected accounts → Connect PlayStation**. In local development, use `/app/apps`. The dedicated production host serves `/apps` without the `/app` prefix; logged-out users are redirected to `/sign-in`.
 
 Sign in to Sony using the link in the form, then open Sony's session page in the same browser and copy the `npsso` value into the protected Sony session token field. Keep the token private. Vox exchanges it with Sony and does not retain it. This is a community PSN integration for PS5 and PS4 activity.
 

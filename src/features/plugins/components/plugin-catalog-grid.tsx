@@ -82,7 +82,7 @@ export function PluginCatalogGrid({
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-smoke" />
           <input
             type="search"
-            placeholder="Search apps..."
+            placeholder="Search connectors..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-border-edge bg-ink/90 py-2.5 pl-10 pr-9 text-sm text-pure-white placeholder-smoke transition-colors focus:border-ash focus:outline-none"

@@ -108,7 +108,7 @@ export function ConnectionsPanel({ id }: { id?: string }) {
         empty={
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <EmptyMessage title="No connected accounts">
-              Link a supported app from the Plugins tab to begin provider
+              Choose an available connector below to begin provider
               authorization.
             </EmptyMessage>
           </div>

@@ -64,35 +64,6 @@ test("start a durable task", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("plugin library keeps registration and skills reachable", async ({
-  page,
-}) => {
-  await signIn(page);
-  await page.goto("/app/apps");
-  await expect(
-    page.getByRole("heading", { name: "Library", level: 1 }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Public" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Apps", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Personal" }).click();
-  await page.getByRole("button", { name: "Add server" }).click();
-  await expect(
-    page.getByRole("form", { name: "Add MCP server" }),
-  ).toBeVisible();
-  await page.getByLabel("Name (optional)").fill("Team notes");
-  await page.getByLabel("MCP server URL").fill("https://notes.example.com/mcp");
-  await page.getByRole("button", { name: "Save server" }).click();
-  await expect(page.getByText(/Team notes.*saved/)).toBeVisible();
-  await page.getByRole("button", { name: /Team notes MCP/ }).click();
-  await expect(page.getByText("Server details not verified")).toBeVisible();
-  await page.getByRole("button", { name: "Skills", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Skills", level: 2 }),
-  ).toBeVisible();
-});
-
 test("manifest-only connector installs and returns from OAuth to agent access", async ({
   page,
 }) => {
@@ -116,28 +87,11 @@ test("manifest-only connector installs and returns from OAuth to agent access", 
   ).toBeVisible();
 });
 
-test("a default skill installs for the selected agent and is available in conversation", async ({ page }) => {
-  await signIn(page);
-  await page.goto("/app/apps");
-  await page.getByRole("button", { name: "Skills", exact: true }).click();
-  const skill = page.getByRole("article", { name: "Summarize and extract actions" });
-  await skill.getByRole("button", { name: "Review and install" }).click();
-  await expect(page.getByRole("heading", { name: "Review Summarize and extract actions v1" })).toBeVisible();
-  await page.getByRole("button", { name: "Install and enable v1" }).click();
-  await expect(page.getByText(/Summarize and extract actions is installed and available/)).toBeVisible();
-  await page.getByLabel(/^Ask /).fill("Summarize my notes");
-  await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByText("I can use Summarize and extract actions. Paste the text to summarize.")).toBeVisible();
-});
-
 test("connected accounts offer only what each connection allows", async ({
   page,
 }) => {
   await signIn(page);
   await page.goto("/app/apps");
-  await page
-    .locator("summary", { hasText: "Connected accounts and agent access" })
-    .click();
 
   const uber = page.getByTestId("connection-conn_uber_rides");
   await uber.getByText("Trip history", { exact: true }).click();
@@ -149,7 +103,6 @@ test("connected accounts offer only what each connection allows", async ({
   await expect(expedia).toBeVisible();
   await expect(expedia.getByText("Find a stay")).toHaveCount(0);
 
-  // Old bookmarks land on Apps & skills.
   await page.goto("/app/journeys");
   await expect(page).toHaveURL(/\/app\/apps$/);
 });
