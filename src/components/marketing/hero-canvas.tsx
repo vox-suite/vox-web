@@ -3,13 +3,13 @@
 import { useEffect, useRef } from "react";
 
 const ramp: [number, number, number][] = [
-  [10, 10, 9],
-  [58, 12, 6],
-  [150, 36, 12],
-  [243, 122, 10],
-  [255, 148, 115],
-  [236, 218, 152],
-  [255, 245, 220],
+  [11, 15, 20],
+  [18, 32, 52],
+  [40, 70, 110],
+  [90, 125, 185],
+  [157, 184, 240],
+  [168, 230, 207],
+  [238, 245, 248],
 ];
 
 function color(v: number) {
@@ -58,7 +58,7 @@ export function HeroCanvas() {
         Math.max(0, Math.sin(t * 1.9) * Math.sin(t * 0.63 + 1) + 0.35 * Math.sin(t * 5.3));
 
     const draw = (time: number) => {
-      const t = time / 1000;
+      const t = time / 2200;
       mouse.x += (mouse.tx - mouse.x) * 0.04;
       mouse.y += (mouse.ty - mouse.y) * 0.04;
       mouse.flare *= 0.95;
@@ -69,7 +69,7 @@ export function HeroCanvas() {
       const cy = (wide ? mouse.y : 0.34) * h;
       const R = Math.min(w, h) * (wide ? 0.3 : 0.27) * (1 + amp * 0.05);
 
-      ctx.fillStyle = "#0a0a09";
+      ctx.fillStyle = "#0b0f14";
       ctx.fillRect(0, 0, w, h);
 
       for (let j = 0; j < rows; j++) {
@@ -106,8 +106,8 @@ export function HeroCanvas() {
       }
 
       const vig = ctx.createRadialGradient(w / 2, h / 2, h * 0.25, w / 2, h / 2, Math.max(w, h) * 0.75);
-      vig.addColorStop(0, "rgba(10,10,9,0)");
-      vig.addColorStop(1, "rgba(10,10,9,0.85)");
+      vig.addColorStop(0, "rgba(11,15,20,0)");
+      vig.addColorStop(1, "rgba(11,15,20,0.9)");
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
     };

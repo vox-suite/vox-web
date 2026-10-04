@@ -1,9 +1,7 @@
-# Vox Web Design System & Master Specification
+# Vox design
 
-> Synchronized with root [Master Design System](file:///Users/rahul/Documents/vox/design.md).
+Dark only, calm. Tokens live in `vox-theme/tokens.json` and are shared by web, desktop (CSS) and Android (`VoxTheme.kt`).
 
-**Theme:** Dark Mode (`#040506` Void Black canvas base)  
-**Color Tokens:** Raycast Semantic Token System  
-**Layout & Principles:** Architectural Blueprint Wireframe Grid, Dithered Halftone Visuals, Structured Message Hierarchy  
-
-Please refer to the root [design.md](file:///Users/rahul/Documents/vox/design.md) for the complete cross-platform specification across Desktop, Mobile, and Web.
+- Serif headings (Newsreader, weight 400), mono body (JetBrains Mono).
+- Deep slate background, soft periwinkle primary, mint/sky/coral as decorative accents only.
+- Hairline borders, 40px cards, pill buttons. Slow motion; reduced motion respected.

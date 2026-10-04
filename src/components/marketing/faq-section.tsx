@@ -36,16 +36,16 @@ export function FAQSection() {
   const [openIndex, setOpenIndex] = React.useState<number | null>(0);
 
   return (
-    <section id="faq" className="relative border-b border-ash dark:border-[#2c2a27] py-20 md:py-32">
+    <section id="faq" className="relative border-b border-line py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <header className="mb-14 max-w-2xl">
-          <span className="font-mono text-[12px] uppercase tracking-widest text-smoke dark:text-[#7b7773]">
-            SYSTEM INQUIRIES // FAQ
+          <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-fg-dim">
+            FAQ
           </span>
-          <h2 className="mt-3 font-serif text-[clamp(2rem,3.8vw,3rem)] font-normal leading-[1.2] tracking-[-0.02em] text-off-black dark:text-[#f6f3f1]">
+          <h2 className="mt-3 font-serif text-[clamp(2rem,3.8vw,3rem)] font-normal leading-[1.2] tracking-[-0.02em] text-fg">
             Frequently asked questions.
           </h2>
-          <p className="mt-4 font-mono text-[16px] text-graphite dark:text-[#aba7a2] leading-[1.35] tracking-[-0.4px]">
+          <p className="mt-4 font-mono text-[16px] text-fg-muted leading-[1.35] tracking-[-0.4px]">
             Technical and operational details regarding caller identification, protocol execution, and proactive follow-through.
           </p>
         </header>
@@ -64,10 +64,10 @@ export function FAQSection() {
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between text-left group cursor-pointer bg-transparent border-none p-0"
                 >
-                  <span className="font-serif text-[22px] sm:text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-off-black dark:text-[#f6f3f1] group-hover:text-lake-blue dark:group-hover:text-[#7ba2ff] transition-colors">
+                  <span className="font-serif text-[22px] sm:text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-fg group-hover:text-primary transition-colors">
                     {faq.question}
                   </span>
-                  <span className="ml-4 flex size-8 shrink-0 items-center justify-center text-off-black dark:text-[#f6f3f1]">
+                  <span className="ml-4 flex size-8 shrink-0 items-center justify-center text-fg">
                     <ChevronDown
                       size={20}
                       className={cn(
@@ -79,7 +79,7 @@ export function FAQSection() {
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="pt-2 pr-12 font-mono text-[16px] font-normal leading-[1.35] tracking-[-0.025em] text-graphite dark:text-[#aba7a2] animate-in fade-in-50 duration-200">
+                  <div className="pt-2 pr-12 font-mono text-[16px] font-normal leading-[1.35] tracking-[-0.025em] text-fg-muted">
                     {faq.answer}
                   </div>
                 )}

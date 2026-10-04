@@ -14,6 +14,7 @@ import {
   Globe,
   MessageCircle,
 } from "lucide-react";
+import { ACCESS_HREF } from "@/lib/site";
 import { VoxLogo } from "@/components/ui/vox-logo";
 import { HeroCanvas } from "./hero-canvas";
 
@@ -33,7 +34,7 @@ function Wave() {
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-muted-foreground">
+    <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-fg-dim">
       {children}
     </span>
   );
@@ -41,7 +42,7 @@ function Eyebrow({ children }: { children: ReactNode }) {
 
 function Primary({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="btn-pill-lake group">
+    <Link href={href} className="btn-pill-primary group">
       <span>{children}</span>
       <span
         className="inline-block transition-transform group-hover:translate-x-0.5"
@@ -55,13 +56,13 @@ function Primary({ href, children }: { href: string; children: ReactNode }) {
 
 export function Hero() {
   return (
-    <section className="stage hero">
+    <section className="hero">
       <HeroCanvas />
       <div className="hero-copy">
-        <div className="fade-in inline-flex items-center gap-2.5 rounded-full border border-[#3a3835] bg-black/40 px-4 py-1.5 backdrop-blur-sm" style={{ "--i": 0 } as React.CSSProperties}>
+        <div className="fade-in inline-flex items-center gap-2.5 rounded-full border border-line-strong bg-black/40 px-4 py-1.5 backdrop-blur-sm" style={{ "--i": 0 } as React.CSSProperties}>
           <span className="size-1.5 animate-pulse rounded-full bg-coral" aria-hidden="true" />
-          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#aba7a2]">
-            Vox is listening · Phone &amp; WhatsApp
+          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+            Phone &amp; WhatsApp · Always listening
           </span>
         </div>
 
@@ -71,7 +72,7 @@ export function Hero() {
           </span>
           <span className="ln">
             <span style={{ "--i": 1 } as React.CSSProperties}>
-              Work <em className="italic text-[#ff9473]">keeps moving.</em>
+              Work <em className="italic text-coral">keeps moving.</em>
             </span>
           </span>
         </h1>
@@ -82,7 +83,7 @@ export function Hero() {
             calendar changes and follow-ups — and calls you back when something needs you.
           </p>
           <div className="fade-in flex flex-wrap items-center gap-4" style={{ "--i": 3 } as React.CSSProperties}>
-            <Primary href="/request-access">Request access</Primary>
+            <Primary href={ACCESS_HREF}>Request access</Primary>
             <Link href="#follow-through" className="btn-pill-ghost">
               Watch a call unfold
             </Link>
@@ -142,7 +143,7 @@ function Scene({
   return (
     <div className={`scene s${index}`}>
       <div>
-        <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#7b7773]">
+        <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-fg-dim">
           0{index + 1} · {tag}
         </span>
         <h2 className="mt-4 text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em]">
@@ -157,7 +158,7 @@ function Scene({
 
 export function CallChapter() {
   return (
-    <section id="follow-through" className="stage">
+    <section id="follow-through" className="bg-background">
       <div className="call-track">
         <div className="call-pin">
           <Scene
@@ -170,13 +171,13 @@ export function CallChapter() {
               <div className="caller-ring">
                 <VoxLogo size={44} animated aria-hidden="true" />
               </div>
-              <p className="font-serif text-[28px] tracking-[-0.02em] !text-[#f6f3f1]">Vox</p>
+              <p className="font-serif text-[28px] tracking-[-0.02em] !text-fg">Vox</p>
               <p className="mt-1 text-[12px] uppercase tracking-[0.14em]">Connected</p>
               <div className="mt-4">
                 <Wave />
               </div>
               <div className="mt-4 flex justify-center">
-                <span className="grid size-14 place-items-center rounded-full bg-[#ff5b4a] text-white">
+                <span className="grid size-14 place-items-center rounded-full bg-danger text-background">
                   <PhoneOff size={22} aria-hidden="true" />
                 </span>
               </div>
@@ -190,7 +191,7 @@ export function CallChapter() {
             body="Pause, correct yourself, wander. Speech streams in and out, and Vox stops talking the moment you start."
           >
             <div className="glass">
-              <p className="mb-4 text-[11px] uppercase tracking-[0.14em] !text-[#7b7773]">
+              <p className="mb-4 text-[11px] uppercase tracking-[0.14em] !text-fg-dim">
                 Illustrative conversation
               </p>
               <div className="stagger flex flex-col gap-3">
@@ -210,7 +211,7 @@ export function CallChapter() {
             body="Decisions become calendar changes, tasks and reminders — each with a durable status, not a transcript you have to process later."
           >
             <div className="glass">
-              <p className="mb-4 text-[11px] uppercase tracking-[0.14em] !text-[#7b7773]">
+              <p className="mb-4 text-[11px] uppercase tracking-[0.14em] !text-fg-dim">
                 Illustrative outcome
               </p>
               <div className="stagger flex flex-col gap-3">
@@ -234,21 +235,21 @@ export function CallChapter() {
             body="When a deadline arrives or a commitment changes, Vox reaches out to you. By phone, or on WhatsApp."
           >
             <div className="glass text-center">
-              <p className="text-[11px] uppercase tracking-[0.14em] !text-[#7b7773]">
+              <p className="text-[11px] uppercase tracking-[0.14em] !text-fg-dim">
                 Scheduled · Tomorrow 8:30 AM
               </p>
               <div className="caller-ring mt-6">
-                <PhoneCall size={40} className="text-[#242424]" aria-hidden="true" />
+                <PhoneCall size={40} className="text-background" aria-hidden="true" />
               </div>
-              <p className="font-serif text-[28px] tracking-[-0.02em] !text-[#f6f3f1]">
+              <p className="font-serif text-[28px] tracking-[-0.02em] !text-fg">
                 Vox is calling
               </p>
               <p className="mt-1 text-[13px]">Morning briefing · open launch items</p>
               <div className="mt-6 flex justify-center gap-10">
-                <span className="grid size-14 place-items-center rounded-full bg-[#ff5b4a] text-white">
+                <span className="grid size-14 place-items-center rounded-full bg-danger text-background">
                   <PhoneOff size={22} aria-hidden="true" />
                 </span>
-                <span className="grid size-14 place-items-center rounded-full bg-[#34c759] text-white">
+                <span className="grid size-14 place-items-center rounded-full bg-success text-background">
                   <Phone size={22} aria-hidden="true" />
                 </span>
               </div>
@@ -292,7 +293,7 @@ const anatomyCards = [
 
 export function Anatomy() {
   return (
-    <section id="anatomy" className="border-b border-border py-28 md:py-40">
+    <section id="anatomy" className="border-b border-line py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <div className="rv max-w-3xl">
           <Eyebrow>Under the hood</Eyebrow>
@@ -331,7 +332,7 @@ export function Anatomy() {
 
 export function Surfaces() {
   return (
-    <section id="surfaces" className="border-b border-border py-28 md:py-40">
+    <section id="surfaces" className="border-b border-line py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <div className="rv max-w-3xl">
           <Eyebrow>Everywhere you are</Eyebrow>
@@ -341,9 +342,9 @@ export function Surfaces() {
         </div>
 
         <div className="mt-16 grid gap-6 lg:grid-cols-12">
-          <article className="rv elevated-card-periwinkle lg:col-span-7">
+          <article className="rv elevated-card lg:col-span-7">
             <div
-              className="pointer-events-none absolute -right-24 -top-24 size-[420px] rounded-full bg-gradient-to-br from-coral/40 via-sky-blue/50 to-mint/40 blur-[70px]"
+              className="pointer-events-none absolute -right-24 -top-24 size-[420px] rounded-full bg-gradient-to-br from-coral/25 via-sky/50 to-mint/25 blur-[70px]"
               aria-hidden="true"
             />
             <div className="relative">
@@ -426,10 +427,10 @@ export function Connections() {
     </div>
   ));
   return (
-    <section id="connections" className="stage py-28 md:py-40">
+    <section id="connections" className="py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <div className="rv max-w-3xl">
-          <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#7b7773]">
+          <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-fg-dim">
             Vox Connections
           </span>
           <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] leading-[1] tracking-[-0.035em]">
@@ -453,8 +454,8 @@ export function Connections() {
 
       <div className="mx-auto mt-20 grid max-w-[1432px] gap-10 px-6 md:grid-cols-3 md:px-12">
         {guarantees.map(([title, body], i) => (
-          <article key={title} className="rv border-t border-[#2c2a27] pt-6">
-            <span className="font-mono text-[12px] text-[#7b7773]">0{i + 1}</span>
+          <article key={title} className="rv border-t border-line pt-6">
+            <span className="font-mono text-[12px] text-fg-dim">0{i + 1}</span>
             <h3 className="mt-3 text-[26px] leading-[1.15] tracking-[-0.02em]">{title}</h3>
             <p className="mt-3 text-[15px] leading-[1.45]">{body}</p>
           </article>
@@ -472,7 +473,7 @@ const trust = [
 
 export function Trust() {
   return (
-    <section id="principles" className="border-b border-border py-28 md:py-40">
+    <section id="principles" className="border-b border-line py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <h2 className="rv max-w-[18ch] text-[clamp(2.5rem,6.5vw,5.5rem)] leading-[1] tracking-[-0.04em]">
           Useful enough to act. Careful enough to trust.
@@ -493,7 +494,7 @@ export function Trust() {
 
 export function SelfHost() {
   return (
-    <section id="self-host" className="border-b border-border py-28 md:py-40">
+    <section id="self-host" className="border-b border-line py-28 md:py-40">
       <div className="mx-auto grid max-w-[1432px] gap-12 px-6 md:px-12 lg:grid-cols-2 lg:items-center">
         <div className="rv">
           <Eyebrow>Vox Deploy</Eyebrow>
@@ -505,16 +506,16 @@ export function SelfHost() {
             Compose distribution under Apache 2.0.
           </p>
         </div>
-        <div className="rv stage overflow-hidden rounded-[32px] border border-[#2c2a27] p-8">
+        <div className="rv overflow-hidden rounded-[32px] border border-line bg-surface p-8">
           <div className="mb-5 flex gap-2" aria-hidden="true">
-            <i className="size-2.5 rounded-full bg-[#ff5b4a]" />
-            <i className="size-2.5 rounded-full bg-[#febc2e]" />
-            <i className="size-2.5 rounded-full bg-[#34c759]" />
+            <i className="size-2.5 rounded-full bg-danger" />
+            <i className="size-2.5 rounded-full bg-gold" />
+            <i className="size-2.5 rounded-full bg-success" />
           </div>
-          <pre className="overflow-x-auto font-mono text-[14px] leading-[1.7] text-[#f6f3f1]">
+          <pre className="overflow-x-auto font-mono text-[14px] leading-[1.7] text-fg">
             <code>
-              <span className="text-[#7b7773]">$ </span>cd vox-deploy{"\n"}
-              <span className="text-[#7b7773]">$ </span>docker compose -f compose.self-hosted.yml up -d
+              <span className="text-fg-dim">$ </span>cd vox-deploy{"\n"}
+              <span className="text-fg-dim">$ </span>docker compose -f compose.self-hosted.yml up -d
             </code>
           </pre>
         </div>
@@ -525,7 +526,7 @@ export function SelfHost() {
 
 export function Closing() {
   return (
-    <section className="stage closing">
+    <section className="closing">
       <div className="closing-glow" aria-hidden="true" />
       <div className="closing-mark" aria-hidden="true">
         vox
@@ -538,9 +539,9 @@ export function Closing() {
           Leave with less to carry. Vox is reachable today by phone call and WhatsApp.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Primary href="/request-access">Request access</Primary>
-          <Link href="/changelog" className="btn-pill-ghost">
-            Follow the build
+          <Primary href={ACCESS_HREF}>Request access</Primary>
+          <Link href="#follow-through" className="btn-pill-ghost">
+            Replay the call
           </Link>
         </div>
       </div>
