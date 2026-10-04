@@ -1,9 +1,25 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { JetBrains_Mono, Newsreader } from "next/font/google";
+import {
+  JetBrains_Mono,
+  Newsreader,
+  Space_Grotesk,
+  Inter,
+} from "next/font/google";
 import { cn } from "@/lib/utils";
 import "./globals.css";
-import "./cinema.css";
+import "./landing.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -34,14 +50,14 @@ export const metadata: Metadata = {
     template: "%s · Vox",
   },
   description:
-    "The smartest person in the room is now one phone call away. Calendar, commitments, priorities—handled before you hang up.",
+    "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Vox — Your chief of staff, on speed dial",
     description:
-      "The smartest person in the room is now one phone call away. Calendar, commitments, priorities—handled before you hang up.",
+      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
     url: "https://voxagent.in",
     siteName: "Vox",
     locale: "en_US",
@@ -59,7 +75,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vox — Your chief of staff, on speed dial",
     description:
-      "The smartest person in the room is now one phone call away. Calendar, commitments, priorities—handled before you hang up.",
+      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
     images: ["/vox.svg"],
   },
   robots: {
@@ -95,14 +111,9 @@ const jsonLd = {
       name: "Vox",
       url: "https://voxagent.in",
       applicationCategory: "BusinessApplication",
-      operatingSystem: "Telephony, iOS, Android, Web",
+      operatingSystem: "Telephony, Desktop, Android, Web",
       description:
         "Voice-first assistant reachable by phone call or WhatsApp. Vox keeps work moving after the conversation ends: creating tasks, updating calendars, scheduling reminders, and placing outbound follow-ups.",
-      offers: {
-        "@type": "Offer",
-        price: "0.00",
-        priceCurrency: "USD",
-      },
     },
   ],
 };
@@ -115,7 +126,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(newsreader.variable, jetbrainsMono.variable)}
+      className={cn(
+        newsreader.variable,
+        jetbrainsMono.variable,
+        spaceGrotesk.variable,
+        inter.variable,
+      )}
     >
       <head>
         <script

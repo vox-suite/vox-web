@@ -640,9 +640,9 @@ export interface VoxLogoProps {
 }
 
 export function VoxLogo({
-  animated = false,
+  animated = true,
   size = 28,
-  theme = "auto",
+  theme = "dark",
   state = "composing",
   speed = 1,
   className,
