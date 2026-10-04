@@ -4,34 +4,36 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-[13px] font-medium whitespace-nowrap transition-colors outline-none select-none focus-visible:ring-2 focus-visible:ring-ash/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center font-mono font-medium uppercase transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 rounded-[100px]",
   {
     variants: {
       variant: {
         default:
-          "bg-mist px-3 py-2 text-iron shadow-[rgba(0,0,0,0.03)_0px_7px_3px_0px,rgba(0,0,0,0.25)_0px_4px_4px_0px] hover:bg-pure-white",
+          "bg-lake-blue dark:bg-[#3d6cf0] text-white hover:brightness-110 shadow-sm active:translate-y-px",
         primary:
-          "bg-mist px-3 py-2 text-iron shadow-[rgba(0,0,0,0.03)_0px_7px_3px_0px,rgba(0,0,0,0.25)_0px_4px_4px_0px] hover:bg-pure-white",
+          "bg-lake-blue dark:bg-[#3d6cf0] text-white hover:brightness-110 shadow-sm active:translate-y-px",
         secondary:
-          "border border-border-edge bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
+          "bg-off-black dark:bg-[#f6f3f1] text-[#f6f3f1] dark:text-[#242424] hover:bg-black dark:hover:bg-white active:translate-y-px",
         outline:
-          "border border-border-edge bg-transparent px-3 py-2 text-ash hover:border-ash hover:text-pure-white",
-        ghost: "bg-transparent px-3 py-2 text-ash hover:text-pure-white",
+          "border border-ash dark:border-[#2c2a27] bg-transparent text-off-black dark:text-[#f6f3f1] hover:border-off-black dark:hover:border-white active:translate-y-px",
+        ghost:
+          "bg-transparent text-off-black dark:text-[#f6f3f1] hover:bg-black/5 dark:hover:bg-white/5 active:translate-y-px",
         destructive:
-          "bg-ember-hush px-3 py-2 text-coral-pulse hover:bg-ember-hush/80",
+          "bg-crimson text-white hover:brightness-110 active:translate-y-px",
         danger:
-          "bg-ember-hush px-3 py-2 text-coral-pulse hover:bg-ember-hush/80",
-        link: "text-ash underline-offset-4 hover:text-pure-white hover:underline",
+          "bg-crimson text-white hover:brightness-110 active:translate-y-px",
+        link:
+          "text-off-black dark:text-[#f6f3f1] underline-offset-4 hover:underline rounded-none p-0",
       },
       size: {
-        default: "h-9",
-        xs: "h-6 gap-1 px-2 text-xs",
-        sm: "h-8 gap-1.5 px-2.5",
-        lg: "h-10 gap-2 px-4",
-        icon: "size-9 px-0",
-        "icon-xs": "size-6 px-0",
-        "icon-sm": "size-7 px-0",
-        "icon-lg": "size-10 px-0",
+        default: "h-11 px-7 text-[13px] tracking-[-0.02em] gap-2",
+        xs: "h-7 px-3 text-[11px] tracking-[-0.033em] gap-1",
+        sm: "h-9 px-5 text-[12px] tracking-[-0.033em] gap-1.5",
+        lg: "h-13 px-9 text-[15px] tracking-[-0.02em] gap-2.5",
+        icon: "size-10 px-0",
+        "icon-xs": "size-7 px-0",
+        "icon-sm": "size-8 px-0",
+        "icon-lg": "size-12 px-0",
       },
     },
     defaultVariants: {

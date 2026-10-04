@@ -1,14 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Funnel_Display, Geist_Mono, Inter } from "next/font/google";
+import { Funnel_Display, Geist_Mono, Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "./globals.css";
+import "./cinema.css";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
   weight: ["400", "500", "600"],
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
+  weight: ["400"],
+  style: ["normal", "italic"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+  weight: ["400", "500"],
 });
 
 const funnel = Funnel_Display({
@@ -29,7 +45,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#040506",
+  themeColor: "#f6f3f1",
 };
 
 export const metadata: Metadata = {
@@ -120,8 +136,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
-        "dark",
+        newsreader.variable,
+        jetbrainsMono.variable,
         inter.variable,
         funnel.variable,
         geistMono.variable,
@@ -129,11 +147,27 @@ export default function RootLayout({
     >
       <head>
         <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('vox_theme');
+                  if (stored === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-mono antialiased bg-parchment text-off-black transition-colors duration-200">
         <a className="skip-link" href="#main">
           Skip to content
         </a>
