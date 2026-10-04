@@ -1,7 +1,7 @@
 # Vox web conventions
 
 - Use Next.js App Router and Tailwind CSS v4.
-- Colors come from `vox-theme` tokens; the site is dark only.
+- Colors come from `vox-shared/theme` tokens; the site is dark only.
 - Route pages compose shared components without `className` or inline `style`; lint enforces this.
 - Authentication in layouts is not sufficient: each data route/server action must check the current session independently.
 - Never add an authentication bypass, infer an owner email, or expose server environment variables in client components.

@@ -4,7 +4,7 @@ import { ACCESS_HREF } from "@/lib/site";
 
 const navLinks = [
   { href: "#follow-through", label: "How it works" },
-  { href: "#anatomy", label: "Under the hood" },
+  { href: "#use-cases", label: "Use cases" },
   { href: "#surfaces", label: "Surfaces" },
   { href: "#connections", label: "Connections" },
   { href: "#faq", label: "FAQ" },

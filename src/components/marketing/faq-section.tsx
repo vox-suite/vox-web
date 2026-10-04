@@ -28,7 +28,7 @@ const faqs = [
   {
     question: "Which external systems and tools does Vox integrate with?",
     answer:
-      "Vox Connections provides OAuth-linked providers including Uber, Zomato, Amazon, PlayStation and Expedia, plus MCP servers and declarative skills. Connecting an account grants nothing by itself; access comes from explicit per-agent grants, and consequential actions need approval.",
+      "Connected Apps supports Google Calendar and PlayStation. You consent to timeline synchronization and assistant reads when linking, then can pause either use independently or disconnect. Other account integrations are outside this release.",
   },
 ];
 

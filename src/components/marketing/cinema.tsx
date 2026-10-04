@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { ACCESS_HREF } from "@/lib/site";
 import { VoxLogo } from "@/components/ui/vox-logo";
-import { HeroCanvas } from "./hero-canvas";
 
 const bars = Array.from({ length: 56 }, (_, i) =>
   Math.round(18 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.55)) * 82),
@@ -40,7 +39,7 @@ function Eyebrow({ children }: { children: ReactNode }) {
   );
 }
 
-function Primary({ href, children }: { href: string; children: ReactNode }) {
+export function Primary({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link href={href} className="btn-pill-primary group">
       <span>{children}</span>
@@ -51,67 +50,6 @@ function Primary({ href, children }: { href: string; children: ReactNode }) {
         ▸
       </span>
     </Link>
-  );
-}
-
-export function Hero() {
-  return (
-    <section className="hero">
-      <HeroCanvas />
-      <div className="hero-copy">
-        <div className="fade-in inline-flex items-center gap-2.5 rounded-full border border-line-strong bg-black/40 px-4 py-1.5 backdrop-blur-sm" style={{ "--i": 0 } as React.CSSProperties}>
-          <span className="size-1.5 animate-pulse rounded-full bg-coral" aria-hidden="true" />
-          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-fg-muted">
-            Phone &amp; WhatsApp · Always listening
-          </span>
-        </div>
-
-        <h1 className="mt-8 text-[clamp(3.25rem,9.5vw,9rem)] leading-[0.96] tracking-[-0.045em]">
-          <span className="ln">
-            <span style={{ "--i": 0 } as React.CSSProperties}>Call once.</span>
-          </span>
-          <span className="ln">
-            <span style={{ "--i": 1 } as React.CSSProperties}>
-              Work <em className="italic text-coral">keeps moving.</em>
-            </span>
-          </span>
-        </h1>
-
-        <div className="hero-foot">
-          <p className="fade-in max-w-[520px] text-[17px] leading-[1.45] md:text-[19px]" style={{ "--i": 2 } as React.CSSProperties}>
-            A chief of staff you reach on a real phone call. It turns what you say into tasks,
-            calendar changes and follow-ups — and calls you back when something needs you.
-          </p>
-          <div className="fade-in flex flex-wrap items-center gap-4" style={{ "--i": 3 } as React.CSSProperties}>
-            <Primary href={ACCESS_HREF}>Request access</Primary>
-            <Link href="#follow-through" className="btn-pill-ghost">
-              Watch a call unfold
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="scroll-cue" aria-hidden="true">
-        Scroll
-      </div>
-    </section>
-  );
-}
-
-const manifesto =
-  "You shouldn’t need another app to run your day. Say what’s on your mind. Vox makes it durable — tasks, calendar changes, reminders, follow-ups — and keeps it moving after you hang up.";
-
-export function Manifesto() {
-  return (
-    <section className="manifesto">
-      <p>
-        {manifesto.split(" ").map((word, i) => (
-          <span className="w" key={i}>
-            {word}
-          </span>
-        ))}
-      </p>
-    </section>
   );
 }
 
@@ -268,60 +206,50 @@ export function CallChapter() {
   );
 }
 
-const nodes = [
-  { tag: "Caller", name: "Your phone", note: "A normal call" },
-  { tag: "Telephony", name: "Twilio", note: "Media Stream · μ-law 8 kHz" },
-  { tag: "Listening", name: "AssemblyAI", note: "Streaming transcription" },
-  { tag: "Thinking", name: "Vox Core", note: "Agents · memory · schedules", core: true },
-  { tag: "Speaking", name: "ElevenLabs", note: "Streamed back as audio" },
+const useCases = [
+  {
+    title: "Protect your day.",
+    say: "“Tomorrow is packed. Hold two hours for the proposal and move anything that can wait.”",
+    body: "Vox shields focus time, shifts flexible meetings and tells you what moved.",
+  },
+  {
+    title: "Delegate and let go.",
+    say: "“There’s a lot on my mind this week.”",
+    body: "It tracks the commitment, sets a deadline and sends the progress update on WhatsApp.",
+  },
+  {
+    title: "Start tomorrow briefed.",
+    say: "“Review the launch items overnight and call me before the 9 AM.”",
+    body: "At 8:30 your phone rings with a short briefing, decisions first.",
+  },
+  {
+    title: "Handle the errands.",
+    say: "“Find somewhere good for dinner and check how long a cab takes.”",
+    body: "With Google Calendar or PlayStation connected, Vox can read upcoming events and gaming activity when helping you. You control timeline synchronization and assistant reads.",
+  },
 ];
 
-const anatomyCards = [
-  {
-    title: "Greeted in 100 ms.",
-    body: "Callers resolve through a minimal Redis cache with a 100 ms deadline. On a miss, a generic greeting plays — the database and the model never stand in the way of hello.",
-  },
-  {
-    title: "Interruptible by design.",
-    body: "Caller speech interrupts active playback, so Vox yields the floor the way a person would.",
-  },
-  {
-    title: "Work outlives the line.",
-    body: "Core Worker leases durable jobs from PostgreSQL, advances schedules, summarizes finished conversations and dispatches actions long after you hang up.",
-  },
-];
-
-export function Anatomy() {
+export function UseCases() {
   return (
-    <section id="anatomy" className="border-b border-line py-28 md:py-40">
+    <section id="use-cases" className="border-b border-line py-28 md:py-40">
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <div className="rv max-w-3xl">
-          <Eyebrow>Under the hood</Eyebrow>
+          <Eyebrow>What people use it for</Eyebrow>
           <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] leading-[1] tracking-[-0.035em]">
-            Anatomy of a call.
+            Say it once. It’s handled.
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.45]">
-            Audio never waits on a database. This is the path a phone call takes, and what keeps
-            running once it ends.
-          </p>
         </div>
-
-        <div className="rv flow mt-16">
-          {nodes.flatMap(({ tag, name, note, core }, i) => [
-            i > 0 && <span key={`l${i}`} className="flow-link" style={{ "--i": i } as React.CSSProperties} aria-hidden="true" />,
-            <div key={name} className={`flow-node${core ? " core" : ""}`}>
-              <small>{tag}</small>
-              <strong>{name}</strong>
-              <span>{note}</span>
-            </div>,
-          ])}
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {anatomyCards.map(({ title, body }) => (
-            <article key={title} className="rv feature-card">
-              <h3 className="text-[26px] leading-[1.15] tracking-[-0.02em]">{title}</h3>
-              <p className="mt-4 text-[15px] leading-[1.45]">{body}</p>
+        <div className="mt-16 grid gap-6 md:grid-cols-2">
+          {useCases.map(({ title, say, body }, i) => (
+            <article key={title} className="rv feature-card flex min-h-[320px] flex-col justify-between">
+              <span className="font-mono text-[12px] text-fg-dim">0{i + 1}</span>
+              <div>
+                <p className="font-serif text-[20px] italic leading-[1.3] text-fg-muted">{say}</p>
+                <h3 className="mt-6 text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.05] tracking-[-0.03em]">
+                  {title}
+                </h3>
+                <p className="mt-3 max-w-[460px] text-[15px] leading-[1.45]">{body}</p>
+              </div>
             </article>
           ))}
         </div>
@@ -353,9 +281,7 @@ export function Surfaces() {
                 Vox Desktop.
               </h3>
               <p className="mt-4 max-w-[520px] text-[16px] leading-[1.45] !text-inherit opacity-80">
-                A native app built on Tauri. Home is a dark, stylized 3D city map that Vox itself
-                can drive, alongside live voice, tasks, notes, schedules and reports on your own
-                data.
+                A native app for your computer. Home is a dark, stylized 3D city map that Vox itself can drive, alongside live voice, tasks, notes, schedules and reports on your own data.
               </p>
               <p className="mt-4 max-w-[520px] text-[14px] leading-[1.45] !text-inherit opacity-70">
                 Optionally let a phone call control your Mac. It is off by default, every command
@@ -370,8 +296,7 @@ export function Surfaces() {
               Vox for Android.
             </h3>
             <p className="mt-4 text-[15px] leading-[1.45]">
-              Kotlin and Jetpack Compose, as a thin client. It captures SMS and location, while
-              Timeline, Pulse and Spaces run from the same shared Vox UI as desktop.
+              Take Vox with you. It captures SMS and location in the background, and Timeline, Pulse and Spaces look and work the same as on desktop.
             </p>
           </article>
 
@@ -381,8 +306,7 @@ export function Surfaces() {
               Phone &amp; WhatsApp.
             </h3>
             <p className="mt-4 text-[15px] leading-[1.45]">
-              Dial in or send a message. Bridge hands every finalized turn to the same Core agent
-              and speaks the answer back.
+              Dial in or send a message. It’s the same assistant either way, and it speaks the answer back on calls.
             </p>
           </article>
 
@@ -403,18 +327,12 @@ export function Surfaces() {
 }
 
 const providers = [
-  ["Uber", "Trip history · estimates"],
-  ["Zomato", "Restaurant search · order handoff"],
-  ["Amazon", "Catalog discovery · purchase handoff"],
-  ["PlayStation", "Playtime history"],
-  ["Expedia", "Lodging"],
-  ["MCP servers", "Tool discovery"],
-  ["Declarative skills", "Versioned packages"],
-  ["Remote extensions", "Reviewed manifests"],
+  ["Google Calendar", "Calendar events · read-only"],
+  ["PlayStation", "Observed playtime · session times unknown"],
 ];
 
 const guarantees = [
-  ["Installing grants nothing.", "Adding an extension or skill never gives it account access. Access comes from explicit, per-agent grants."],
+  ["Two uses, your choice.", "Linking asks for consent to timeline synchronization and assistant reads. You can pause either independently."],
   ["Handoffs are labelled.", "Where a provider can’t be driven end to end, Vox says it is handing off instead of pretending the work is done."],
   ["Consequential means approved.", "Actions that matter need an exact approval, and leave an audit record behind."],
 ];
@@ -431,14 +349,13 @@ export function Connections() {
       <div className="mx-auto max-w-[1432px] px-6 md:px-12">
         <div className="rv max-w-3xl">
           <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-fg-dim">
-            Vox Connections
+            Connected accounts
           </span>
           <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] leading-[1] tracking-[-0.035em]">
             Connected, never presumed.
           </h2>
           <p className="mt-5 text-[17px] leading-[1.45]">
-            A standalone connector platform with OAuth lifecycles, per-agent capability grants and
-            signed requests. Independent of Core, usable by any host.
+            Link the accounts you already use. You decide what Vox can touch, and what it still has to ask you about.
           </p>
         </div>
       </div>
@@ -467,7 +384,7 @@ export function Connections() {
 
 const trust = [
   { icon: Fingerprint, title: "Your voice protects your context.", body: "Speaker recognition keeps personal work attached to the right person, even when a phone changes hands." },
-  { icon: ShieldCheck, title: "Hosts are signed in.", body: "Every Bridge call carries a timestamped, nonce-bound assertion. Host credentials never enter agent context." },
+  { icon: ShieldCheck, title: "Every action leaves a record.", body: "Consequential actions are confirmed, scoped and logged, so you can always see what happened." },
   { icon: CheckCheck, title: "Status is a prompt to verify.", body: "Vox queries authoritative state instead of assuming a background task succeeded." },
 ];
 
@@ -486,38 +403,6 @@ export function Trust() {
               <p className="mt-4 text-[15px] leading-[1.45]">{body}</p>
             </article>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function SelfHost() {
-  return (
-    <section id="self-host" className="border-b border-line py-28 md:py-40">
-      <div className="mx-auto grid max-w-[1432px] gap-12 px-6 md:px-12 lg:grid-cols-2 lg:items-center">
-        <div className="rv">
-          <Eyebrow>Vox Deploy</Eyebrow>
-          <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] leading-[1] tracking-[-0.035em]">
-            Run it your way.
-          </h2>
-          <p className="mt-5 max-w-[520px] text-[17px] leading-[1.45]">
-            Core API, Core Worker, Bridge, PostgreSQL with pgvector and Redis ship as a supported
-            Compose distribution under Apache 2.0.
-          </p>
-        </div>
-        <div className="rv overflow-hidden rounded-[32px] border border-line bg-surface p-8">
-          <div className="mb-5 flex gap-2" aria-hidden="true">
-            <i className="size-2.5 rounded-full bg-danger" />
-            <i className="size-2.5 rounded-full bg-gold" />
-            <i className="size-2.5 rounded-full bg-success" />
-          </div>
-          <pre className="overflow-x-auto font-mono text-[14px] leading-[1.7] text-fg">
-            <code>
-              <span className="text-fg-dim">$ </span>cd vox-deploy{"\n"}
-              <span className="text-fg-dim">$ </span>docker compose -f compose.self-hosted.yml up -d
-            </code>
-          </pre>
         </div>
       </div>
     </section>

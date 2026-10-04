@@ -1,13 +1,11 @@
 import { SiteHeader, SiteFooter } from "@/components/marketing/shell";
+import { Hero } from "@/components/marketing/hero";
 import {
-  Hero,
-  Manifesto,
   CallChapter,
-  Anatomy,
+  UseCases,
   Surfaces,
   Connections,
   Trust,
-  SelfHost,
   Closing,
 } from "@/components/marketing/cinema";
 import { FAQSection } from "@/components/marketing/faq-section";
@@ -18,13 +16,11 @@ export default function HomePage() {
       <SiteHeader />
       <main id="main">
         <Hero />
-        <Manifesto />
         <CallChapter />
-        <Anatomy />
+        <UseCases />
         <Surfaces />
         <Connections />
         <Trust />
-        <SelfHost />
         <FAQSection />
         <Closing />
       </main>
