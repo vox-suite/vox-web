@@ -33,6 +33,7 @@
   }
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 96px;
     background: var(--vox-background);
   }
   body {
@@ -67,7 +68,7 @@
     color: var(--vox-on-primary);
   }
   :focus-visible {
-    outline: 2px solid var(--vox-primary);
+    outline: 2px solid var(--vox-sky);
     outline-offset: 2px;
   }
   .skip-link {
@@ -107,6 +108,7 @@
       transform 200ms ease;
   }
   .btn-pill-primary {
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.4) inset, 0 -1px 0 rgb(0 0 0 / 0.15) inset;
     background: var(--vox-primary);
     color: var(--vox-on-primary);
   }
@@ -138,7 +140,7 @@
     position: relative;
     overflow: hidden;
     padding: 40px;
-    border: 1px solid rgb(138 168 242 / 0.25);
+    border: 1px solid rgb(255 99 99 / 0.25);
     border-radius: var(--vox-radius-card);
     background: var(--vox-surface-accent);
   }

@@ -2,6 +2,7 @@ import { SiteHeader, SiteFooter } from "@/components/marketing/shell";
 import { Hero } from "@/components/marketing/hero";
 import {
   CallChapter,
+  Findings,
   UseCases,
   Surfaces,
   Connections,
@@ -17,6 +18,7 @@ export default function HomePage() {
       <main id="main">
         <Hero />
         <CallChapter />
+        <Findings />
         <UseCases />
         <Surfaces />
         <Connections />

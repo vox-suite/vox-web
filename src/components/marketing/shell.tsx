@@ -12,15 +12,15 @@ const navLinks = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-20 w-full max-w-[1432px] items-center justify-between px-6 md:px-12">
+    <header className="pointer-events-none fixed inset-x-0 top-4 z-40 flex justify-center px-4">
+      <div className="pointer-events-auto flex h-16 w-full max-w-[1080px] items-center justify-between rounded-full border border-white/10 bg-background/40 pl-6 pr-3 shadow-[0_10px_40px_rgb(0_0_0/0.4)] backdrop-blur-xl backdrop-saturate-150">
         <Link href="/" className="flex items-center gap-3" aria-label="Vox home">
-          <VoxLogo animated size={28} aria-hidden="true" />
+          <VoxLogo animated size={26} aria-hidden="true" />
           <span className="font-serif text-[22px] tracking-[-0.02em]">Vox</span>
         </Link>
 
         <nav
-          className="hidden items-center gap-8 font-mono text-[13px] uppercase tracking-[-0.02em] text-fg-muted lg:flex"
+          className="hidden items-center gap-7 font-mono text-[13px] uppercase tracking-[-0.02em] text-fg-muted lg:flex"
           aria-label="Main navigation"
         >
           {navLinks.map(({ href, label }) => (
@@ -30,7 +30,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <Link href={ACCESS_HREF} className="btn-pill-primary !px-6 !py-2.5 !text-[12px]">
+        <Link href={ACCESS_HREF} className="btn-pill-primary !px-5 !py-2.5 !text-[12px]">
           Request access
         </Link>
       </div>
