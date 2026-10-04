@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -107,6 +107,23 @@ function Geometry({ kind }: { kind: "orbit" | "pyramid" | "overlap" }) {
 
 function CallDemo() {
   const [active, setActive] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  function selectChapter(index: number) {
+    setActive(index);
+    setTimerKey((key) => key + 1);
+  }
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = window.setTimeout(() => {
+      setActive((index) => (index + 1) % chapters.length);
+      setTimerKey((key) => key + 1);
+    }, 8000);
+    return () => window.clearTimeout(timer);
+  }, [active, timerKey, paused]);
+
   const chapter = chapters[active];
   const Icon = chapter.icon;
   return (
@@ -122,6 +139,19 @@ function CallDemo() {
           list. Give Vox the loose end. Keep your day.
         </p>
       </div>
+      <div className="chapter-playback">
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => {
+            setPaused(!paused);
+            if (paused) setTimerKey((key) => key + 1);
+          }}
+          aria-pressed={paused}
+        >
+          {paused ? "Resume autoplay" : "Pause autoplay"}
+        </button>
+      </div>
       <div className="call-demo cut-panel">
         <div className="chapter-tabs" role="tablist" aria-label="Follow a call">
           {chapters.map((item, i) => (
@@ -133,7 +163,7 @@ function CallDemo() {
               aria-selected={active === i}
               aria-controls="chapter-content"
               tabIndex={active === i ? 0 : -1}
-              onClick={() => setActive(i)}
+              onClick={() => selectChapter(i)}
               onKeyDown={(event) => {
                 let next = i;
                 if (event.key === "ArrowRight")
@@ -144,12 +174,19 @@ function CallDemo() {
                 else if (event.key === "End") next = chapters.length - 1;
                 else return;
                 event.preventDefault();
-                setActive(next);
+                selectChapter(next);
                 document.getElementById(`chapter-${next}`)?.focus();
               }}
             >
               <span>0{i + 1}</span>
               {item.label}
+              {active === i && (
+                <i
+                  key={timerKey}
+                  className={`chapter-timer${paused ? " paused" : ""}`}
+                  aria-hidden="true"
+                />
+              )}
             </button>
           ))}
         </div>
@@ -167,7 +204,7 @@ function CallDemo() {
             <button
               className="text-button"
               type="button"
-              onClick={() => setActive((active + 1) % chapters.length)}
+              onClick={() => selectChapter((active + 1) % chapters.length)}
             >
               {active === 3 ? "Replay the call" : "Next part"}
               <ArrowUpRight size={17} aria-hidden="true" />
@@ -402,7 +439,7 @@ export function LandingPage() {
     <div className="vox-landing">
       <header className="landing-header">
         <Link className="landing-brand" href="/" aria-label="Vox home">
-          <VoxLogo size={32} />
+          <VoxLogo size={40} className="header-logo" />
           <span>vox</span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -467,14 +504,6 @@ export function LandingPage() {
                   title="Access request destination is being set up"
                 >
                   Request access
-                </button>
-                <button
-                  type="button"
-                  className="landing-button secondary"
-                  disabled
-                  title="Downloads for macOS, Windows and Android are coming next"
-                >
-                  Download
                 </button>
               </div>
             </div>
