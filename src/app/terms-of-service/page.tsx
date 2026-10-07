@@ -66,7 +66,7 @@ export default function TermsOfServicePage() {
     <LegalPage
       title="Terms of service"
       updated="5 October 2026"
-      intro="These terms govern your use of Vox at voxagent.in. By using Vox you agree to them."
+      intro="These terms govern your use of Vox at callvox.si. By using Vox you agree to them."
       sections={sections}
     />
   );

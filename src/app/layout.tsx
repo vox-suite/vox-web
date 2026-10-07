@@ -44,21 +44,21 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://voxagent.in"),
+  metadataBase: new URL("https://callvox.si"),
   title: {
-    default: "Vox — Your chief of staff, on speed dial",
+    default: "Vox — Your life, understood. Your next move, clearer.",
     template: "%s · Vox",
   },
   description:
-    "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
+    "Bring your days, ideas, and connected world together. Explore Spans, Spaces, Pulse, and a personal AI assistant across desktop, Android, and voice.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Vox — Your chief of staff, on speed dial",
+    title: "Vox — Your life, understood. Your next move, clearer.",
     description:
-      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
-    url: "https://voxagent.in",
+      "Bring your days, ideas, and connected world together. Explore Spans, Spaces, Pulse, and a personal AI assistant across desktop, Android, and voice.",
+    url: "https://callvox.si",
     siteName: "Vox",
     locale: "en_US",
     type: "website",
@@ -73,9 +73,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vox — Your chief of staff, on speed dial",
+    title: "Vox — Your life, understood. Your next move, clearer.",
     description:
-      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
+      "Bring your days, ideas, and connected world together. Explore Spans, Spaces, Pulse, and a personal AI assistant across desktop, Android, and voice.",
     images: ["/vox.svg"],
   },
   robots: {
@@ -97,23 +97,23 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://voxagent.in/#website",
-      url: "https://voxagent.in",
+      "@id": "https://callvox.si/#website",
+      url: "https://callvox.si",
       name: "Vox",
-      description: "Voice-first assistant reachable by phone call or WhatsApp.",
+      description: "Personal AI assistant across desktop, Android, and voice.",
       publisher: {
-        "@id": "https://voxagent.in/#organization",
+        "@id": "https://callvox.si/#organization",
       },
     },
     {
       "@type": "SoftwareApplication",
-      "@id": "https://voxagent.in/#application",
+      "@id": "https://callvox.si/#application",
       name: "Vox",
-      url: "https://voxagent.in",
+      url: "https://callvox.si",
       applicationCategory: "BusinessApplication",
       operatingSystem: "Telephony, Desktop, Android, Web",
       description:
-        "Voice-first assistant reachable by phone call or WhatsApp. Vox keeps work moving after the conversation ends: creating tasks, updating calendars, scheduling reminders, and placing outbound follow-ups.",
+        "Personal AI assistant connecting your timeline, planning, and insights through Spans, Spaces, and Pulse across desktop, Android, and voice.",
     },
   ],
 };
