@@ -538,6 +538,7 @@ export function LandingPage() {
         </Link>
         <p>Work keeps moving.</p>
         <Link href="#trust">Your control & privacy</Link>
+        <Link href="/speech-time-calculator">Speech time calculator</Link>
         <Link href="/privacy-policy">Privacy policy</Link>
         <Link href="/terms-of-service">Terms of service</Link>
         <span>© {new Date().getFullYear()} Vox</span>

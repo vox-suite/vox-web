@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import "./landing.css";
+import { SITE_URL } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -44,7 +45,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://voxagent.in"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Vox — Your chief of staff, on speed dial",
     template: "%s · Vox",
