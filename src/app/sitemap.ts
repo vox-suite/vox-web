@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: "https://callvox.si", lastModified: new Date(), priority: 1 }];
+  return [{ url: "https://voxagent.in", lastModified: new Date(), priority: 1 }];
 }

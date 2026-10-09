@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
     <LegalPage
       title="Privacy policy"
       updated="5 October 2026"
-      intro="This policy explains what Vox collects, how it is used and the control you have. Vox is a voice-first assistant available at callvox.si."
+      intro="This policy explains what Vox collects, how it is used and the control you have. Vox is a voice-first assistant available at voxagent.in."
       sections={sections}
     />
   );
