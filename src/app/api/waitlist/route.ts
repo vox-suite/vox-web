@@ -49,14 +49,15 @@ export async function POST(request: Request) {
       ? body.source
       : "hero";
 
-  const url = process.env.WAITLIST_SUPABASE_URL;
+  const rawUrl = process.env.WAITLIST_SUPABASE_URL;
   const key = process.env.WAITLIST_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key)
+  if (!rawUrl || !key)
     return Response.json(
       { error: "The waitlist is unavailable right now." },
       { status: 503 },
     );
 
+  const url = rawUrl.replace(/\/+$/, "");
   const headers = {
     apikey: key,
     "Content-Type": "application/json",
@@ -71,11 +72,14 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, source }),
       signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok)
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => "");
+      console.error("Supabase waitlist error:", res.status, errorText);
       return Response.json(
         { error: "Could not save your email. Try again." },
         { status: 502 },
       );
+    }
 
     const task =
       typeof body.task === "string" ? body.task.trim().slice(0, 280) : "";
@@ -86,7 +90,9 @@ export async function POST(request: Request) {
         body: JSON.stringify({ email, task }),
         signal: AbortSignal.timeout(10000),
       }).catch(() => null);
-      if (!taskResult?.ok)
+      if (!taskResult?.ok) {
+        const taskErrorText = await taskResult?.text().catch(() => "");
+        console.error("Supabase waitlist_tasks error:", taskResult?.status, taskErrorText);
         return Response.json(
           {
             emailSaved: true,
@@ -95,6 +101,7 @@ export async function POST(request: Request) {
           },
           { status: 502 },
         );
+      }
     }
     return Response.json({ ok: true });
   } catch {
