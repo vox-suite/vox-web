@@ -2384,17 +2384,37 @@
 
 .site-breadcrumbs { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 13px; color: var(--h-body); margin-bottom: 28px; }
 .site-breadcrumbs a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; }
-.download-page { padding-top: clamp(64px,8vw,112px); }
-.download-page h1 { font-size: clamp(44px,6vw,76px); line-height: 1.1; max-width: 800px; }
-.download-page > p { max-width: 65ch; font-size: 17px; margin-top: 24px; }
-.download-platform-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 32px; margin-block: 48px; }
-.download-platform-list > div { border-top: 1px solid var(--h-line); padding-top: 24px; }
-.download-platform-list h2 { font-size: 26px; margin-block: 16px; }
-.download-platform-list p { font-size: 15px; }
-.download-signup { max-width: 680px; padding-block: 40px 80px; }
-.download-signup h2 { font-size: 32px; margin-bottom: 18px; }
-.download-signup > p { margin-bottom: 24px; }
-@media(max-width:600px) { .download-platform-list { grid-template-columns: 1fr; gap: 28px; } }
+/* Downloads: editorial device composition and a shared availability form. */
+.download-page { padding-top: clamp(40px, 5vw, 72px); }
+.download-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); padding-block: 28px 56px; }
+.download-hero-copy { min-width: 0; }
+.download-page h1 { font-size: clamp(44px, 4.8vw, 68px); line-height: 1.08; text-wrap: balance; }
+.download-hero-copy > p { max-width: 48ch; font-size: 17px; margin-block: 24px 28px; }
+.download-hero-art { position: relative; width: 100%; aspect-ratio: 1.08; }
+.download-hero-art img { display: block; position: absolute; height: auto; filter: none; mix-blend-mode: normal; }
+.download-art-desktop { width: 86%; left: 0; top: 0; transform: rotate(-5deg); }
+.download-art-phone { width: 45%; right: -1%; bottom: 0; transform: rotate(8deg); }
+.download-platform-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; padding-block: 28px 44px; border-top: 1px solid var(--h-line); }
+.download-platform-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.download-platform-heading svg { color: var(--h-muted); flex-shrink: 0; }
+.download-platform-list h2 { font-size: 24px; margin: 0; }
+.download-platform-list p { font-size: 15px; max-width: 34ch; }
+.download-signup { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 64px; padding-block: 48px 72px; border-top: 1px solid var(--h-line); scroll-margin-top: 112px; }
+.download-signup h2 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1.12; margin-bottom: 18px; }
+.download-signup p { max-width: 46ch; }
+.download-signup-form { min-width: 0; }
+.download-signup-form .h-form { width: 100%; max-width: 100%; margin: 0; }
+.download-signup-form .h-note { text-align: left; }
+@media (max-width: 760px) {
+  .download-hero { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-bottom: 32px; }
+  .download-page h1 { max-width: 580px; }
+  .download-hero-art { width: min(100%, 430px); justify-self: center; }
+  .download-platform-list { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 28px; }
+  .download-platform-list > div + div { border-top: 1px solid var(--h-line); padding-top: 24px; }
+  .download-platform-list p { max-width: 48ch; }
+  .download-signup { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 32px 56px; }
+}
+
 
 /* Keep the largest above-the-fold text visible from the first paint. */
 .h-hero-copy > h1 { animation: none; }
