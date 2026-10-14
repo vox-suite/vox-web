@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 const { key } = JSON.parse(await readFile('src/lib/indexnow.json', 'utf8'));
-const host = 'callvox.si';
+const host = 'callvox.in';
 const sitemapResponse = await fetch(`https://${host}/sitemap.xml`);
 if (!sitemapResponse.ok) throw new Error(`Sitemap HTTP ${sitemapResponse.status}`);
 const xml = await sitemapResponse.text();

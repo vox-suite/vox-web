@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 const base = process.argv[2] ?? 'http://127.0.0.1:3100';
-const canonical = 'https://callvox.si';
+const canonical = 'https://callvox.in';
 const paths = ['/', '/timeline', '/download', '/speech-time-calculator', '/privacy-policy', '/terms-of-service'];
 const titles = new Set(), descriptions = new Set();
 function tag(html, name, value) {

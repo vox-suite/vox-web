@@ -1944,7 +1944,7 @@
   cursor: pointer;
 }
 .h-follow-examples button[aria-pressed="true"] {
-  color: var(--h-coral);
+  color: var(--h-text);
   border-color: var(--h-coral);
   background: color-mix(in srgb, var(--vox-coral) 4.7%, transparent);
 }
@@ -2395,3 +2395,6 @@
 .download-signup h2 { font-size: 32px; margin-bottom: 18px; }
 .download-signup > p { margin-bottom: 24px; }
 @media(max-width:600px) { .download-platform-list { grid-template-columns: 1fr; gap: 28px; } }
+
+/* Keep the largest above-the-fold text visible from the first paint. */
+.h-hero-copy > h1 { animation: none; }
