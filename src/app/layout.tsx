@@ -1,12 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
-import {
-  JetBrains_Mono,
-  Newsreader,
-  Space_Grotesk,
-  Inter,
-} from "next/font/google";
+import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import "./landing.css";
@@ -15,32 +10,13 @@ import { SITE_URL } from "@/lib/site";
 import { SITE_DESCRIPTION } from "@/lib/seo";
 import { VOX_THEME } from "@/lib/vox-tokens";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  display: "swap",
-  weight: "variable",
-  axes: ["opsz"],
-  style: ["normal", "italic"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-  weight: ["400", "500"],
-});
+const spaceGrotesk = localFont({ src: "./fonts/space-grotesk.woff2", weight: "300 700", variable: "--font-space-grotesk", display: "swap" });
+const inter = localFont({ src: "./fonts/inter.woff2", weight: "100 900", variable: "--font-inter", display: "swap" });
+const newsreader = localFont({ src: [
+  { path: "./fonts/newsreader.woff2", weight: "200 800", style: "normal" },
+  { path: "./fonts/newsreader-italic.woff2", weight: "200 800", style: "italic" },
+], variable: "--font-newsreader", display: "swap", adjustFontFallback: "Times New Roman" });
+const jetbrainsMono = localFont({ src: "./fonts/jetbrains-mono.woff2", weight: "400 500", variable: "--font-jetbrains-mono", display: "swap" });
 
 export const viewport: Viewport = {
   width: "device-width",
