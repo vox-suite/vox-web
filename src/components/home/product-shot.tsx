@@ -63,7 +63,7 @@ export function ProductShot({
   const real = shotExists(name);
   if (kind === "window" && COMPOSED.has(name) && Mock) {
     return (
-      <figure className={`h-shot h-shot-window${crop ? " h-shot-crop" : ""}`}>
+      <figure data-theme="dark" className={`h-shot h-shot-window${crop ? " h-shot-crop" : ""}`}>
         <div className="h-shot-mock">
           <Mock />
           <span className="h-preview">Preview</span>
@@ -74,7 +74,7 @@ export function ProductShot({
   if (kind === "window" && replicaExists(name)) {
     const box = trim && TRIM[name] ? TRIM[name] : crop ? CROP : FULL;
     return (
-      <figure className={`h-shot h-shot-window h-shot-replica${crop || trim ? " h-shot-replicacrop" : ""}`}>
+      <figure data-theme="dark" className={`h-shot h-shot-window h-shot-replica${crop || trim ? " h-shot-replicacrop" : ""}`}>
         <ReplicaSvg name={name} box={box} label={alt} />
       </figure>
     );
@@ -82,7 +82,7 @@ export function ProductShot({
   const trimmed = trim && real ? TRIMMED[name] : undefined;
   if (trimmed) {
     return (
-      <figure className="h-shot h-shot-window h-shot-real">
+      <figure data-theme="dark" className="h-shot h-shot-window h-shot-real">
         <Image
           src={`/shots/cropped/${name}.webp`}
           alt={alt}
@@ -94,7 +94,7 @@ export function ProductShot({
     );
   }
   return (
-    <figure className={`h-shot h-shot-${kind}${crop ? " h-shot-crop" : ""}${real ? " h-shot-real" : ""}`}>
+    <figure data-theme="dark" className={`h-shot h-shot-${kind}${crop ? " h-shot-crop" : ""}${real ? " h-shot-real" : ""}`}>
       {real ? (
         <Image
           src={`/shots/${name}.webp`}

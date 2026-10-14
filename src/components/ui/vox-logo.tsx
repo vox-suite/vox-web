@@ -746,7 +746,7 @@ function HiResThinkingOrb({
 export function VoxLogo({
   animated = true,
   size = 28,
-  theme = "dark",
+  theme = "auto",
   state = "composing",
   speed = 1,
   className,

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { pageMetadata, pageSchema } from "@/lib/seo";
+import { StructuredData } from "@/components/ui/structured-data";
 import { LegalPage, type LegalSection } from "@/components/marketing/legal-page";
 
-export const metadata: Metadata = {
-  title: "Terms of service",
-  alternates: { canonical: "/terms-of-service" },
-};
+const seoTitle = "Terms of Service";
+const description = "Read the terms for using Vox, including connected services, acceptable use, AI output, availability and contact information.";
+export const metadata = pageMetadata({ title: seoTitle, description, path: "/terms-of-service", image: "terms" });
 
 const sections: LegalSection[] = [
   {
@@ -63,11 +63,14 @@ const sections: LegalSection[] = [
 
 export default function TermsOfServicePage() {
   return (
+    <>
+    <StructuredData data={pageSchema(seoTitle, description, "/terms-of-service")} />
     <LegalPage
       title="Terms of service"
       updated="5 October 2026"
-      intro="These terms govern your use of Vox at voxagent.in. By using Vox you agree to them."
+      intro="These terms govern your use of Vox at callvox.si. By using Vox you agree to them."
       sections={sections}
     />
+    </>
   );
 }

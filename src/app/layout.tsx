@@ -12,6 +12,8 @@ import "./globals.css";
 import "./landing.css";
 import "./home.css";
 import { SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION } from "@/lib/seo";
+import { VOX_THEME } from "@/lib/vox-tokens";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -44,79 +46,22 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#040506",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: VOX_THEME.light.background },
+    { media: "(prefers-color-scheme: dark)", color: VOX_THEME.dark.background },
+  ],
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: "Vox — Your chief of staff, on speed dial.",
-    template: "%s · Vox",
-  },
-  description:
-    "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "Vox — Your chief of staff, on speed dial.",
-    description:
-      "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
-    url: SITE_URL,
-    siteName: "Vox",
-    locale: "en_US",
-    type: "website",
-    images: [
-      {
-        url: "/vox.svg",
-        width: 800,
-        height: 600,
-        alt: "Vox Logo and Brand Wordmark",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Vox — Your chief of staff, on speed dial.",
-    description:
-      "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
-    images: ["/vox.svg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  icons: { icon: "/vox.svg" },
-};
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: "Vox",
-      description: "A personal agent you reach by phone call, connected to the accounts you choose.",
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": `${SITE_URL}/#application`,
-      name: "Vox",
-      url: SITE_URL,
-      applicationCategory: "ProductivityApplication",
-      operatingSystem: "macOS, Windows, Android",
-      description:
-        "A personal agent you can call by phone. It answers from the accounts you connect, shows its sources, and can call you for reminders you set.",
-    },
-  ],
+  applicationName: "Vox",
+  verification: { other: { "msvalidate.01": "AA6D6183228CAD9CACFCBF57FB1338BD" } },
+  title: { default: "Vox | Personal AI Assistant by Phone", template: "%s | Vox" },
+  description: SITE_DESCRIPTION,
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+  icons: { icon: [{ url: "/vox.svg", type: "image/svg+xml" }, { url: "/icon-192.png", type: "image/png", sizes: "192x192" }], apple: "/apple-touch-icon.png" },
+  openGraph: { title: "Vox | Personal AI Assistant by Phone", description: SITE_DESCRIPTION, siteName: "Vox", type: "website", images: [{ url: "/social/home.png", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", title: "Vox | Personal AI Assistant by Phone", description: SITE_DESCRIPTION, images: ["/social/home.png"] },
 };
 
 export default function RootLayout({
@@ -139,10 +84,7 @@ export default function RootLayout({
         <Script id="vox-theme-init" strategy="beforeInteractive">
           {`(function(){var r=document.documentElement,m=matchMedia("(prefers-color-scheme: light)"),p="auto";try{p=localStorage.getItem("vox-theme")||"auto"}catch(e){}r.dataset.themePref=p;function a(){var q=r.dataset.themePref;r.dataset.theme=q==="light"||q==="dark"?q:m.matches?"light":"dark"}a();m.addEventListener("change",a)})()`}
         </Script>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+
       </head>
       <body>
         <a className="skip-link" href="#main">

@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import Link from "next/link";
 import { Header, Footer } from "@/components/home/home-page";
 import "./secondary-pages.css";
@@ -23,6 +24,7 @@ export function LegalPage({ title, updated, intro, sections }: {
       <Header />
       <main id="main" className="h-wrap vx-legal" tabIndex={-1}>
         <div className="vx-legal-intro">
+          <Breadcrumbs current={title} />
           <h1>{title}</h1>
           <p className="vx-updated">Last updated {updated}</p>
           <p>{intro}</p>

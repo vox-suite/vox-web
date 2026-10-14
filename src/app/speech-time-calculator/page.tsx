@@ -1,20 +1,13 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { SpeechTimeTool } from "@/components/marketing/speech-time-tool";
 import { FAQ } from "@/lib/speech-time";
 import { SITE_URL } from "@/lib/site";
 
 const url = `${SITE_URL}/speech-time-calculator`;
-const title = "Speech Time Calculator: Words to Minutes (Free)";
 const description =
   "Paste your speech and see how long it takes to say out loud. Free speech time calculator with word count, slow, normal and fast pace. No signup.";
 
-export const metadata: Metadata = {
-  title: { absolute: title },
-  description,
-  alternates: { canonical: url },
-  openGraph: { title, description, url, type: "website", siteName: "Vox" },
-  twitter: { card: "summary", title, description },
-};
+export const metadata = pageMetadata({ title: "Speech Time Calculator: Words to Minutes", description, path: "/speech-time-calculator", image: "speech" });
 
 const jsonLd = {
   "@context": "https://schema.org",

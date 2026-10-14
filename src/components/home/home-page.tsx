@@ -78,7 +78,7 @@ function Grain({ id }: { id: string }) {
 function Brand({ size = 34 }: { size?: number }) {
   return (
     <Link href="/" className="h-brand" aria-label="Vox home">
-      <VoxLogo size={size} theme="auto" />
+      <VoxLogo size={size} />
       <span className="h-brand-name">vox</span>
     </Link>
   );
@@ -108,7 +108,7 @@ export function Header({ current }: { current?: string }) {
           <Link href="/timeline" aria-current={current === "timeline" ? "page" : undefined}>Timeline</Link>
           <span className="h-nav-pending" title="Insights page coming soon">Insights <small>Soon</small></span>
           <span className="h-nav-pending" title="Projects page coming soon">Projects <small>Soon</small></span>
-          <Link href="/download">Downloads</Link>
+          <Link href="/download" aria-current={current === "download" ? "page" : undefined}>Downloads</Link>
         </nav>
         <MobileMenu links={[["/timeline", "Timeline"], ["/download", "Downloads"]]} current={current} />
         <ThemeToggle />
@@ -139,7 +139,7 @@ function Hero() {
           <em>on speed dial.</em>
         </h1>
         <p className="h-lead">
-          Vox brings together the details of your life, helps you make sense of
+          Vox is a personal AI assistant you can call. It brings together the details of your life, helps you make sense of
           them, and follows through on tasks you hand over.{" "}
           <em>Call, message or open the app.</em>
         </p>
@@ -364,6 +364,7 @@ export function Footer() {
         <nav aria-label="Product">
           <h3>Product</h3>
           <Link href="/timeline">Timeline</Link>
+          <Link href="/speech-time-calculator">Speech time calculator</Link>
           <span className="h-footer-pending">Insights <small>Coming soon</small></span>
           <span className="h-footer-pending">Projects <small>Coming soon</small></span>
           <Link href="/download">Downloads</Link>

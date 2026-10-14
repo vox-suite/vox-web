@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,6 +29,7 @@ export function TimelinePage() {
     <Header current="timeline" />
     <main id="main" tabIndex={-1}>
       <section className="tl-hero h-wrap">
+        <Breadcrumbs current="Timeline" />
         <div className="tl-hero-composition">
         <div className="tl-hero-copy">
         <h1>Your days,<br/><em>brought together.</em></h1>

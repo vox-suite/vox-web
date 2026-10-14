@@ -8,7 +8,10 @@
     "build": "next build --webpack",
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "verify:seo": "node scripts/verify-seo.mjs",
+    "submit:indexnow": "node scripts/submit-indexnow.mjs",
+    "generate:social": "node scripts/generate-social-images.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

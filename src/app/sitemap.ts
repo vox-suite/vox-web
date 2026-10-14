@@ -2,9 +2,6 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    { url: SITE_URL, lastModified: new Date(), priority: 1 },
-    { url: `${SITE_URL}/timeline`, lastModified: new Date(), priority: 0.9 },
-    { url: `${SITE_URL}/speech-time-calculator`, lastModified: new Date(), priority: 0.8 },
-  ];
+  // Omit lastModified until per-page content dates are maintained accurately.
+  return ["/", "/timeline", "/download", "/speech-time-calculator", "/privacy-policy", "/terms-of-service"].map(path => ({ url: `${SITE_URL}${path}` }));
 }

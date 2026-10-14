@@ -1,0 +1,14 @@
+import { readFile } from 'node:fs/promises';
+const { key } = JSON.parse(await readFile('src/lib/indexnow.json', 'utf8'));
+const host = 'callvox.si';
+const sitemapResponse = await fetch(`https://${host}/sitemap.xml`);
+if (!sitemapResponse.ok) throw new Error(`Sitemap HTTP ${sitemapResponse.status}`);
+const xml = await sitemapResponse.text();
+const urlList = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+if (!urlList.length || urlList.some(url => new URL(url).hostname !== host)) throw new Error('Invalid canonical sitemap URLs');
+const keyLocation = `https://${host}/${key}.txt`;
+const proof = await fetch(keyLocation);
+if (!proof.ok || (await proof.text()).trim() !== key) throw new Error('Publish the IndexNow key before submitting');
+const response = await fetch('https://api.indexnow.org/indexnow', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ host, key, keyLocation, urlList }) });
+console.log(JSON.stringify({ status: response.status, urls: urlList.length, meaning: response.status === 200 ? 'Received; indexing is not guaranteed' : response.status === 202 ? 'Received; key validation pending' : await response.text() }));
+if (![200,202].includes(response.status)) process.exitCode = 1;

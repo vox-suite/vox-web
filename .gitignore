@@ -13,3 +13,5 @@ playwright-report/
 test-results/
 .playwright-mcp/
 .superpowers/
+.vercel
+.env*

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { pageMetadata, pageSchema } from "@/lib/seo";
+import { StructuredData } from "@/components/ui/structured-data";
 import { LegalPage, type LegalSection } from "@/components/marketing/legal-page";
 
-export const metadata: Metadata = {
-  title: "Privacy policy",
-  alternates: { canonical: "/privacy-policy" },
-};
+const seoTitle = "Privacy Policy";
+const description = "Read how Vox collects and uses account, conversation and connected-service information, plus your choices for access, retention and deletion.";
+export const metadata = pageMetadata({ title: seoTitle, description, path: "/privacy-policy", image: "privacy" });
 
 const sections: LegalSection[] = [
   {
@@ -70,11 +70,14 @@ const sections: LegalSection[] = [
 
 export default function PrivacyPolicyPage() {
   return (
+    <>
+    <StructuredData data={pageSchema(seoTitle, description, "/privacy-policy")} />
     <LegalPage
       title="Privacy policy"
       updated="5 October 2026"
-      intro="This policy explains what Vox collects, how it is used and the control you have. Vox is a voice-first assistant available at voxagent.in."
+      intro="This policy explains what Vox collects, how it is used and the control you have. Vox is a voice-first assistant available at callvox.si."
       sections={sections}
     />
+    </>
   );
 }
