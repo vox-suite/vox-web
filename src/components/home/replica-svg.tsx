@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+
+import { ditherSvg } from "./dither-svg";
 
 const cache = new Map<string, Promise<string>>();
 
@@ -25,6 +27,7 @@ export function ReplicaSvg({
   box: [number, number, number, number];
   label: string;
 }) {
+  const filterId = `replica-dither-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const ref = useRef<HTMLDivElement>(null);
   const [markup, setMarkup] = useState("");
 
@@ -38,7 +41,7 @@ export function ReplicaSvg({
         observer.disconnect();
         load(name)
           .then((text) => {
-            if (!cancelled) setMarkup(text);
+            if (!cancelled) setMarkup(ditherSvg(text, filterId));
           })
           .catch(() => {});
       },
@@ -49,7 +52,7 @@ export function ReplicaSvg({
       cancelled = true;
       observer.disconnect();
     };
-  }, [name]);
+  }, [name, filterId]);
 
   const html = markup.replace(
     /^<svg [^>]*>/,

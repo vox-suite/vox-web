@@ -76,11 +76,11 @@ export const VOX_THEME = {
     "pink": "#b8327a",
     "orange": "#b45309",
     "slate": "#566273",
-    "map": "#ecebe7",
-    "mapWater": "#d3dde2",
-    "mapLand": "#e6e5e0",
-    "mapRoad": "#ffffff",
-    "mapBuilding": "#d8d7d2"
+    "map": "#c4cac6",
+    "mapWater": "#6b8fa8",
+    "mapLand": "#b8beba",
+    "mapRoad": "#8c938f",
+    "mapBuilding": "#ffffff"
   }
 } as const;
 export type VoxColor = "background" | "surface" | "surface-raised" | "surface-accent" | "panel" | "sidebar" | "modal" | "border" | "border-strong" | "text" | "text-muted" | "text-dim" | "primary" | "primary-hover" | "on-primary" | "on-accent" | "ink" | "shade" | "coral" | "coral-soft" | "gold" | "mint" | "sky" | "crimson" | "danger" | "success" | "warning" | "info" | "violet" | "teal" | "cyan" | "pink" | "orange" | "slate" | "map" | "map-water" | "map-land" | "map-road" | "map-building";

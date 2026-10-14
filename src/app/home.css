@@ -269,6 +269,7 @@
   border: 1px solid var(--h-line-strong);
   border-radius: 999px;
   background: var(--vox-surface-raised);
+  overflow: hidden;
   transition:
     border-color 200ms ease,
     box-shadow 200ms ease;
@@ -289,9 +290,20 @@
     400 16px var(--font-inter),
     sans-serif;
   outline: none;
+  border-radius: 999px 0 0 999px;
 }
 .h-field input[type="email"]::placeholder {
   color: var(--h-dim);
+}
+.h-field input[type="email"]:-webkit-autofill,
+.h-field input[type="email"]:-webkit-autofill:hover,
+.h-field input[type="email"]:-webkit-autofill:focus,
+.h-field input[type="email"]:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--h-text) !important;
+  caret-color: var(--h-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--vox-surface-raised) inset !important;
+  box-shadow: 0 0 0 1000px var(--vox-surface-raised) inset !important;
+  transition: background-color 5000000s ease-in-out 0s;
 }
 .h-form-error {
   min-height: 22px;
@@ -1380,6 +1392,17 @@
   color: var(--h-text);
   font: inherit;
   font-size: 15px;
+  border-radius: 12px;
+}
+.h-input input:-webkit-autofill,
+.h-input input:-webkit-autofill:hover,
+.h-input input:-webkit-autofill:focus,
+.h-input input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--h-text) !important;
+  caret-color: var(--h-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--vox-surface) inset !important;
+  box-shadow: 0 0 0 1000px var(--vox-surface) inset !important;
+  transition: background-color 5000000s ease-in-out 0s;
 }
 .h-suggest {
   display: flex;
@@ -2305,6 +2328,15 @@
 [data-theme="light"] .h-field:focus-within {
   border-color: color-mix(in srgb, var(--vox-ink) 35%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--vox-ink) 5%, transparent);
+}
+[data-theme="light"] :is(.h-field input[type="email"], .h-input input):-webkit-autofill,
+[data-theme="light"] :is(.h-field input[type="email"], .h-input input):-webkit-autofill:hover,
+[data-theme="light"] :is(.h-field input[type="email"], .h-input input):-webkit-autofill:focus,
+[data-theme="light"] :is(.h-field input[type="email"], .h-input input):-webkit-autofill:active {
+  -webkit-text-fill-color: var(--h-text) !important;
+  caret-color: var(--h-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--vox-surface) inset !important;
+  box-shadow: 0 0 0 1000px var(--vox-surface) inset !important;
 }
 [data-theme="light"] .h-spot::before {
   background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--vox-ink) 3%, transparent), transparent 60%);

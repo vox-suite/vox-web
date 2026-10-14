@@ -71,6 +71,14 @@
     outline: 2px solid var(--vox-sky);
     outline-offset: 2px;
   }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--vox-text) !important;
+    caret-color: var(--vox-text);
+    transition: background-color 5000000s ease-in-out 0s, color 5000000s ease-in-out 0s;
+  }
   .skip-link {
     position: fixed;
     top: 1rem;
