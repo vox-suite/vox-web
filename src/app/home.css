@@ -81,6 +81,30 @@
   z-index: 30;
   padding-inline: 20px;
   pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.h-header::before {
+  content: "";
+  position: absolute;
+  inset: -14px 0 -10px;
+  z-index: -1;
+  background: color-mix(in srgb, color-mix(in srgb, var(--h-coral) 8%, var(--vox-surface)) 62%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid var(--h-line);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.h-header[data-scrolled="true"]::before {
+  opacity: 1;
+}
+.h-header[data-hidden="true"] {
+  transform: translateY(calc(-100% - 28px));
+}
+@media (prefers-reduced-motion: reduce) {
+  .h-header {
+    transition: none;
+  }
 }
 .h-header-inner {
   position: relative;

@@ -12,6 +12,7 @@ import { TimeRibbon } from "./time-ribbon";
 import { Spotlight } from "./spotlight";
 import { WaitlistForm } from "./waitlist-form";
 import { ThemeToggle } from "./theme-toggle";
+import { HeaderScroll } from "./header-scroll";
 
 const connectors = [
   "gmail",
@@ -102,6 +103,7 @@ function Head({
 export function Header({ current }: { current?: string }) {
   return (
     <header className="h-header">
+      <HeaderScroll />
       <div className="h-header-inner">
         <Brand size={46} />
         <nav className="h-nav" aria-label="Main navigation">
