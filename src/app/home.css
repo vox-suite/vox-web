@@ -81,7 +81,7 @@
   z-index: 30;
   padding-inline: 20px;
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+
 }
 .h-header::before {
   content: "";
@@ -97,9 +97,6 @@
 }
 .h-header[data-scrolled="true"]::before {
   opacity: 1;
-}
-.h-header[data-hidden="true"] {
-  transform: translateY(calc(-100% - 28px));
 }
 @media (prefers-reduced-motion: reduce) {
   .h-header {
@@ -2486,3 +2483,59 @@
 
 /* Keep the largest above-the-fold text visible from the first paint. */
 .h-hero-copy > h1 { animation: none; }
+
+/* The header turns red when it returns above scrolled page content. */
+.h-header[data-scrolled="true"]::before {
+  background: var(--vox-danger);
+  opacity: 1;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: color-mix(in srgb, var(--vox-on-primary) 20%, transparent);
+}
+.h-header[data-scrolled="true"] .h-brand-name,
+.h-header[data-scrolled="true"] .h-nav a,
+.h-header[data-scrolled="true"] .h-nav-pending,
+.h-header[data-scrolled="true"] .h-theme,
+.h-header[data-scrolled="true"] .h-mobile-menu summary {
+  color: var(--vox-on-primary);
+}
+.h-header[data-scrolled="true"] .h-nav,
+[data-theme="light"] .h-header[data-scrolled="true"] .h-nav {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--vox-on-primary) 25%, transparent);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.h-header[data-scrolled="true"] .h-nav a[aria-current="page"],
+.h-header[data-scrolled="true"] .h-nav a:hover,
+[data-theme="light"] .h-header[data-scrolled="true"] .h-nav a:hover {
+  color: var(--vox-on-primary);
+  background: color-mix(in srgb, var(--vox-on-primary) 16%, transparent);
+}
+.h-header[data-scrolled="true"] .h-theme {
+  border-color: color-mix(in srgb, var(--vox-on-primary) 35%, transparent);
+  background: transparent;
+}
+.h-header[data-scrolled="true"] .h-theme:hover {
+  background: color-mix(in srgb, var(--vox-on-primary) 16%, transparent);
+}
+.h-header[data-scrolled="true"] .h-mobile-menu nav .h-nav-pending { color: var(--h-body); }
+
+/* A quiet attention cue while the autonomy example is held in view. */
+.h-au-stage { position: relative; isolation: isolate; }
+.h-au-stage::before {
+  content: "";
+  position: absolute;
+  inset: -36px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 62% 48%, color-mix(in srgb, var(--vox-danger) 18%, transparent), transparent 72%);
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.h-au-scroll[data-pin-active="true"] .h-au-stage::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .h-au-stage::before { transition: none; }
+}

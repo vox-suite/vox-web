@@ -111,9 +111,13 @@ export function AutonomyPanel({ children }: { children: ReactNode }) {
         height < window.innerHeight - 120;
       container.dataset.pinned = String(enabled);
       container.style.setProperty("--au-height", `${height}px`);
-      if (!enabled || manual.current) return;
       const top = Math.max(88, (window.innerHeight - height) / 2);
-      const distance = container.getBoundingClientRect().height - height;
+      const bounds = container.getBoundingClientRect();
+      container.dataset.pinActive = String(
+        enabled && bounds.top <= top && bounds.bottom >= top + height,
+      );
+      if (!enabled || manual.current) return;
+      const distance = bounds.height - height;
       const progress = Math.max(
         0,
         Math.min(1, (top - container.getBoundingClientRect().top) / distance),
