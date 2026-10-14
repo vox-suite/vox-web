@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "src/app/home.css"
+        ],
+        "createdAt": "2026-10-12T16:09:47.801Z",
+        "reason": "agent judgment: height transition on details::details-content is the standard native accordion technique with no transform equivalent; hover padding animation was fixed separately"
+      }
+    ]
+  }
+}

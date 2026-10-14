@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import "./landing.css";
+import "./home.css";
 import { SITE_URL } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
@@ -26,7 +27,8 @@ const newsreader = Newsreader({
   subsets: ["latin"],
   variable: "--font-newsreader",
   display: "swap",
-  weight: ["400"],
+  weight: "variable",
+  axes: ["opsz"],
   style: ["normal", "italic"],
 });
 
@@ -47,19 +49,19 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Vox — Your chief of staff, on speed dial",
+    default: "Vox — Your chief of staff, on speed dial.",
     template: "%s · Vox",
   },
   description:
-    "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
+    "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Vox — Your chief of staff, on speed dial",
+    title: "Vox — Your chief of staff, on speed dial.",
     description:
-      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
-    url: "https://voxagent.in",
+      "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
+    url: SITE_URL,
     siteName: "Vox",
     locale: "en_US",
     type: "website",
@@ -74,9 +76,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vox — Your chief of staff, on speed dial",
+    title: "Vox — Your chief of staff, on speed dial.",
     description:
-      "Call once. Work keeps moving. Vox turns conversations into tasks, plans and follow-ups, then reaches back when you need the next move.",
+      "Call Vox to ask about your day, your spending or what comes next, no app or mobile data needed. Vox can also call you for reminders you set and urgent updates you've enabled.",
     images: ["/vox.svg"],
   },
   robots: {
@@ -98,23 +100,20 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://voxagent.in/#website",
-      url: "https://voxagent.in",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
       name: "Vox",
-      description: "Voice-first assistant reachable by phone call or WhatsApp.",
-      publisher: {
-        "@id": "https://voxagent.in/#organization",
-      },
+      description: "A personal agent you reach by phone call, connected to the accounts you choose.",
     },
     {
       "@type": "SoftwareApplication",
-      "@id": "https://voxagent.in/#application",
+      "@id": `${SITE_URL}/#application`,
       name: "Vox",
-      url: "https://voxagent.in",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Telephony, Desktop, Android, Web",
+      url: SITE_URL,
+      applicationCategory: "ProductivityApplication",
+      operatingSystem: "macOS, Windows, Android",
       description:
-        "Voice-first assistant reachable by phone call or WhatsApp. Vox keeps work moving after the conversation ends: creating tasks, updating calendars, scheduling reminders, and placing outbound follow-ups.",
+        "A personal agent you can call by phone. It answers from the accounts you connect, shows its sources, and can call you for reminders you set.",
     },
   ],
 };

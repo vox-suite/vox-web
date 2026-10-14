@@ -7,7 +7,16 @@
         "rule": "design-system-font",
         "value": "sfmono-regular",
         "createdAt": "2026-09-21T17:30:37.386Z",
-        "reason": "Standard monospace fallback stack for code blocks, badges, and changelog dates \u2014 not a display font"
+        "reason": "Standard monospace fallback stack for code blocks, badges, and changelog dates — not a display font"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "src/app/home.css"
+        ],
+        "createdAt": "2026-10-12T18:28:29.324Z",
+        "reason": "agent judgment: height transition on details::details-content is the native accordion technique; no transform equivalent reflows the rows below. Hover padding animation was fixed separately."
       }
     ]
   }

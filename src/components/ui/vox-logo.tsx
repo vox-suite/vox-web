@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useSyncExternalStore } from "react";
+import React, { useEffect, useRef, useSyncExternalStore } from "react";
 
 const emptySubscribe = () => () => {};
 function useIsMounted() {
@@ -10,8 +10,7 @@ function useIsMounted() {
     () => false,
   );
 }
-import type { OrbState } from "thinking-orbs";
-import { ThinkingOrb } from "thinking-orbs";
+import { MODE_DRAWS, resolvePreset, type OrbState, type OrbTheme } from "thinking-orbs";
 
 const STATIC_ORB_DOTS: readonly [
   cx: number,
@@ -639,6 +638,99 @@ export interface VoxLogoProps {
   "aria-hidden"?: boolean | "true" | "false";
 }
 
+function HiResThinkingOrb({
+  state,
+  displaySize,
+  theme = "dark",
+  speed = 1,
+}: {
+  state: OrbState;
+  displaySize: number;
+  theme?: OrbTheme;
+  speed?: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const speedRef = useRef(speed);
+  useEffect(() => {
+    speedRef.current = speed;
+  });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const engineSize = displaySize >= 24 ? 64 : 20;
+    const dark = theme !== "light";
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    const pixel = Math.round(displaySize * dpr);
+    canvas.width = pixel;
+    canvas.height = pixel;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+    const { mode, speed: baseSpeed, opts } = resolvePreset(state, engineSize);
+    const draw = MODE_DRAWS[mode];
+    const scale = (displaySize / engineSize) * dpr;
+    const paint = (t: number) => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, pixel, pixel);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      draw(ctx, engineSize, t, dark, opts);
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      paint(0.6);
+      return;
+    }
+    let raf = 0;
+    let running = false;
+    let visible = true;
+    let last = performance.now();
+    let sim = 0;
+    const tick = (now: number) => {
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      sim += dt * baseSpeed * speedRef.current;
+      paint(sim);
+      if (running) raf = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    paint(0);
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && document.visibilityState !== "hidden") start();
+      else stop();
+    });
+    io.observe(canvas);
+    const onVis = () => {
+      if (document.visibilityState === "hidden") stop();
+      else if (visible) start();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    start();
+    return () => {
+      stop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [state, displaySize, theme]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      role="img"
+      aria-label="Vox"
+      style={{ width: displaySize, height: displaySize, display: "block" }}
+    />
+  );
+}
+
 export function VoxLogo({
   animated = true,
   size = 28,
@@ -664,8 +756,6 @@ export function VoxLogo({
     );
   }
 
-  const presetSize = size >= 24 ? 64 : 20;
-
   return (
     <span
       className={className}
@@ -681,13 +771,7 @@ export function VoxLogo({
         ...style,
       }}
     >
-      <ThinkingOrb
-        state={state}
-        size={presetSize}
-        theme={theme}
-        speed={speed}
-        style={{ width: size, height: size }}
-      />
+      <HiResThinkingOrb state={state} displaySize={size} theme={theme} speed={speed} />
     </span>
   );
 }
