@@ -27,3 +27,8 @@ create policy "anyone can add a task"
   on public.waitlist_tasks for insert
   to anon
   with check (true);
+
+grant select, insert on table public.waitlist to anon;
+grant select, insert on table public.waitlist_tasks to anon;
+grant all on table public.waitlist to service_role;
+grant all on table public.waitlist_tasks to service_role;
