@@ -4197,3 +4197,44 @@ html[data-theme="light"]:has(.vox-home) body {
 .h-footer-bottom a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; }
 .h-wordmark { font-size: clamp(120px, 24vw, 320px); letter-spacing: -.04em; margin-top: 28px; }
 @media(max-width:600px) { .h-footer { padding-top: 40px; } .h-footer-grid { gap: 28px; } .h-footer-pending { flex-wrap: wrap; gap: 0 8px; } .h-footer-bottom { font-size: 13px; } }
+
+/* Center the complete header row, with one shared alignment axis. */
+.h-header-inner { justify-content: center; gap: 24px; height: 64px; }
+.h-header .h-brand { flex-shrink: 0; margin-right: 24px; }
+.h-header .h-brand-name { font-size: 36px; letter-spacing: -.035em; }
+.h-header .h-nav { position: static; transform: none; align-items: center; }
+.h-header .h-theme { margin-left: 24px; flex-shrink: 0; }
+.h-header .h-btn-small { flex-shrink: 0; }
+@media(max-width:960px) {
+ .h-header-inner { justify-content: space-between; gap: 10px; }
+ .h-header .h-brand { margin-right: 0; }
+ .h-header .h-theme { margin-left: 0; }
+ .h-header .h-brand-name { font-size: 30px; }
+ .h-header .h-brand canvas { width: 40px !important; height: 40px !important; }
+}
+@media(max-width:400px) {
+ .h-header { padding-inline: 12px; }
+ .h-header-inner { gap: 6px; }
+ .h-header .h-brand { gap: 6px; }
+ .h-header .h-brand-name { font-size: 28px; }
+ .h-header .h-brand canvas { width: 34px !important; height: 34px !important; }
+ .h-header .h-theme { width: 32px; height: 40px; }
+ .h-header .h-btn-small { padding-inline: 12px; font-size: 11px; }
+}
+.h-join-short { display: none; }
+@media(max-width:400px) {
+ .h-header .h-theme { margin-right: 0; }
+ .h-header .h-mobile-menu { margin: 0; }
+}
+@media(max-width:360px) {
+ .h-header .h-join-full { display: none; }
+ .h-header .h-join-short { display: inline; }
+}
+
+/* Keep the brand and actions spread out, with navigation centered independently. */
+@media(min-width:961px) {
+ .h-header-inner { justify-content: space-between; }
+ .h-header .h-brand { margin-right: 0; }
+ .h-header .h-nav { position: absolute; left: 50%; transform: translateX(-50%); }
+ .h-header .h-theme { margin-left: auto; margin-right: 0; }
+}

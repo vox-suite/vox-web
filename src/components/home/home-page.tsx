@@ -103,7 +103,7 @@ export function Header({ current }: { current?: string }) {
   return (
     <header className="h-header">
       <div className="h-header-inner">
-        <Brand />
+        <Brand size={46} />
         <nav className="h-nav" aria-label="Main navigation">
           <Link href="/timeline" aria-current={current === "timeline" ? "page" : undefined}>Timeline</Link>
           <span className="h-nav-pending" title="Insights page coming soon">Insights <small>Soon</small></span>
@@ -113,7 +113,7 @@ export function Header({ current }: { current?: string }) {
         <MobileMenu links={[["/timeline", "Timeline"], ["/download", "Downloads"]]} current={current} />
         <ThemeToggle />
         <Link href="/#waitlist" className="h-btn h-btn-small">
-          <span>Join the waitlist</span>
+          <span className="h-join-full">Join the waitlist</span><span className="h-join-short">Join waitlist</span>
         </Link>
       </div>
     </header>
