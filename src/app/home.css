@@ -1419,6 +1419,9 @@
   background: color-mix(in srgb, var(--vox-ink) 92%, transparent);
 }
 @media (max-width: 860px) {
+  .h-final {
+    padding: 40px 20px;
+  }
   .h-panel {
     padding: 0;
     border: 0;
