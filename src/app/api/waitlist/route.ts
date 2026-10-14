@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       : "hero";
 
   const url = process.env.WAITLIST_SUPABASE_URL;
-  const key = process.env.WAITLIST_SUPABASE_ANON_KEY;
+  const key = process.env.WAITLIST_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key)
     return Response.json(
       { error: "The waitlist is unavailable right now." },
@@ -59,7 +59,6 @@ export async function POST(request: Request) {
 
   const headers = {
     apikey: key,
-    Authorization: `Bearer ${key}`,
     "Content-Type": "application/json",
   };
   try {
