@@ -2,25 +2,25 @@ import Image from "next/image";
 
 const channels = [
   {
-    image: "dithered-receiver",
+    image: "dithered-receiver-cutout",
     name: "Call",
     title: "Help is a phone call away.",
     text: "Ask a question or set a reminder out loud. No app or mobile data needed.",
   },
   {
-    image: "dithered-plane",
+    image: "dithered-plane-cutout",
     name: "Message",
     title: "A quick question. A reply to keep.",
     text: "Reach Vox on WhatsApp or Telegram and return to the conversation when you’re ready.",
   },
   {
-    image: "dithered-desktop",
+    image: "dithered-desktop-transparent",
     name: "Desktop",
     title: "Room for the bigger picture.",
     text: "Explore your timeline, compare charts, check sources and work through plans.",
   },
   {
-    image: "dithered-mobile",
+    image: "dithered-mobile-transparent",
     name: "Mobile",
     title: "Your day, within reach.",
     text: "Check your timeline and ask Vox while you’re out.",

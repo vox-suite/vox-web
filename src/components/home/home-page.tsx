@@ -1,7 +1,8 @@
+import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { MobileMenu } from "./mobile-menu";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { VoxLogo } from "@/components/ui/vox-logo";
 import { AutonomyPanel } from "./autonomy-panel";
 import { AutomateFlow } from "./automate-flow";
@@ -10,6 +11,7 @@ import { ProductShot } from "./product-shot";
 import { TimeRibbon } from "./time-ribbon";
 import { Spotlight } from "./spotlight";
 import { WaitlistForm } from "./waitlist-form";
+import { ThemeToggle } from "./theme-toggle";
 
 const connectors = [
   "gmail",
@@ -20,13 +22,7 @@ const connectors = [
   "playstation",
 ];
 
-const navLinks = [
-  ["#track", "Know your day"],
-  ["#automate", "Automate"],
-  ["#autonomy", "Control"],
-  ["#channels", "Channels"],
-  ["#faq", "FAQ"],
-];
+
 
 const faqs = [
   [
@@ -82,7 +78,7 @@ function Grain({ id }: { id: string }) {
 function Brand({ size = 34 }: { size?: number }) {
   return (
     <Link href="/" className="h-brand" aria-label="Vox home">
-      <VoxLogo size={size} />
+      <VoxLogo size={size} theme="auto" />
       <span className="h-brand-name">vox</span>
     </Link>
   );
@@ -103,22 +99,22 @@ function Head({
   );
 }
 
-function Header() {
+export function Header({ current }: { current?: string }) {
   return (
     <header className="h-header">
       <div className="h-header-inner">
         <Brand />
         <nav className="h-nav" aria-label="Main navigation">
-          {navLinks.map(([href, label]) => (
-            <a key={href} href={href}>
-              {label}
-            </a>
-          ))}
+          <Link href="/timeline" aria-current={current === "timeline" ? "page" : undefined}>Timeline</Link>
+          <span className="h-nav-pending" title="Insights page coming soon">Insights <small>Soon</small></span>
+          <span className="h-nav-pending" title="Projects page coming soon">Projects <small>Soon</small></span>
+          <Link href="/download">Downloads</Link>
         </nav>
-        <MobileMenu links={navLinks} />
-        <a href="#waitlist" className="h-btn h-btn-small">
+        <MobileMenu links={[["/timeline", "Timeline"], ["/download", "Downloads"]]} current={current} />
+        <ThemeToggle />
+        <Link href="/#waitlist" className="h-btn h-btn-small">
           <span>Join the waitlist</span>
-        </a>
+        </Link>
       </div>
     </header>
   );
@@ -238,7 +234,7 @@ function Automate() {
         <AutomateFlow>
           <Image
             className="h-reminder-art"
-            src="/illustrations/dithered-clock.png"
+            src="/illustrations/dithered-clock-transparent.png"
             alt=""
             width={88}
             height={88}
@@ -290,7 +286,7 @@ function Security() {
         <div className="h-trust-band">
           <Image
             className="h-trust-art"
-            src="/illustrations/dithered-key.png"
+            src="/illustrations/dithered-key-transparent.png"
             alt=""
             width={180}
             height={180}
@@ -312,17 +308,7 @@ function Faq() {
         <Head>
           A few things <em>you might be wondering.</em>
         </Head>
-        <div className="h-faq-list">
-          {faqs.map(([q, a], i) => (
-            <details key={q} name="faq" open={i === 0}>
-              <summary>
-                <span>{q}</span>
-                <ChevronDown size={18} aria-hidden="true" />
-              </summary>
-              <p>{a}</p>
-            </details>
-          ))}
-        </div>
+        <FaqAccordion items={faqs} name="home-faq" />
       </div>
     </section>
   );
@@ -340,7 +326,7 @@ function Waitlist() {
           <div className="h-final-copy">
             <Image
               className="h-waitlist-art"
-              src="/illustrations/dithered-envelope.png"
+              src="/illustrations/dithered-envelope-transparent.png"
               alt=""
               width={100}
               height={100}
@@ -367,7 +353,7 @@ function Waitlist() {
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="h-footer">
       <div className="h-wrap h-footer-grid">
@@ -377,18 +363,17 @@ function Footer() {
         </div>
         <nav aria-label="Product">
           <h3>Product</h3>
-          {navLinks.slice(0, 4).map(([href, label]) => (
-            <a key={href} href={href}>
-              {label}
-            </a>
-          ))}
+          <Link href="/timeline">Timeline</Link>
+          <span className="h-footer-pending">Insights <small>Coming soon</small></span>
+          <span className="h-footer-pending">Projects <small>Coming soon</small></span>
+          <Link href="/download">Downloads</Link>
         </nav>
         <nav aria-label="Legal">
           <h3>Legal</h3>
           <Link href="/privacy-policy">Privacy policy</Link>
           <Link href="/terms-of-service">Terms of service</Link>
         </nav>
-        <span>© {new Date().getFullYear()} Vox</span>
+        <div className="h-footer-bottom"><span>© {new Date().getFullYear()} Vox</span><Link href="/#waitlist">Join the waitlist</Link></div>
       </div>
       <div className="h-wordmark" aria-hidden="true">
         vox

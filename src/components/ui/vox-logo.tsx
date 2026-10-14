@@ -10,6 +10,18 @@ function useIsMounted() {
     () => false,
   );
 }
+function subscribeTheme(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+}
+function usePageTheme(): "light" | "dark" {
+  return useSyncExternalStore(
+    subscribeTheme,
+    () => (document.documentElement.dataset.theme === "light" ? "light" : "dark"),
+    () => "dark",
+  );
+}
 import { MODE_DRAWS, resolvePreset, type OrbState, type OrbTheme } from "thinking-orbs";
 
 const STATIC_ORB_DOTS: readonly [
@@ -743,6 +755,8 @@ export function VoxLogo({
   "aria-hidden": ariaHidden = true,
 }: VoxLogoProps) {
   const mounted = useIsMounted();
+  const pageTheme = usePageTheme();
+  const resolvedTheme = theme === "auto" ? pageTheme : theme;
 
   if (!animated || !mounted) {
     return (
@@ -771,7 +785,7 @@ export function VoxLogo({
         ...style,
       }}
     >
-      <HiResThinkingOrb state={state} displaySize={size} theme={theme} speed={speed} />
+      <HiResThinkingOrb state={state} displaySize={size} theme={resolvedTheme} speed={speed} />
     </span>
   );
 }

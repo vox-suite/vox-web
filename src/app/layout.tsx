@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import {
   JetBrains_Mono,
@@ -126,6 +127,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         newsreader.variable,
         jetbrainsMono.variable,
@@ -134,6 +136,9 @@ export default function RootLayout({
       )}
     >
       <head>
+        <Script id="vox-theme-init" strategy="beforeInteractive">
+          {`(function(){var r=document.documentElement,m=matchMedia("(prefers-color-scheme: light)"),p="auto";try{p=localStorage.getItem("vox-theme")||"auto"}catch(e){}r.dataset.themePref=p;function a(){var q=r.dataset.themePref;r.dataset.theme=q==="light"||q==="dark"?q:m.matches?"light":"dark"}a();m.addEventListener("change",a)})()`}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
