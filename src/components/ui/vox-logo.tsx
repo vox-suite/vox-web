@@ -697,10 +697,13 @@ function HiResThinkingOrb({
     let last = performance.now();
     let sim = 0;
     const tick = (now: number) => {
-      const dt = Math.min(0.1, (now - last) / 1000);
-      last = now;
-      sim += dt * baseSpeed * speedRef.current;
-      paint(sim);
+      // Small brand marks do not need a redraw on every display refresh.
+      if (now - last >= 1000 / 24) {
+        const dt = Math.min(0.1, (now - last) / 1000);
+        last = now;
+        sim += dt * baseSpeed * speedRef.current;
+        paint(sim);
+      }
       if (running) raf = requestAnimationFrame(tick);
     };
     const start = () => {
