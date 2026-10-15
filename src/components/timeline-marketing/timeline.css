@@ -183,3 +183,14 @@
  .tl-download-desktop { width: 250px; }
  .tl-download-phone { width: 140px; }
 }
+
+/* The actual desktop vector replica, with its original geometry and theme. */
+.tl-desktop-preview { margin: 0; scroll-margin-top: 110px; }
+.tl-desktop-preview-scroll { overflow-x: auto; border-radius: 16px; background: var(--vox-surface); }
+.tl-desktop-preview-scroll .h-replica { min-width: 760px; border-radius: 0; box-shadow: none; }
+.tl-desktop-preview-scroll:focus-visible { outline: 2px solid var(--tl-accent); outline-offset: 5px; }
+.tl-desktop-preview figcaption { margin-top: 14px; font-size: 12px; color: var(--tl-muted); }
+.tl-desktop-preview figcaption span { display: none; }
+@media (max-width: 800px) {
+  .tl-desktop-preview figcaption span { display: inline; }
+}

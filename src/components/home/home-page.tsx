@@ -109,10 +109,10 @@ export function Header({ current }: { current?: string }) {
         <nav className="h-nav" aria-label="Main navigation">
           <Link href="/timeline" aria-current={current === "timeline" ? "page" : undefined}>Timeline</Link>
           <span className="h-nav-pending" title="Insights page coming soon">Insights <small>Soon</small></span>
-          <span className="h-nav-pending" title="Projects page coming soon">Projects <small>Soon</small></span>
+          <Link href="/projects" aria-current={current === "projects" ? "page" : undefined}>Projects</Link>
           <Link href="/download" aria-current={current === "download" ? "page" : undefined}>Downloads</Link>
         </nav>
-        <MobileMenu links={[["/timeline", "Timeline"], ["/download", "Downloads"]]} current={current} />
+        <MobileMenu links={[["/timeline", "Timeline"], ["/projects", "Projects"], ["/download", "Downloads"]]} current={current} />
         <ThemeToggle />
         <Link href="/#waitlist" className="h-btn h-btn-small">
           <span className="h-join-full">Join the waitlist</span><span className="h-join-short">Join waitlist</span>
@@ -368,7 +368,7 @@ export function Footer() {
           <Link href="/timeline">Timeline</Link>
           <Link href="/speech-time-calculator">Speech time calculator</Link>
           <span className="h-footer-pending">Insights <small>Coming soon</small></span>
-          <span className="h-footer-pending">Projects <small>Coming soon</small></span>
+          <Link href="/projects">Projects</Link>
           <Link href="/download">Downloads</Link>
         </nav>
         <nav aria-label="Legal">

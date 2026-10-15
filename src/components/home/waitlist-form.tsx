@@ -6,7 +6,7 @@ import { ArrowRight, Mail } from "lucide-react";
 
 type Status = "idle" | "sending" | "done" | "error";
 
-export function WaitlistForm({ source }: { source: "nav" | "hero" | "final" }) {
+export function WaitlistForm({ source }: { source: "nav" | "hero" | "final" | "projects" }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [invalidEmail, setInvalidEmail] = useState(false);
